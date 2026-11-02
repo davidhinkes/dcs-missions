@@ -6,7 +6,9 @@ Requires **DCS World, Syria and OH-58D**. Single-player lead with two AI wingmen
 
 ## Install and fly
 
-Copy [the mission](dist/Operation-Green-Lantern-Syria-OH58D.miz) into your DCS Saved Games `Missions` folder. Open it through Missions. All three helicopters start hot on separate pads at HAVEN. Lead and #2 carry two Hellfires and a .50-cal gun; #3 carries a .50-cal gun and seven M151 rockets. All carry 270 kg fuel. Lead has the PDU enabled.
+[Download the mission file](https://github.com/davidhinkes/dcs-missions/raw/refs/heads/main/missions/green-lantern/dist/Operation-Green-Lantern-Syria-OH58D.miz), copy it into `%USERPROFILE%\Saved Games\DCS\Missions` (or your DCS profile's `Missions` folder), then open it through DCS's **Missions** screen. Steam and standalone DCS use the same mission file. No developer setup, submodules or Lua hook is needed by players.
+
+All three helicopters start hot on separate pads at HAVEN. Lead and #2 carry two Hellfires and a .50-cal gun; #3 carries a .50-cal gun and seven M151 rockets. All carry 270 kg fuel. Lead has the PDU enabled.
 
 Read the [full briefing](dist/Operation-Green-Lantern-Briefing.txt) for timing, radios and threats. Departure is about 13 nm from the search area; return to LANTERN is about 25 nm. Labels are off and the F10 map shows friendly assets only.
 

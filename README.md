@@ -18,15 +18,26 @@ A collection of authored DCS World missions, their design decisions, source scri
 - `docs/lessons-learned.md`: general DCS findings with evidence and limits.
 - `docs/mission-design-template.md`: starting point for the next design.
 - `shared/`: tools and helpers actually shared across missions.
-- `vendor/dcs-mcp/`: pinned authoring tool source and original license; no server installation needed to build.
+- `vendor/dcs-mcp/`: authoring-tool Git submodule pinned to an exact commit; no server installation needed to build.
 
 ## Play Green Lantern
 
-Copy `missions/green-lantern/dist/Operation-Green-Lantern-Syria-OH58D.miz` into your DCS Saved Games `Missions` folder and open it in DCS. Requires Syria and OH-58D. The mission embeds its Lua; players do not need Node.js or DCS-MCP.
+1. [Download the Green Lantern mission](https://github.com/davidhinkes/dcs-missions/raw/refs/heads/main/missions/green-lantern/dist/Operation-Green-Lantern-Syria-OH58D.miz).
+2. Copy the `.miz` file into `%USERPROFILE%\Saved Games\DCS\Missions` (use your own DCS profile folder if different).
+3. Start DCS, choose **Missions**, open Green Lantern, and fly.
+
+Requires **Syria** and **OH-58D**. Works with Steam and standalone DCS. All mission scripts are embedded. Players do not need Git, Node.js, DCS-MCP, its Lua hook, or any submodule setup. The development instructions below are only for mission authors.
 
 ## Build and check
 
-Use Node.js 22 or newer and npm from the project directory. No global packages are required.
+Use Git and Node.js 22 or newer with npm. No global npm packages are required. A fresh checkout can include the dependency immediately:
+
+```powershell
+git clone --recurse-submodules https://github.com/davidhinkes/dcs-missions.git
+cd dcs-missions
+```
+
+From the project directory:
 
 ```powershell
 npm run setup
@@ -35,7 +46,7 @@ npm test
 npm run verify
 ```
 
-`setup` installs the vendored tool's locked dependencies locally and compiles it; it needs network access on a fresh checkout. This initial working copy already has dependencies and compiled tools available. `build` has no dependency on personal Saved Games files. `test` runs simulated mission logic under DCS's Lua interpreter. `verify` checks the archive using the authoring validator and DCS's Lua / Mission Editor routines. Neither replaces an actual sortie.
+`setup` runs `git submodule update --init --recursive`, installs the tool's locked dependencies locally with `npm ci`, and compiles it. It also works after a normal clone that omitted submodules. Rerun setup after pulling dependency changes; fresh setup needs network access. This working copy already has dependencies and compiled tools available. `build` has no dependency on personal Saved Games files. `test` runs simulated mission logic under DCS's Lua interpreter. `verify` checks the archive using the authoring validator and DCS's Lua / Mission Editor routines. Neither replaces an actual sortie.
 
 On this PC, Node is available through the existing bundled runtime, while npm is not currently on PATH. You can use the prepared copy directly without installing anything:
 

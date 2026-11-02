@@ -24,6 +24,7 @@ function lua(){
 const build=()=>run(process.execPath,[path.join(dir,'src/build.mjs')]);
 switch(action){
   case 'setup': {
+    run('git',['submodule','update','--init','--recursive','--','vendor/dcs-mcp']);
     // Launch npm through Node, avoiding shell quoting and Windows .cmd execution.
     const npm=process.env.npm_execpath;
     if(!npm)throw Error('Run setup through npm: npm run setup');

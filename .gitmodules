@@ -1,0 +1,3 @@
+[submodule "vendor/dcs-mcp"]
+	path = vendor/dcs-mcp
+	url = https://github.com/sharRahul/dcs-mcp.git
