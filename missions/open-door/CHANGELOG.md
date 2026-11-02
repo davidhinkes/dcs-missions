@@ -2,6 +2,8 @@
 
 ## Unreleased development build — 2026-11-01
 
+- Reduced all four Kiowas from 300 kg starting fuel to approximately 400 lb (181.4 kg) after the user reported an overweight load. Briefing now displays pounds and kilograms.
+
 - Fixed reported airborne hot-start/crash configuration: five visible single helipads, four Kiowas 60 m apart, native hot-ground starts at zero terrain-relative altitude, no copied BARO start height or parking links. Added fuel/ammo/repair/command facilities and immediate support vehicles plus all five pad warehouses.
 - Log also showed extraction setup failure: widened LZ search to 1500 m and used an 18 m rotor-clearance radius with retained land/slope checks.
 - Added regression checks for ground start parameters, unique matching pads, spacing, start-time facilities, support ranges and expanded LZ search.

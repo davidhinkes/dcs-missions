@@ -1,17 +1,37 @@
 {
-  "home": {"x":19948.236328125,"y":6806.8149414062,"alt":33.384346008301},
-  "transportPad": {"x":19648.236328125,"y":6626.8149414062,"alt":33.384346008301},
-  "building": {"x":64200,"y":20150},
-  "sam": {"x":63600,"y":18100},
-  "hold": {"x":55200,"y":15150},
-  "plannedLZ": {"x":63750,"y":20200},
-  "rescueSeconds":180,
-  "fuelKg":300,
-  "blackHawkFuelKg":1000,
-  "hostages":6,
-  "alertRadius":8000,
-  "holdGate":12000,
-  "reinforcementDelay":180,
-  "safeRadius":400,
-  "returnSeconds":20
+  "home": {
+    "x": 19948.236328125,
+    "y": 6806.8149414062,
+    "alt": 33.384346008301
+  },
+  "transportPad": {
+    "x": 19648.236328125,
+    "y": 6626.8149414062,
+    "alt": 33.384346008301
+  },
+  "building": {
+    "x": 64200,
+    "y": 20150
+  },
+  "sam": {
+    "x": 63600,
+    "y": 18100
+  },
+  "hold": {
+    "x": 55200,
+    "y": 15150
+  },
+  "plannedLZ": {
+    "x": 63750,
+    "y": 20200
+  },
+  "rescueSeconds": 180,
+  "fuelKg": 181.4,
+  "blackHawkFuelKg": 1000,
+  "hostages": 6,
+  "alertRadius": 8000,
+  "holdGate": 12000,
+  "reinforcementDelay": 180,
+  "safeRadius": 400,
+  "returnSeconds": 20
 }

@@ -10,7 +10,7 @@ A Syria hostage rescue: four OH-58Ds clear a fictional village compound, then ca
 
 ## Fly the rescue
 
-- Four hot Kiowas start on four separate visible DCS helipads at FARP KEYSTONE, 60 m apart, 24.96 nm from the objective. Ground starts use zero terrain-relative altitude; the Black Hawk has its own fifth pad. Set your physical collective fully down before pressing Fly. Lead/#2 have two Hellfires and a .50-cal gun; #3/#4 have gun and seven M151 rockets. Each has 300 kg fuel. Check cockpit performance and reserve; tank-capacity checks are not flight performance certification.
+- Four hot Kiowas start on four separate visible DCS helipads at FARP KEYSTONE, 60 m apart, 24.96 nm from the objective. Ground starts use zero terrain-relative altitude; the Black Hawk has its own fifth pad. Set your physical collective fully down before pressing Fly. Lead/#2 have two Hellfires and a .50-cal gun; #3/#4 have gun and seven M151 rockets. Each has approximately 400 lb (181.4 kg) of fuel. Check cockpit performance and reserve; tank-capacity checks are not flight performance certification.
 - Lifeline launches after you lift off, accompanies the flight and holds outside the objective area. It needs explicit clearance; eliminating the defenders never sends it in automatically.
 - Clear the known Strela and nearby guards. Hostages and their building are vulnerable. Avoid rockets or gunfire into the marked building. Defeating every reinforcement is optional.
 - Use **F10 > Other > OPEN DOOR > Transport > Clear Black Hawk to land**. Actual LZ location is terrain-checked near WP5 and marked on F10; request green smoke under **Rescue**.

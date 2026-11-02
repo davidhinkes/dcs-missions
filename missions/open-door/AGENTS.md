@@ -14,3 +14,5 @@
 - Preserve Kiowa target points `1T|1|SA13` (Strela) and `2T|1|UNK` (protected hostage building) separately from route waypoints. The manual confirms PREPT supports target points; importing them is not proof of cockpit alignment.
 
 - Preserve the corrected FARP start scheme: five native visible SINGLE_HELIPAD/FARP objects; four Kiowas separated by 60 m; TakeOffGroundHot / From Ground Area Hot, alt=0 and alt_type=RADIO on units and first waypoint; no parking or helipad links on the ground-start waypoint. Black Hawk recovery remains linked to pad 200. Never reuse a prior unit BARO altitude as terrain elevation. Support must exist from mission start, independently of extraction initialization.
+
+- Kiowa starting fuel is approximately 400 lb each (181.4 kg in the DCS payload). The user reported the previous 300 kg load overweight. Apply this to all four Kiowas; validate gross weight and mission endurance separately.

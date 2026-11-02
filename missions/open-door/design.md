@@ -10,7 +10,7 @@ The desired rhythm is reconnaissance, controlled attacks, clearance, a vulnerabl
 
 ## Confirmed decisions
 
-- Syria map; player leads four hot-start OH-58Ds with a mix of Hellfires, guns and rockets. Lead/#2 carry two Hellfires plus gun; #3/#4 carry gun and seven M151 rockets. Each Kiowa carries 300 kg fuel (capacity checked; performance/endurance not flight-certified).
+- Syria map; player leads four hot-start OH-58Ds with a mix of Hellfires, guns and rockets. Lead/#2 carry two Hellfires plus gun; #3/#4 carry gun and seven M151 rockets. Each Kiowa carries approximately 400 lb (181.4 kg) of fuel (capacity checked; performance/endurance not flight-certified).
 - Depart from a FARP about 25 nm from the village: roughly 17 minutes inbound at 90 knots before maneuvering or holding.
 - Hostages are vulnerable to gunfire and nearby explosions. Careful target identification and weapon employment matter.
 - Village setting with scattered guards, ground reinforcements, heavy machine guns and one nearby Strela-10 (SA-13) short-range guided SAM. This replaces the earlier ZU-23 choice.
