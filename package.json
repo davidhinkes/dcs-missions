@@ -7,6 +7,8 @@
     "setup": "node shared/tools/mission.mjs setup",
     "build": "node shared/tools/mission.mjs build",
     "test": "node shared/tools/mission.mjs test",
-    "verify": "node shared/tools/mission.mjs verify"
+    "verify": "node shared/tools/mission.mjs verify",
+    "deploy": "node shared/tools/mission.mjs deploy",
+    "test:tools": "node --test shared/tools/deploy.test.mjs"
   }
 }

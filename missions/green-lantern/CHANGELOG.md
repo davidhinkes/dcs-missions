@@ -2,6 +2,8 @@
 
 ## Unreleased — migrated 2026-11-01
 
+- Moved mission-specific agent instructions and iteration lessons into this mission directory.
+- Added a checked local deploy command and agent workflow: build, test, verify, back up the installed revision, copy into DCS Missions and confirm the file hash.
 - Replaced copied DCS-MCP source with a Git submodule at the same upstream commit; setup initializes the submodule and installs/builds packages locally.
 - Organized the mission into source, tests, design, player documentation and tracked playable output.
 - Replaced personal mission-file build dependencies with checked-in data templates; pinned the authoring tools.

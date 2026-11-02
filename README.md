@@ -11,6 +11,7 @@ A collection of authored DCS World missions, their design decisions, source scri
 ## Project layout
 
 - `missions/<name>/design.md`: mission intent, decisions, timing, acceptance criteria and open work.
+- `missions/<name>/AGENTS.md` and `lessons-learned.md`: mission-specific agent instructions, preferences and iteration history.
 - `missions/<name>/src/`: build code, embedded Lua and checked-in data templates.
 - `missions/<name>/tests/`: mission-specific checks.
 - `missions/<name>/dist/`: latest playable `.miz` and briefing, tracked in Git.
@@ -20,15 +21,13 @@ A collection of authored DCS World missions, their design decisions, source scri
 - `shared/`: tools and helpers actually shared across missions.
 - `vendor/dcs-mcp/`: authoring-tool Git submodule pinned to an exact commit; no server installation needed to build.
 
-## Play Green Lantern
+## Play a mission
 
-1. [Download the Green Lantern mission](https://github.com/davidhinkes/dcs-missions/raw/refs/heads/main/missions/green-lantern/dist/Operation-Green-Lantern-Syria-OH58D.miz).
-2. Copy the `.miz` file into `%USERPROFILE%\Saved Games\DCS\Missions` (use your own DCS profile folder if different).
-3. Start DCS, choose **Missions**, open Green Lantern, and fly.
-
-Requires **Syria** and **OH-58D**. Works with Steam and standalone DCS. All mission scripts are embedded. Players do not need Git, Node.js, DCS-MCP, its Lua hook, or any submodule setup. The development instructions below are only for mission authors.
+Open a mission's player README from the catalog above for its download link and required aircraft/terrain modules. Copy its downloaded `.miz` into your DCS Saved Games `Missions` folder and open it from DCS's **Missions** screen. Players do not need the developer tooling, Git submodules or MCP hook.
 
 ## Build and check
+
+In the commands below, replace `mission-slug` with the folder name of the mission you are working on.
 
 Use Git and Node.js 22 or newer with npm. No global npm packages are required. A fresh checkout can include the dependency immediately:
 
@@ -41,9 +40,9 @@ From the project directory:
 
 ```powershell
 npm run setup
-npm run build
-npm test
-npm run verify
+npm run build -- mission-slug
+npm test -- mission-slug
+npm run verify -- mission-slug
 ```
 
 `setup` runs `git submodule update --init --recursive`, installs the tool's locked dependencies locally with `npm ci`, and compiles it. It also works after a normal clone that omitted submodules. Rerun setup after pulling dependency changes; fresh setup needs network access. This working copy already has dependencies and compiled tools available. `build` has no dependency on personal Saved Games files. `test` runs simulated mission logic under DCS's Lua interpreter. `verify` checks the archive using the authoring validator and DCS's Lua / Mission Editor routines. Neither replaces an actual sortie.
@@ -51,20 +50,41 @@ npm run verify
 On this PC, Node is available through the existing bundled runtime, while npm is not currently on PATH. You can use the prepared copy directly without installing anything:
 
 ```powershell
-node shared/tools/mission.mjs build
-node shared/tools/mission.mjs test
-node shared/tools/mission.mjs verify
+node shared/tools/mission.mjs build mission-slug
+node shared/tools/mission.mjs test mission-slug
+node shared/tools/mission.mjs verify mission-slug
 ```
 
 Steam and standard standalone DCS locations are detected. For another installation:
 
 ```powershell
 $env:DCS_LUA='D:\DCS World\bin\luae.exe'
-npm test
-npm run verify
+npm test -- mission-slug
+npm run verify -- mission-slug
 ```
 
-For an additional mission, use `npm run build -- <mission-folder>` and provide its `src/build.mjs`. The test and verification commands currently target Green Lantern's harness and filename; extend the runner when adding the next mission.
+For an additional mission, provide `missions/<slug>/src/build.mjs` and a `mission.json` naming its artifact and Lua test path. Use `npm run build -- <slug>` (or `test`, `verify`, `deploy`).
+
+## Iterate and deploy locally
+
+After a mission edit, the agent uses:
+
+```powershell
+node shared/tools/mission.mjs deploy mission-slug
+```
+
+With npm available, the equivalent is `npm run deploy -- mission-slug`. This builds the mission once, runs its logic tests and archive checks, and copies it to the detected Saved Games DCS `Missions` folder. SHA-256 verification confirms that DCS received the build. If any check fails, deployment stops before replacing the installed mission.
+
+Every distinct previous installed file is backed up under `Missions/.mission-backups`, including manual Mission Editor changes. An unchanged file needs no copy or backup. The command prints the actual destination and any backup path. Restart the mission in DCS to use the update; an already running mission is not changed.
+
+The default checks the standard `DCS` and `DCS.openbeta` Saved Games profiles and requires exactly one to exist. For a custom profile, relocated Saved Games folder or multiple standard profiles, specify the target explicitly in your local shell; do not commit personal paths:
+
+```powershell
+$env:DCS_MISSIONS_DIR='D:\Saved Games\DCS\Missions'
+node shared/tools/mission.mjs deploy mission-slug
+```
+
+Developer filesystem tests for deployment run with `npm run test:tools` or `node --test shared/tools/deploy.test.mjs`.
 
 ## Working practices
 

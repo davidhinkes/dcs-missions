@@ -1,11 +1,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {spawnSync} from 'node:child_process';
+import {resolveMissionsDir,installMission} from './deploy.mjs';
 
 const root=path.resolve(import.meta.dirname,'../..');
-const [action='build',name='green-lantern']=process.argv.slice(2);
-if(!/^[a-z0-9-]+$/.test(name))throw Error('Use a mission folder name containing letters, numbers and hyphens.');
-const dir=path.join(root,'missions',name);
+const [action='build',name]=process.argv.slice(2);
+if(action!=='setup'&&(typeof name!=='string'||!/^[a-z0-9-]+$/.test(name)))throw Error('Specify a mission folder name: node shared/tools/mission.mjs <build|test|verify|deploy> <mission-slug>.');
+const dir=name?path.join(root,'missions',name):null;
 const vendor=path.join(root,'vendor/dcs-mcp');
 function run(exe,args,cwd=root,env=process.env){
   const r=spawnSync(exe,args,{cwd,env,stdio:'inherit'});
@@ -22,6 +23,14 @@ function lua(){
   return found;
 }
 const build=()=>run(process.execPath,[path.join(dir,'src/build.mjs')]);
+const config=()=>JSON.parse(fs.readFileSync(path.join(dir,'mission.json'),'utf8'));
+function artifact(){
+  const filename=config().artifact;
+  if(typeof filename!=='string'||path.basename(filename)!==filename||!filename.endsWith('.miz'))throw Error('mission.json artifact must be a .miz filename.');
+  return path.join(dir,'dist',filename);
+}
+const test=()=>run(lua(),[config().logicTest],dir);
+const verify=()=>run(process.execPath,[path.join(vendor,'scripts/verify-mission.mjs'),artifact()],root,{...process.env,DCS_LUA:lua()});
 switch(action){
   case 'setup': {
     run('git',['submodule','update','--init','--recursive','--','vendor/dcs-mcp']);
@@ -33,11 +42,14 @@ switch(action){
     break;
   }
   case 'build': build();break;
-  case 'test': build();run(lua(),['tests/rescue-test.lua'],dir);break;
-  case 'verify': {
-    build();
-    run(process.execPath,[path.join(vendor,'scripts/verify-mission.mjs'),path.join(dir,'dist/Operation-Green-Lantern-Syria-OH58D.miz')],root,{...process.env,DCS_LUA:lua()});
+  case 'test': build();test();break;
+  case 'verify': build();verify();break;
+  case 'deploy': {
+    const missionsDir=resolveMissionsDir();
+    lua(); // Fail before building if the required verification runtime is unavailable.
+    build();test();verify();
+    console.log(JSON.stringify({deployment:installMission(artifact(),missionsDir),next:'Restart the mission in DCS to load this build.'},null,2));
     break;
   }
-  default:throw Error('Expected setup, build, test or verify.');
+  default:throw Error('Expected setup, build, test, verify or deploy.');
 }
