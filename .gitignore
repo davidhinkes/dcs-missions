@@ -1,0 +1,12 @@
+**/node_modules/
+vendor/dcs-mcp/dist/
+**/.build/
+work/
+*.log
+*.trk
+*.acmi
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db

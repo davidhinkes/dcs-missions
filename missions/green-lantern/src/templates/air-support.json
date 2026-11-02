@@ -1,0 +1,69 @@
+{
+  "hind": {
+    "alt": 29,
+    "hardpoint_racks": true,
+    "alt_type": "BARO",
+    "livery_id": "standard 1",
+    "skill": "High",
+    "parking": "45",
+    "ropeLength": 15,
+    "speed": 41.666666666667,
+    "type": "Mi-24V",
+    "unitId": 58,
+    "psi": -3.1243152696404,
+    "parking_id": "42",
+    "x": 42925.5703125,
+    "name": "24",
+    "payload": {
+      "pylons": {
+        "1": {
+          "CLSID": "{B919B0F4-7C25-455E-9A02-CEA51DB895E3}"
+        },
+        "6": {
+          "CLSID": "{B919B0F4-7C25-455E-9A02-CEA51DB895E3}"
+        }
+      },
+      "fuel": "1704",
+      "flare": 192,
+      "chaff": 0,
+      "gun": 100
+    },
+    "onboard_num": "24",
+    "callsign": 224,
+    "heading": 3.1243152696404,
+    "y": 6191.8510742188
+  },
+  "e2": {
+    "alt": 1584.96,
+    "type": "E-2C",
+    "callsign": {
+      "1": 1,
+      "2": 1,
+      "3": 1,
+      "name": "Overlord11"
+    },
+    "alt_type": "BARO",
+    "psi": -0.0068336066099498,
+    "livery_id": "E-2D Demo",
+    "skill": "High",
+    "heading": 0.0068336066099498,
+    "y": -610308.0044077,
+    "x": -80225.082719591,
+    "name": "Aerial-2-1",
+    "payload": {
+      "pylons": {},
+      "fuel": "5624",
+      "flare": 60,
+      "chaff": 120,
+      "gun": 100
+    },
+    "speed": 133.61111111111,
+    "onboard_num": "011",
+    "AddPropAircraft": {
+      "STN_L16": "00204",
+      "VoiceCallsignNumber": "11",
+      "VoiceCallsignLabel": "OD"
+    },
+    "unitId": 4
+  }
+}
