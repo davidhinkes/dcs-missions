@@ -1,0 +1,17 @@
+# Changelog
+
+## Unreleased development build — 2026-11-01
+
+- Built and deployed the first playable mission with four Kiowas, one AI UH-60A, fixed Strela/hostage intelligence, guarded compound, ground reinforcements, explicit clearance, wave-off/retry and full/partial rescue outcomes.
+- Added separate Kiowa MMS-compatible target points: 1T for Strela-10 (SA13), 2T for the protected hostage building.
+- Automated logic/archive checks passed; native flight and cockpit verification remain pending.
+
+## Design draft — 2026-11-01
+
+- Replaced approximate compound intelligence with precise satellite-reported hostage-building and air-defense navigation points, briefing coordinates and static markers. The known air-defense point identifies the confirmed Strela-10 launcher.
+- Proposed Operation Open Door as a separate Syria hostage rescue.
+- Confirmed explicit F10 clearance for the waiting Black Hawk, a timed simulated ground rescue, and village defenders with reinforcements and limited anti-aircraft defenses.
+- Confirmed four hot-start Kiowas with mixed weapons, a departure FARP about 25 nm away, and hostages vulnerable to gunfire and explosions.
+- Confirmed machine guns and one Strela-10 (replacing the initially chosen ZU-23), six hostages, a three-minute simulated rescue and return to the departure FARP.
+- Corrected extraction helicopter to a Black Hawk; plan uses the locally available built-in AI UH-60A.
+- Confirmed helicopter-only operation, continuation after hostage casualties with partial success, labels off, friendly-only map; precise satellite intelligence subsequently replaced the approximate compound marker.

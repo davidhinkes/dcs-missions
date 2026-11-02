@@ -1,0 +1,29 @@
+OPERATION OPEN DOOR
+Syria / fictional village hostage rescue / single-player OH-58D flight of four
+
+SITUATION
+Six hostages are held in the identified village building. Satellite intelligence precisely locates the building and a Strela-10 launcher. These are fixed intelligence points, not live tracking. Other guards and reinforcements are hidden. Labels are OFF and F10 units are friendly-only. No fighter aircraft or other air support is available.
+
+FLIGHT
+Anvil 1-1: you. All four Kiowas start hot on separate FARP KEYSTONE pads. Lead and #2 each carry two Hellfires and a .50-cal gun with 500 rounds. #3/#4 each carry the gun plus seven M151 rockets. Fuel: 300 kg each (within the checked 333.69 kg capacity; hover/gross weight and endurance need cockpit verification). Lead PDU enabled. Use normal wingman radio commands. Monitor fuel and preserve a reserve; fuel-capacity compliance is not an endurance guarantee.
+Lifeline is one built-in AI UH-60A Black Hawk on its own nearby pad. It starts following you when you lift off and holds back as you approach the village. No UH-60L mod or external scripts need installation by players.
+
+NAVIGATION / INTELLIGENCE
+WP1 KEYSTONE. WP2 IP / transport hold. WP3 STRELA-10. WP4 HOSTAGE BUILDING. WP5 PLANNED LZ. WP6 HOME.
+MMS TARGET POINTS: 1T = STRELA-10 (SA13); 2T = HOSTAGE BUILDING (UNK, NO FIRE). These are separate Navigation Target Fix Points in the aircraft target database. To slew the MMS, select PREPT on its Mode Selector, use Manual/Slave as needed until the advisory reads PREPT, press R2 PPT, enter 1T or 2T on the multifunction keyboard and press Enter. Target-point loading and sensor alignment need cockpit verification; neither point is an automatic lock or authorization to fire. TIS/TV selection is independent.
+WP3 and WP4 are target reference points: do not follow the route blindly over the SAM or hostage building. Choose a terrain-masked approach. The building is a protected no-fire location. The exact hostage building and Strela are also marked on F10; all coordinates identify mission objects in DCS planar metres: building x=64200, east=20150; Strela x=63600, east=18100. F10 places them geographically and mission-start messages provide lat/lon when available.
+Departure to objective: 25.0 nm, about 17 minutes at 90 knots. Return is the same distance: approximately 50 nm round trip before combat, holding and three minutes on the ground. Allow roughly 45-60 minutes overall. The village is an authored mission compound; terrain/scenery appearance still needs flight verification.
+
+EXECUTION
+Clear the Strela and the guards around the compound/LZ, positively identifying targets before firing. Hostages can die from fire, explosions or destruction of their building. Continue rescuing survivors after casualties. Lifeline will never enter merely because defenders are killed: use F10 > Other > OPEN DOOR > Transport > Clear Black Hawk to land. Clearance is rejected while the known Strela or close defenders still threaten the site. The actual LZ is terrain/scenery-checked near WP5; the F10 LZ marker and requested green smoke identify it.
+Once Lifeline is landed within 80 m of the LZ and below 1 m/s, the simulated team needs 180 seconds to secure the survivors and board. Cover it. A local threat, movement or wave-off resets rescue progress; re-clear once safe. Ground-team movement and boarding are represented by timing/messages, not passenger animation. Neutral infantry models stand in for hostages and do not fight.
+Enemy reinforcements begin moving about three minutes after your flight enters 8 km of the compound. Defeating every enemy is optional. Keep the approaches clear while Lifeline is on the ground.
+After boarding Lifeline returns to its own pad at KEYSTONE. Escort it home. It must land there for 20 seconds to count the rescued hostages: six is full success; one to five is partial success. No survivors, Black Hawk loss or player helicopter loss is failure. Flying continues after the result.
+
+F10 / RADIOS
+OPEN DOOR > Transport: clearance; hold / wave off; abort and return. OPEN DOOR > Rescue: status; mark actual LZ green.
+Wave-off returns Lifeline to its hold and resets the rescue timer; it needs fresh clearance. Abort before boarding cancels the extraction and returns empty (mission failure once home). After boarding, abort/wave-off returns home with those aboard. Do not fire on the marked hostage building.
+UHF package 251.000 AM. KEYSTONE 128.500 AM; transport pad 127.500 AM. Both pads have service vehicles/warehouses; ground servicing still needs DCS confirmation.
+
+BUILD STATUS
+Development build. Automated checks do not certify native UH-60A follow, temporary landing, takeoff/recovery, terrain placement or actual combat. Requires an in-simulator sortie. Requires Syria and OH-58D only.
