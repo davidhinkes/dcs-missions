@@ -28,15 +28,16 @@ function heli(name,type,count,pos,skill){
   const g=addAircraftGroup(m,'helicopter',{name,type,count,side:'blue',country:'USA',...pos,altitudeMetres:pos.alt??33,heading:17,skill,task:type==='OH58D'?'CAS':'Transport'});
   for(const [i,u]of Object.entries(g.units)){
     if(type==='OH58D'){const identity=clone(u);Object.assign(u,clone(t.oh58),identity);}
-    Object.assign(u,{alt:pos.alt??33,alt_type:'BARO',speed:0,skill:i==='1'?skill:'High',x:pos.x,y:pos.y,parking:String(i),parking_id:String(i),onboard_num:String(20+Number(i)),callsign:{1:1,2:type==='OH58D'?1:2,3:Number(i),name:(type==='OH58D'?'Anvil1':'Springfield2')+i}});
+    Object.assign(u,{alt:0,alt_type:'RADIO',speed:0,skill:i==='1'?skill:'High',x:pos.x+(type==='OH58D'?(Number(i)-1)*60:0),y:pos.y,psi:-u.heading,onboard_num:String(20+Number(i)),callsign:{1:1,2:type==='OH58D'?1:2,3:Number(i),name:(type==='OH58D'?'Anvil1':'Springfield2')+i}});
+    delete u.parking;delete u.parking_id;
     delete u.datalinks;
   }
   Object.assign(g,{frequency:251,modulation:0,communication:true,radioSet:true,start_time:0,uncontrolled:false,tasks:{}});
-  g.route.points={1:wp(pos,'FARP KEYSTONE',pos.alt??33,0)};g.route.points[1].alt_type='BARO';g.route.points[1].ETA_locked=true;
+  g.route.points={1:wp(pos,'FARP KEYSTONE - HOT ON GROUND',0,0)};g.route.points[1].ETA_locked=true;
+  Object.assign(g.route.points[1],{type:'TakeOffGroundHot',action:'From Ground Area Hot',alt:0,alt_type:'RADIO'});
   return g;
 }
 const flight=heli('LATCH','OH58D',4,c.home,'Player');
-Object.assign(flight.route.points[1],{type:'TakeOffParkingHot',action:'From Parking Area Hot',helipadId:100,linkUnit:100});
 flight.route.points[2]=wp(c.hold,'IP - BLACK HAWK HOLD');
 flight.route.points[3]=wp(c.sam,'INTEL - STRELA-10 (DO NOT OVERFLY)');
 flight.route.points[4]=wp(c.building,'INTEL - HOSTAGE BUILDING (NO FIRE)');
@@ -54,14 +55,21 @@ for(const [i,u]of Object.entries(flight.units)){
   u.AddPropAircraft??={};u.AddPropAircraft.PDU=true;
 }
 const hawk=heli('LIFELINE','UH-60A',1,c.transportPad,'High');hawk.uncontrolled=true;
-Object.assign(hawk.route.points[1],{type:'TakeOffParkingHot',action:'From Parking Area Hot',helipadId:200,linkUnit:200});
 hawk.units[1].payload={pylons:{},fuel:c.blackHawkFuelKg,flare:30,chaff:0,gun:100};hawk.units[1].livery_id='standard';
 hawk.route.points[2]=wp(c.hold,'SAFE HOLD - AWAIT CLEARANCE',200,50);
 hawk.route.points[2].task={id:'ComboTask',params:{tasks:{1:{number:1,enabled:true,auto:false,id:'Orbit',params:{pattern:'Circle',altitude:600,speed:40}}}}};
 const usa=Object.values(m.coalition.blue.country).find(x=>x.name==='USA');
 usa.static={group:{}};
-for(const [id,p,name,freq]of [[100,c.home,'FARP KEYSTONE',128.5],[200,c.transportPad,'KEYSTONE TRANSPORT PAD',127.5]]){
-  usa.static.group[id]={name,groupId:id,x:p.x,y:p.y,heading:0,dead:false,route:{points:{1:{x:p.x,y:p.y,alt:0,speed:0,type:'',action:''}}},units:{1:{name,unitId:id,type:'FARP',shape_name:'FARPS',category:'Heliports',x:p.x,y:p.y,heading:0,heliport_frequency:freq,heliport_modulation:0,heliport_callsign_id:id===100?2:3,canCargo:false}}};
+const padSpecs=[...[1,2,3,4].map(i=>[99+i,{x:c.home.x+(i-1)*60,y:c.home.y},'KEYSTONE PAD '+i,128.5]),[200,c.transportPad,'KEYSTONE TRANSPORT PAD',127.5]];
+for(const [id,p,name,freq]of padSpecs){
+  usa.static.group[id]={name,groupId:id,x:p.x,y:p.y,heading:0,dead:false,route:{points:{1:{x:p.x,y:p.y,alt:0,speed:0,type:'',action:''}}},units:{1:{name,unitId:id,type:'SINGLE_HELIPAD',shape_name:'FARP',category:'Heliports',x:p.x,y:p.y,heading:0,heliport_frequency:freq,heliport_modulation:0,heliport_callsign_id:id===200?3:2,canCargo:false}}};
+}
+let staticId=300;
+for(const [prefix,p]of [['KEYSTONE',c.home],['TRANSPORT',c.transportPad]])for(const [label,type,dx,dy]of [
+  ['FUEL DEPOT','FARP Fuel Depot',90,-90],['AMMO CANOPY','FARP Ammo Dump Coating',90,110],
+  ['REPAIR TENT','FARP Tent',-50,-85],['COMMAND POST','FARP CP Blindage',-50,85]]){
+  const id=staticId++,x=p.x+dx,y=p.y+dy,name=prefix+' '+label;
+  usa.static.group[id]={name,groupId:id,x,y,heading:0,dead:false,route:{points:{1:{x,y,alt:0,speed:0,type:'',action:''}}},units:{1:{name,unitId:id,type,category:'Fortifications',x,y,heading:0,canCargo:false}}};
 }
 function ground(name,type,count,p,side='red',country='Russia',late=false){
   const g=addGroundGroup(m,'vehicle',{name,type,count,...p,side,country,...(side==='neutrals'?{countryId:7}:{}),heading:180,spacingMetres:18,skill:'Average'});
@@ -80,7 +88,10 @@ for(const [i,dx,dy]of [[1,160,130],[2,-160,100],[3,180,-170]])ground('VILLAGE-'+
 const people=ground('HOSTAGES','Soldier M4',6,c.building,'neutrals','UN Peacekeepers');
 for(const [i,u]of Object.entries(people.units)){u.x=c.building.x+(Number(i)%3-1)*3;u.y=c.building.y+(Math.floor((Number(i)-1)/3)-0.5)*3;u.playerCanDrive=false;}
 for(const [prefix,p]of [['KEYSTONE',c.home],['TRANSPORT',c.transportPad]]){
-  for(const [suffix,type,count,dx,dy]of [['FUEL','M978 HEMTT Tanker',1,85,0],['SERVICE','M 818',3,60,65],['COMMS','Hummer',1,-70,45]])ground(prefix+' '+suffix,type,count,{x:p.x+dx,y:p.y+dy},'blue','USA',true);
+  for(const [suffix,type,count,dx,dy]of [['FUEL','M978 HEMTT Tanker',1,85,-55],['SERVICE','M 818',3,60,65],['COMMS','Hummer',1,90,-75]]){
+    const support=ground(prefix+' '+suffix,type,count,{x:p.x+dx,y:p.y+dy},'blue','USA',false);
+    support.hidden=false;support.hiddenOnMFD=false;
+  }
 }
 for(const [name,p,radius]of [['HOSTAGE BUILDING',c.building,50],['KNOWN STRELA',c.sam,50],['PLANNED LZ',c.plannedLZ,500],['KEYSTONE',c.home,500]])addTriggerZone(m,{name,...p,radius});
 const distance=Math.hypot(c.building.x-c.home.x,c.building.y-c.home.y)/1852;
@@ -91,7 +102,7 @@ SITUATION
 Six hostages are held in the identified village building. Satellite intelligence precisely locates the building and a Strela-10 launcher. These are fixed intelligence points, not live tracking. Other guards and reinforcements are hidden. Labels are OFF and F10 units are friendly-only. No fighter aircraft or other air support is available.
 
 FLIGHT
-Anvil 1-1: you. All four Kiowas start hot on separate FARP KEYSTONE pads. Lead and #2 each carry two Hellfires and a .50-cal gun with 500 rounds. #3/#4 each carry the gun plus seven M151 rockets. Fuel: ${c.fuelKg} kg each (within the checked 333.69 kg capacity; hover/gross weight and endurance need cockpit verification). Lead PDU enabled. Use normal wingman radio commands. Monitor fuel and preserve a reserve; fuel-capacity compliance is not an endurance guarantee.
+Anvil 1-1: you. All four Kiowas start hot ON THE GROUND at four separate, visible native DCS helipads in FARP KEYSTONE, 60 m apart. Native hot-ground starts use zero terrain-relative altitude; no copied barometric spawn height. Lifeline has its own fifth pad. Set your physical collective fully down before Fly. Fuel tanker/depot, ammunition trucks/canopy, ground crew, command post and repair tent are present from mission start, with unlimited warehouse resources. Use Ground Crew while parked; shut down for repairs. Lead and #2 each carry two Hellfires and a .50-cal gun with 500 rounds. #3/#4 each carry the gun plus seven M151 rockets. Fuel: ${c.fuelKg} kg each (within the checked 333.69 kg capacity; hover/gross weight and endurance need cockpit verification). Lead PDU enabled. Use normal wingman radio commands. Monitor fuel and preserve a reserve; fuel-capacity compliance is not an endurance guarantee.
 Lifeline is one built-in AI UH-60A Black Hawk on its own nearby pad. It starts following you when you lift off and holds back as you approach the village. No UH-60L mod or external scripts need installation by players.
 
 NAVIGATION / INTELLIGENCE
@@ -123,7 +134,7 @@ assert.equal(Object.keys(flight.units).length,4);assert(c.fuelKg<=333.69);assert
 assert.equal(hawk.units[1].type,'UH-60A');assert.equal(hawk.uncontrolled,true);
 assert.equal(flight.route.points[3].x,c.sam.x);assert.equal(flight.route.points[4].x,c.building.x);
 const warehouse=()=>({coalition:'BLUE',size:100,speed:16.666666,periodicity:30,unlimitedMunitions:true,unlimitedAircrafts:true,unlimitedFuel:true,OperatingLevel_Air:10,OperatingLevel_Fuel:10,OperatingLevel_Eqp:10,aircrafts:{},weapons:{},suppliers:{},gasoline:{InitFuel:100},methanol_mixture:{InitFuel:100},diesel:{InitFuel:100},jet_fuel:{InitFuel:100},dynamicSpawn:false,dynamicCargo:false,allowHotStart:true});
-const zip=new AdmZip(s.sourceBytes);zip.updateFile('warehouses',Buffer.from(serializeLuaAssignment('warehouses',{airports:{},warehouses:{100:warehouse(),200:warehouse()}})));s.sourceBytes=zip.toBuffer();
+const zip=new AdmZip(s.sourceBytes);zip.updateFile('warehouses',Buffer.from(serializeLuaAssignment('warehouses',{airports:{},warehouses:Object.fromEntries(padSpecs.map(([id])=>[id,warehouse()]))})));s.sourceBytes=zip.toBuffer();
 await saveSessionAs(s,path.join(base,'dist/Operation-Open-Door-Syria-OH58D.miz'),true);
 fs.writeFileSync(path.join(base,'dist/Operation-Open-Door-Briefing.txt'),brief);
 fs.writeFileSync(path.join(base,'.build/mission.lua'),serializeLuaAssignment('mission',m));

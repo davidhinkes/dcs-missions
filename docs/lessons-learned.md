@@ -6,7 +6,7 @@ Keep only reusable findings here. Store a mission's observed failures, coordinat
 
 - Valid Lua and archive structure do not guarantee a playable mission. Check player/client slots, start type/action, linked airbase or FARP, pad allocations and required modules together.
 - Every routed group needs a valid first route point. Use the archive verifier to catch editor load failures before launching DCS.
-- Ground starts need terrain-appropriate altitude and valid pad links. Prefer terrain queries or observed DCS data to guessed elevations.
+- Ground starts need a coherent native start mode, pad placement and altitude convention. A prior aircraft BARO altitude is not a terrain survey. For explicit ground-area starts, check zero terrain-relative altitude and avoid contradictory parking links; for parking starts validate the actual linked airbase and slots. Ground services should be present independently of objective initialization.
 - Player discovery and player destruction are distinct states. Allow startup delay before concluding that the player was lost.
 - Optional scenery, support or patrol placement must not prevent mandatory objective initialization. Use bounded searches, fallbacks and clear failure reporting.
 

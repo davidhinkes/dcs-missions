@@ -30,7 +30,7 @@ local function reset(opts)
   Group={Category={GROUND=2},getByName=function(n)return groups[n]end}
   Object={Category={SCENERY=5}}
   land={getHeight=function()return 40 end,getSurfaceType=function()return opts.water and 3 or 1 end}
-  world={VolumeType={SPHERE=0},searchObjects=function(_,volume,fn)if opts.blockLZ and volume.params.radius==45 and volume.params.point.x==OPEN_DOOR_CONFIG.plannedLZ.x then fn({})end end}
+  world={VolumeType={SPHERE=0},searchObjects=function(_,volume,fn)if opts.blockLZ and volume.params.radius==18 and math.abs(volume.params.point.x-OPEN_DOOR_CONFIG.plannedLZ.x)<(opts.blockRadius or 1)then fn({})end end}
   coalition={addGroup=function(_,_,g)if opts.noServices then error('service unavailable')end;return addGroup(g)end}
   trigger={smokeColor={Green=0},action={
     outTextForCoalition=function(_,s)messages[#messages+1]=s end,
@@ -76,6 +76,33 @@ end
 reset();advance(600);assert(OPEN_DOOR.phase=='ready' and not OPEN_DOOR.launched and not activated.RELIEF)
 assert(groups.HOSTAGES.on==false and groups['HOSTAGE-BUILDING'].on==false)
 assert(mission.forcedOptions.labels==0 and mission.forcedOptions.optionsView=='optview_onlyallies')
+local pads={};local flightGroups={};local support={}
+for _,country in pairs(mission.coalition.blue.country)do
+  for _,g in pairs((country.static or{}).group or{})do for _,u in pairs(g.units)do pads[u.unitId]=u end end
+  for _,g in pairs((country.helicopter or{}).group or{})do flightGroups[g.name]=g end
+  for _,g in pairs((country.vehicle or{}).group or{})do support[g.name]=g end
+end
+for _,g in pairs(flightGroups)do
+  local start=g.route.points[1]
+  assert(start.type=='TakeOffGroundHot' and start.action=='From Ground Area Hot' and start.alt==0 and start.alt_type=='RADIO')
+  assert(not start.helipadId and not start.linkUnit,'Ground starts must not use conflicting parking links')
+  for _,u in pairs(g.units)do
+    assert(u.alt==0 and u.alt_type=='RADIO' and not u.parking and not u.parking_id,'No copied BARO height or parking assignment')
+    local matching=0
+    for _,p in pairs(pads)do if p.type=='SINGLE_HELIPAD' and p.x==u.x and p.y==u.y then matching=matching+1;assert(p.shape_name=='FARP')end end
+    assert(matching==1,'Every helicopter must start on exactly one real visible helipad')
+  end
+end
+for i=1,4 do local u=flightGroups.LATCH.units[i];for j=i+1,4 do local v=flightGroups.LATCH.units[j];assert(math.abs(u.x-v.x)>=60)end end
+for _,prefix in ipairs({'KEYSTONE','TRANSPORT'})do
+  for _,suffix in ipairs({' FUEL',' SERVICE',' COMMS'})do assert(support[prefix..suffix]and not support[prefix..suffix].lateActivation)end
+  local facilities={};for _,u in pairs(pads)do if u.name:match('^'..prefix..' ')then facilities[u.type]=true end end
+  assert(facilities['FARP Fuel Depot']and facilities['FARP Ammo Dump Coating']and facilities['FARP Tent']and facilities['FARP CP Blindage'])
+end
+for id=100,103 do for _,name in ipairs({'KEYSTONE FUEL','KEYSTONE SERVICE','KEYSTONE COMMS'})do
+  for _,u in pairs(support[name].units)do local p=pads[id];assert(math.sqrt((p.x-u.x)^2+(p.y-u.y)^2)<=150)end
+end end
+printResult('PASS: five visible native helipads, separated zero-AGL hot-ground starts and complete startup FARP services')
 local nav=groups.LATCH -- The runtime mock records flight control; inspect source mission for imported targets.
 local points=nil
 for _,country in pairs(mission.coalition.blue.country)do for _,g in pairs((country.helicopter or{}).group or{})do if g.name=='LATCH'then points=g.NavTargetPoints end end end
@@ -131,9 +158,9 @@ reset({blockLZ=true});advance(2);assert(OPEN_DOOR.phase=='ready' and OPEN_DOOR.l
 assert(marks[8201].p.x==OPEN_DOOR_CONFIG.building.x and marks[8202].p.x==OPEN_DOOR_CONFIG.sam.x)
 cmd('Rescue/Mark actual LZ (green)');assert(smokes[1].x==OPEN_DOOR.lz.x)
 printResult('PASS: LZ avoids scenery while precise intelligence remains fixed; smoke marks actual LZ')
-reset({noServices=true});advance(2);assert(OPEN_DOOR.phase=='ready' and not flags[923])
+reset({blockLZ=true,blockRadius=400});advance(2);assert(OPEN_DOOR.phase=='ready' and math.abs(OPEN_DOOR.lz.x-OPEN_DOOR_CONFIG.plannedLZ.x)>=400)
 reset({water=true});advance(2);assert(OPEN_DOOR.phase=='failed' and flags[923])
-printResult('PASS: optional service failure does not abort; invalid main-site terrain reports setup failure')
+printResult('PASS: extended LZ search survives an obstructed first 300 m; invalid main-site terrain is reported')
 reset();advance(2);launchAndHold();move('LATCH-1',{x=OPEN_DOOR_CONFIG.building.x-7000,y=OPEN_DOOR_CONFIG.building.y},true,45);advance(8)
 assert(OPEN_DOOR.alertAt==8);advance(186);assert(not activated.RELIEF);advance(188);assert(activated.RELIEF==188 and activated['RELIEF-TRUCKS']==188)
 local destination=groups.RELIEF.task.params.route.points[2]

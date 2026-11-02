@@ -9,3 +9,9 @@
 - Reinforcement activation is not arrival. Routes must actually approach a tactically relevant area; a group stopping too far away cannot create the intended extraction pressure. Tests check both activation delay and destination.
 - A delayed-spawn test must remove the player before the script first sees it. Removing a previously acquired player correctly exercises player loss instead. Keep these as distinct cases.
 - Terrain-aware LZ selection can vary while satellite target references stay fixed. Never silently relocate the building or SAM just to simplify terrain placement. Failure to find a safe main site must be reported; optional service failure must not abort rescue initialization.
+
+## First in-game attempt: start/crash and setup failures
+
+The user's flight reported hovering about 10 ft above the start and crashing. The debrief confirms lead pilot death around 2.32 s; the log also reports no clear LZ within the original search. The exact physics cause was not independently reproduced. Replacing copied BARO heights and parking starts with explicit zero-AGL hot ground starts on separate visible native helipads avoids relying on those heights/links. Facilities must be available at time zero rather than depend on a later rescue setup function. Added assertions cover all start parameters, pad matching/spacing and support proximity. Native spawn stability still needs user confirmation.
+
+The original 45 m scenery clearance and 300 m search found no LZ in the actual mountainous scene. Updated to 18 m rotor clearance, a 2.5 m elevation-difference limit at 25 m samples, and a 1500 m bounded search. A test obstructs the original region to exercise the larger search. This is not evidence that the new site has been flight-tested; F10/smoke identify the final site and timed rescue remains an abstraction.

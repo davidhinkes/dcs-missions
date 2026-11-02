@@ -30,7 +30,7 @@ end
 local function findClear(center,maxRadius,vehicle)
   for r=0,maxRadius,50 do for a=0,330,30 do
     local p=point({x=center.x+r*math.cos(math.rad(a)),y=center.y+r*math.sin(math.rad(a))})
-    if clear(p,vehicle and 8 or 45,vehicle and 6 or 1.5)then return p end
+    if clear(p,vehicle and 8 or 18,vehicle and 6 or 2.5)then return p end
   end end
   error('No clear site near '..center.x..','..center.y)
 end
@@ -130,18 +130,10 @@ end
 local function setup()
   local surface=land.getSurfaceType({x=C.building.x,y=C.building.y})
   assert(surface==1 or surface==4 or surface==5,'Hostage compound is not on land')
-  S.lz=findClear(C.plannedLZ,300,false);S.home=point(C.transportPad)
+  S.lz=findClear(C.plannedLZ,1500,false);S.home=point(C.transportPad)
   disable('HOSTAGES');disable('HOSTAGE-BUILDING');for i=1,3 do disable('VILLAGE-'..i)end
-  -- Service templates are moved only to local clear ground; fixed intelligence objects never move.
-  for name,t in pairs(templates)do if name:match('^KEYSTONE ')or name:match('^TRANSPORT ')then
-    local ok,err=pcall(function()
-      local g=copy(t.data);g.lateActivation=false
-      for _,u in pairs(g.units)do local p=findClear({x=u.x,y=u.y},100,true);u.x=p.x;u.y=p.z end
-      g.x=g.units[1].x;g.y=g.units[1].y;g.route.points[1].x=g.x;g.route.points[1].y=g.y
-      coalition.addGroup(t.country,Group.Category.GROUND,g)
-    end)
-    if not ok then env.info('[OPEN_DOOR] Optional service placement: '..tostring(err))end
-  end end
+  -- FARP service units and facilities are present at mission start. They must not
+  -- depend on this extraction setup succeeding or on delayed spawning.
   trigger.action.markToCoalition(8201,'SATELLITE INTEL: HOSTAGE BUILDING - NO FIRE',point(C.building),2,true)
   trigger.action.markToCoalition(8202,'SATELLITE INTEL: STRELA-10',point(C.sam),2,true)
   trigger.action.markToCoalition(8203,'EXTRACTION LZ - LIFELINE',S.lz,2,true)

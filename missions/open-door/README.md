@@ -10,12 +10,16 @@ A Syria hostage rescue: four OH-58Ds clear a fictional village compound, then ca
 
 ## Fly the rescue
 
-- Four hot Kiowas start at FARP KEYSTONE, 24.96 nm from the objective. Lead/#2 have two Hellfires and a .50-cal gun; #3/#4 have gun and seven M151 rockets. Each has 300 kg fuel. Check cockpit performance and reserve; tank-capacity checks are not flight performance certification.
+- Four hot Kiowas start on four separate visible DCS helipads at FARP KEYSTONE, 60 m apart, 24.96 nm from the objective. Ground starts use zero terrain-relative altitude; the Black Hawk has its own fifth pad. Set your physical collective fully down before pressing Fly. Lead/#2 have two Hellfires and a .50-cal gun; #3/#4 have gun and seven M151 rockets. Each has 300 kg fuel. Check cockpit performance and reserve; tank-capacity checks are not flight performance certification.
 - Lifeline launches after you lift off, accompanies the flight and holds outside the objective area. It needs explicit clearance; eliminating the defenders never sends it in automatically.
 - Clear the known Strela and nearby guards. Hostages and their building are vulnerable. Avoid rockets or gunfire into the marked building. Defeating every reinforcement is optional.
 - Use **F10 > Other > OPEN DOOR > Transport > Clear Black Hawk to land**. Actual LZ location is terrain-checked near WP5 and marked on F10; request green smoke under **Rescue**.
 - Cover Lifeline for three continuous minutes while it is landed. Threats force wave-off; movement/takeoff resets progress. Team movement and boarding are simulated with timing/messages.
 - Escort Lifeline back to its separate pad at the departure FARP. Landing there for 20 seconds completes the rescue: six hostages = full success, one to five = partial. No survivors or loss of the lead/Black Hawk is failure.
+
+## FARP facilities
+
+Visible fuel depots/tankers, ammunition trucks/canopies, ground crew Hummers, command posts and repair tents are present from the start. Each pad has an unlimited warehouse entry. Service vehicles for the four Kiowas are within 150 m of each pad. Use the Ground Crew radio menu while parked; shut down for repair. Actual service interaction still needs an in-game check.
 
 ## Use the Kiowa's MMS prepoints
 
@@ -37,4 +41,4 @@ Route: WP1 KEYSTONE, WP2 IP/hold, WP3 SAM reference, WP4 protected building, WP5
 
 ## Status and limitations
 
-All 20 printed logic scenarios and archive checks pass. These simulate DCS APIs and inspect mission data; they do not establish real AI flight/combat or terrain appearance. The new compound/transport pad, FARP services, UH-60A follow/hold/land/takeoff/recovery and Kiowa target import still need a complete sortie. Hostages use disabled neutral infantry stand-in models. See [design](design.md) and [verification](verification.md).
+All 21 printed logic scenarios and archive checks pass. These simulate DCS APIs and inspect mission data; they do not establish real AI flight/combat or terrain appearance. The new compound/transport pad, FARP services, UH-60A follow/hold/land/takeoff/recovery and Kiowa target import still need a complete sortie. Hostages use disabled neutral infantry stand-in models. See [design](design.md) and [verification](verification.md).

@@ -2,6 +2,10 @@
 
 ## Unreleased development build — 2026-11-01
 
+- Fixed reported airborne hot-start/crash configuration: five visible single helipads, four Kiowas 60 m apart, native hot-ground starts at zero terrain-relative altitude, no copied BARO start height or parking links. Added fuel/ammo/repair/command facilities and immediate support vehicles plus all five pad warehouses.
+- Log also showed extraction setup failure: widened LZ search to 1500 m and used an 18 m rotor-clearance radius with retained land/slope checks.
+- Added regression checks for ground start parameters, unique matching pads, spacing, start-time facilities, support ranges and expanded LZ search.
+
 - Built and deployed the first playable mission with four Kiowas, one AI UH-60A, fixed Strela/hostage intelligence, guarded compound, ground reinforcements, explicit clearance, wave-off/retry and full/partial rescue outcomes.
 - Added separate Kiowa MMS-compatible target points: 1T for Strela-10 (SA13), 2T for the protected hostage building.
 - Automated logic/archive checks passed; native flight and cockpit verification remain pending.
