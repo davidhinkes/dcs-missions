@@ -16,3 +16,11 @@ Run `node shared/tools/mission.mjs deploy open-door` from the collection root af
 ## Ground-start revision
 
 User's first flight exposed unsafe start behavior and a separate LZ setup error. Revised ground-start configuration and facilities passed 21 printed logic scenarios, zero-error/warning validation, 49-unit editor fixup checks, Lua trigger parsing and geometry checks. Tests assert zero-AGL hot-ground mode, no contradictory parking fields, five matching visible pads, 60 m aircraft spacing, full facilities and support range. No corrected in-game spawn or servicing is yet claimed.
+
+## Forward FARP and route revision
+
+All 23 printed logic scenarios pass, including a nominal 15 nm forward site, support within 150 m of all forward pads, whole-camp relocation around obstructed scenery, fixed intelligence positions and no enemy targets in the player route. Archive checks pass with 62 units and valid compiled Lua. Native terrain appearance, moving the forward objects while retaining pad warehouse service, and actual refuel/rearm/repair still require a DCS check.
+
+## FOOTHOLD departure revision
+
+All 23 printed logic scenarios and archive checks pass with 62 units. Tests confirm departure exactly 15 nm from the objective, fixed matched ground-start pads (no runtime replacement of occupied FOOTHOLD pads), optional KEYSTONE services, target-only enemy locations, and return success at FOOTHOLD. The new native FOOTHOLD spawn/terrain remains to be checked in-game.

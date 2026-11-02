@@ -1,8 +1,8 @@
 -- Tests state transitions with a simulated DCS API, not aircraft flight dynamics.
 local printResult=print
-local now,queue,units,groups,commands,flags,messages,marks,activated,smokes
+local now,queue,units,groups,commands,flags,messages,marks,activated,smokes,statics
 local function reset(opts)
-  opts=opts or{};now=0;queue={};units={};groups={};commands={};flags={};messages={};marks={};activated={};smokes={}
+  opts=opts or{};now=0;queue={};units={};groups={};commands={};flags={};messages={};marks={};activated={};smokes={};statics={}
   dofile('.build/config.lua');dofile('.build/mission.lua')
   env={mission=mission,info=function()end,error=function()end}
   local function addGroup(d)
@@ -30,8 +30,11 @@ local function reset(opts)
   Group={Category={GROUND=2},getByName=function(n)return groups[n]end}
   Object={Category={SCENERY=5}}
   land={getHeight=function()return 40 end,getSurfaceType=function()return opts.water and 3 or 1 end}
-  world={VolumeType={SPHERE=0},searchObjects=function(_,volume,fn)if opts.blockLZ and volume.params.radius==18 and math.abs(volume.params.point.x-OPEN_DOOR_CONFIG.plannedLZ.x)<(opts.blockRadius or 1)then fn({})end end}
-  coalition={addGroup=function(_,_,g)if opts.noServices then error('service unavailable')end;return addGroup(g)end}
+  world={VolumeType={SPHERE=0},searchObjects=function(_,volume,fn)
+    if opts.blockLZ and volume.params.radius==18 and math.abs(volume.params.point.x-OPEN_DOOR_CONFIG.plannedLZ.x)<(opts.blockRadius or 1)then fn({})end
+    if opts.blockForward and math.abs(volume.params.point.x-OPEN_DOOR_CONFIG.alternateFarp.x)<300 then fn({})end
+  end}
+  coalition={addGroup=function(_,_,g)if opts.noServices then error('service unavailable')end;return addGroup(g)end,addStaticObject=function(_,u)statics[u.name]=u;return u end}
   trigger={smokeColor={Green=0},action={
     outTextForCoalition=function(_,s)messages[#messages+1]=s end,
     setUserFlag=function(k,v)flags[k]=v end,
@@ -94,22 +97,37 @@ for _,g in pairs(flightGroups)do
   end
 end
 for i=1,4 do local u=flightGroups.LATCH.units[i];for j=i+1,4 do local v=flightGroups.LATCH.units[j];assert(math.abs(u.x-v.x)>=60)end end
-for _,prefix in ipairs({'KEYSTONE','TRANSPORT'})do
+for _,prefix in ipairs({'FOOTHOLD','TRANSPORT'})do
   for _,suffix in ipairs({' FUEL',' SERVICE',' COMMS'})do assert(support[prefix..suffix]and not support[prefix..suffix].lateActivation)end
   local facilities={};for _,u in pairs(pads)do if u.name:match('^'..prefix..' ')then facilities[u.type]=true end end
   assert(facilities['FARP Fuel Depot']and facilities['FARP Ammo Dump Coating']and facilities['FARP Tent']and facilities['FARP CP Blindage'])
 end
-for id=100,103 do for _,name in ipairs({'KEYSTONE FUEL','KEYSTONE SERVICE','KEYSTONE COMMS'})do
+for id=100,103 do for _,name in ipairs({'FOOTHOLD FUEL','FOOTHOLD SERVICE','FOOTHOLD COMMS'})do
   for _,u in pairs(support[name].units)do local p=pads[id];assert(math.sqrt((p.x-u.x)^2+(p.y-u.y)^2)<=150)end
 end end
-printResult('PASS: five visible native helipads, separated zero-AGL hot-ground starts and complete startup FARP services')
+printResult('PASS: departure helipads, separated zero-AGL hot-ground starts and complete startup FARP services')
 local nav=groups.LATCH -- The runtime mock records flight control; inspect source mission for imported targets.
 local points=nil
 for _,country in pairs(mission.coalition.blue.country)do for _,g in pairs((country.helicopter or{}).group or{})do if g.name=='LATCH'then points=g.NavTargetPoints end end end
 assert(points and points[1].text_comment=='1T|1|SA13' and points[2].text_comment=='2T|1|UNK')
 assert(points[1].x==OPEN_DOOR_CONFIG.sam.x and points[1].y==OPEN_DOOR_CONFIG.sam.y)
 assert(points[2].x==OPEN_DOOR_CONFIG.building.x and points[2].y==OPEN_DOOR_CONFIG.building.y)
+assert(#flightGroups.LATCH.route.points==4 and flightGroups.LATCH.route.points[2].name:match('IP'))
+for _,p in pairs(flightGroups.LATCH.route.points)do for _,target in ipairs({OPEN_DOOR_CONFIG.sam,OPEN_DOOR_CONFIG.building})do
+  assert(math.sqrt((p.x-target.x)^2+(p.y-target.y)^2)>100,'Enemy target must not be a route waypoint')
+end end
 printResult('PASS: separate Kiowa 1T/2T target points match the SAM and protected building')
+assert(OPEN_DOOR.alternate and marks[8205])
+local f=OPEN_DOOR.alternate;local b=OPEN_DOOR_CONFIG.building
+assert(math.abs(math.sqrt((f.x-b.x)^2+(f.z-b.y)^2)/1852-25)<0.1)
+for i=1,4 do assert(statics['KEYSTONE PAD '..i].unitId==399+i)end
+for _,name in ipairs({'KEYSTONE FUEL','KEYSTONE SERVICE','KEYSTONE COMMS'})do
+  assert(groups[name].active)
+  for _,u in pairs(groups[name].units)do for i=1,4 do local p=statics['KEYSTONE PAD '..i];assert(math.sqrt((u.p.x-p.x)^2+(u.p.z-p.y)^2)<=150)end end
+end
+local departurePos=OPEN_DOOR_CONFIG.home;assert(math.abs(math.sqrt((departurePos.x-b.x)^2+(departurePos.y-b.y)^2)/1852-15)<0.01)
+assert(not statics['FOOTHOLD PAD 1'],'Departure pads must not relocate beneath starting aircraft')
+printResult('PASS: FOOTHOLD departure is 15 nm from objective; KEYSTONE alternate is about 25 nm from objective, four native pads and all service vehicles within 150 m')
 local countries=mission.coalition.neutrals.country;local un=false;local neutralBuilding=false
 for _,c in pairs(countries)do if c.name=='UN Peacekeepers'then assert(c.id==7);un=true;for _,g in pairs(c.vehicle.group)do if g.name=='HOSTAGE-BUILDING'then neutralBuilding=true end end end end
 assert(un and neutralBuilding,'Hostages and protected building must be neutral to prevent premature guard attacks')
@@ -171,4 +189,8 @@ printResult('PASS: abort before boarding returns empty and does not award succes
 reset();advance(2);local n=0;for k in pairs(commands)do n=n+1;assert(not k:match('GUARD')and not k:match('WATCHTOWER'))end;assert(n==5)
 assert(commands['OPEN DOOR/Transport/Hold / wave off']and commands['OPEN DOOR/Rescue/Status'])
 printResult('PASS: F10 hierarchy has five unique commands and discloses no internal enemy identities')
+reset({blockForward=true});advance(2);assert(OPEN_DOOR.alternate and math.abs(OPEN_DOOR.alternate.x-OPEN_DOOR_CONFIG.alternateFarp.x)>=300)
+assert(marks[8205].p.x==OPEN_DOOR.alternate.x)
+assert(marks[8201].p.x==OPEN_DOOR_CONFIG.building.x and marks[8202].p.x==OPEN_DOOR_CONFIG.sam.x)
+printResult('PASS: forward camp relocates as one footprint around scenery; intel targets remain fixed')
 printResult('ALL OPEN DOOR LOGIC TESTS PASSED (mock DCS API; not a flight test)')

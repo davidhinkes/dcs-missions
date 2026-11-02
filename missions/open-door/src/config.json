@@ -1,13 +1,11 @@
 {
   "home": {
-    "x": 19948.236328125,
-    "y": 6806.8149414062,
-    "alt": 33.384346008301
+    "x": 37602.80390745693,
+    "y": 12130.177058387671
   },
   "transportPad": {
-    "x": 19648.236328125,
-    "y": 6626.8149414062,
-    "alt": 33.384346008301
+    "x": 37302.80390745693,
+    "y": 11950.177058387671
   },
   "building": {
     "x": 64200,
@@ -33,5 +31,13 @@
   "holdGate": 12000,
   "reinforcementDelay": 180,
   "safeRadius": 400,
-  "returnSeconds": 20
+  "returnSeconds": 20,
+  "alternateFarp": {
+    "x": 19948.236328125,
+    "y": 6806.8149414062,
+    "frequency": 128.5,
+    "searchRadius": 1852
+  },
+  "homeFrequency": 129.5,
+  "transportFrequency": 129
 }

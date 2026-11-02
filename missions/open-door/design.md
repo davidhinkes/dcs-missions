@@ -11,7 +11,7 @@ The desired rhythm is reconnaissance, controlled attacks, clearance, a vulnerabl
 ## Confirmed decisions
 
 - Syria map; player leads four hot-start OH-58Ds with a mix of Hellfires, guns and rockets. Lead/#2 carry two Hellfires plus gun; #3/#4 carry gun and seven M151 rockets. Each Kiowa carries approximately 400 lb (181.4 kg) of fuel (capacity checked; performance/endurance not flight-certified).
-- Depart from a FARP about 25 nm from the village: roughly 17 minutes inbound at 90 knots before maneuvering or holding.
+- Depart from FARP FOOTHOLD 15 nm from the village: roughly 10 minutes inbound at 90 knots before maneuvering or holding.
 - Hostages are vulnerable to gunfire and nearby explosions. Careful target identification and weapon employment matter.
 - Village setting with scattered guards, ground reinforcements, heavy machine guns and one nearby Strela-10 (SA-13) short-range guided SAM. This replaces the earlier ZU-23 choice.
 - Black Hawk accompanies the operation but hangs back outside the rescue area.
@@ -20,7 +20,7 @@ The desired rhythm is reconnaissance, controlled attacks, clearance, a vulnerabl
 - The Black Hawk lands for about three minutes to deploy the team, secure six hostages and board everyone, then leaves.
 - Rescue continues if a hostage is killed. Report full or partial success according to the survivors brought home.
 - Four Kiowas and one Black Hawk only: no friendly jets or enemy aircraft.
-- Escort the Black Hawk back to the departure FARP for recovery.
+- Escort the Black Hawk back to the departure FARP FOOTHOLD for recovery.
 - Labels off and friendly-only F10 unit visibility. Precise satellite intelligence identifies the hostage building and one air-defense site; both have named preplanned navigation points, briefing coordinates and static intelligence markers. This supersedes the earlier approximate compound marker. Other enemy positions remain undisclosed.
 
 ## Implemented behavior — native AI flight verification pending
@@ -30,7 +30,7 @@ The desired rhythm is reconnaissance, controlled attacks, clearance, a vulnerabl
 - A prepared landing site outside the village avoids having the transport land among buildings. The ground team's movement and hostage boarding are simulated with a timer and messages; do not promise native visible passenger animations.
 - Once cleared, the transport approaches; a clear landing/grounded condition starts the rescue timer. A local threat forces a wave-off; movement/takeoff or leaving the 80 m LZ radius resets the three-minute timer. Guard defeat, player clearance, transport arrival, rescue completion and return are separate states.
 - Enemy units and player-facing replies must be designed together so missions do not accidentally disclose unbriefed enemy identities, counts or live positions. The explicitly briefed air-defense site is an intelligence exception.
-- Recover to the departure FARP complex with separate transport parking. Count success on return, not merely when the Black Hawk leaves the village.
+- Recover to the departure FARP FOOTHOLD complex with separate transport parking. Count success on return, not merely when the Black Hawk leaves the village.
 
 ## Build choices
 
@@ -51,9 +51,17 @@ The desired rhythm is reconnaissance, controlled attacks, clearance, a vulnerabl
 - Points are briefing-time intelligence, not live enemy tracking. Markers do not follow units, disappear automatically on kills or reveal moving reinforcements.
 - Keep the Black Hawk's flight route through safe staging and its landing zone. Target reference points must not route the transport over the air-defense site or force Kiowas to overfly it.
 
-## Geography and timing
+## Bases, route and timing
 
-Departure FARP KEYSTONE deliberately reuses an observed DCS pad position (x=19948.236328125, east=6806.8149414062, elevation=33.384346008301 m). Its transport pad is offset 300 m south and 180 m west. Four visible native SINGLE_HELIPAD objects are positioned 60 m apart; the Black Hawk has a fifth. All aircraft use explicit TakeOffGroundHot / From Ground Area Hot, with zero RADIO altitude and no conflicting parking links. Native ground starts resolve terrain height independently of the copied BARO elevation. Direct departure-to-building distance is 24.96 nm, about 17 minutes at 90 knots. New compound placement, transport-pad ground elevation and native AI flight behavior still require a DCS sortie. At runtime the actual LZ is searched within 1500 m of planned x=63750, east=20200, rejecting water, excessive slope and scenery obstacles using an 18 m rotor-clearance radius; known target objects never relocate. Locate the transport hold behind friendly cover, not simply at an arbitrary range. The round trip is approximately 50 nm (about 34 minutes at 90 knots), plus reconnaissance, fighting, three minutes on the ground, holding and recovery. Compute final timings and fuel from actual routes. The revised FARP uses five separate visible native single helipads: four at 60 m spacing for the Kiowas and a separate transport pad. Start-time fuel/ammunition trucks, ground-crew Hummers, fuel depots, ammunition canopies, repair tents and command posts serve the installation. Each pad has an unlimited warehouse entry.
+FOOTHOLD was first requested as an additional refueling site 15 nm from the village, then promoted by the user to the actual departure/recovery base. Anchor x=37602.80390745693, east=12130.177058387671. Four fixed visible native single helipads are 60 m apart; the Black Hawk's separate pad is 300 m south and 180 m west. Both use zero-AGL native hot-ground starts. No setup function moves the occupied departure pads. Main FARP radio 129.500 AM; transport pad 129.000 AM.
+
+Fuel/ammo/crew vehicles, depots/canopies, repair tents and command posts are available from mission start. Native pad IDs 100–103 and 200 have unlimited warehouses. All four Kiowas retain approximately 400 lb fuel. Actual new-site terrain/servicing needs a DCS check.
+
+KEYSTONE is retained near the former departure site, about 25 nm from the village (roughly 10 nm behind FOOTHOLD). Its complete unoccupied camp footprint is checked for land, slope, scenery and ground-height spread, searching within 1 nm. If suitable, all alternate objects/support are placed together, retaining warehouse IDs 400–403. The actual F10 marker is authoritative. Failed alternate preparation is reported without failing the rescue. Radio 128.500 AM. KEYSTONE does not satisfy mission recovery.
+
+Route: WP1 FOOTHOLD, WP2 IP/hold, WP3 planned LZ, WP4 FOOTHOLD/home. Enemy building and SAM are solely separate target points 1T/2T plus static intelligence markers. No enemy site lies on the flight route. Direct outbound distance is exactly 15 nm, about ten minutes at 90 knots; round trip about 30 nm / 20 minutes before holding, fighting and three-minute rescue. Expected sortie roughly 30–45 minutes.
+
+The fictional village remains at x=64200, east=20150; Strela at x=63600, east=18100. The actual LZ is searched within 1500 m of x=63750, east=20200, using land/slope and 18 m scenery-clearance checks. Fixed intelligence objects never relocate. Team movement/boarding remains a timed abstraction.
 
 ## Acceptance criteria
 

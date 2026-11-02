@@ -33,16 +33,14 @@ function heli(name,type,count,pos,skill){
     delete u.datalinks;
   }
   Object.assign(g,{frequency:251,modulation:0,communication:true,radioSet:true,start_time:0,uncontrolled:false,tasks:{}});
-  g.route.points={1:wp(pos,'FARP KEYSTONE - HOT ON GROUND',0,0)};g.route.points[1].ETA_locked=true;
+  g.route.points={1:wp(pos,'FARP FOOTHOLD - HOT ON GROUND',0,0)};g.route.points[1].ETA_locked=true;
   Object.assign(g.route.points[1],{type:'TakeOffGroundHot',action:'From Ground Area Hot',alt:0,alt_type:'RADIO'});
   return g;
 }
 const flight=heli('LATCH','OH58D',4,c.home,'Player');
 flight.route.points[2]=wp(c.hold,'IP - BLACK HAWK HOLD');
-flight.route.points[3]=wp(c.sam,'INTEL - STRELA-10 (DO NOT OVERFLY)');
-flight.route.points[4]=wp(c.building,'INTEL - HOSTAGE BUILDING (NO FIRE)');
-flight.route.points[5]=wp(c.plannedLZ,'PLANNED LZ - CHECK F10 ACTUAL LZ');
-flight.route.points[6]=wp(c.home,'FARP KEYSTONE - RETURN');
+flight.route.points[3]=wp(c.plannedLZ,'PLANNED LZ - CHECK F10 ACTUAL LZ');
+flight.route.points[4]=wp(c.home,'FARP FOOTHOLD - RETURN');
 // OH-58D manual section 24.4: Navigation Target Fix Points use #T|quantity|subtype.
 // These load into the aircraft's target-point database, independently of route waypoints.
 flight.NavTargetPoints={
@@ -60,12 +58,12 @@ hawk.route.points[2]=wp(c.hold,'SAFE HOLD - AWAIT CLEARANCE',200,50);
 hawk.route.points[2].task={id:'ComboTask',params:{tasks:{1:{number:1,enabled:true,auto:false,id:'Orbit',params:{pattern:'Circle',altitude:600,speed:40}}}}};
 const usa=Object.values(m.coalition.blue.country).find(x=>x.name==='USA');
 usa.static={group:{}};
-const padSpecs=[...[1,2,3,4].map(i=>[99+i,{x:c.home.x+(i-1)*60,y:c.home.y},'KEYSTONE PAD '+i,128.5]),[200,c.transportPad,'KEYSTONE TRANSPORT PAD',127.5]];
+const padSpecs=[...[1,2,3,4].map(i=>[99+i,{x:c.home.x+(i-1)*60,y:c.home.y},'FOOTHOLD PAD '+i,c.homeFrequency]),[200,c.transportPad,'FOOTHOLD TRANSPORT PAD',c.transportFrequency],...[1,2,3,4].map(i=>[399+i,{x:c.alternateFarp.x+(i-1)*60,y:c.alternateFarp.y},'KEYSTONE PAD '+i,c.alternateFarp.frequency])];
 for(const [id,p,name,freq]of padSpecs){
   usa.static.group[id]={name,groupId:id,x:p.x,y:p.y,heading:0,dead:false,route:{points:{1:{x:p.x,y:p.y,alt:0,speed:0,type:'',action:''}}},units:{1:{name,unitId:id,type:'SINGLE_HELIPAD',shape_name:'FARP',category:'Heliports',x:p.x,y:p.y,heading:0,heliport_frequency:freq,heliport_modulation:0,heliport_callsign_id:id===200?3:2,canCargo:false}}};
 }
 let staticId=300;
-for(const [prefix,p]of [['KEYSTONE',c.home],['TRANSPORT',c.transportPad]])for(const [label,type,dx,dy]of [
+for(const [prefix,p]of [['FOOTHOLD',c.home],['TRANSPORT',c.transportPad],['KEYSTONE',c.alternateFarp]])for(const [label,type,dx,dy]of [
   ['FUEL DEPOT','FARP Fuel Depot',90,-90],['AMMO CANOPY','FARP Ammo Dump Coating',90,110],
   ['REPAIR TENT','FARP Tent',-50,-85],['COMMAND POST','FARP CP Blindage',-50,85]]){
   const id=staticId++,x=p.x+dx,y=p.y+dy,name=prefix+' '+label;
@@ -87,13 +85,13 @@ ground('HOSTAGE-BUILDING','house1arm',1,c.building,'neutrals','UN Peacekeepers')
 for(const [i,dx,dy]of [[1,160,130],[2,-160,100],[3,180,-170]])ground('VILLAGE-'+i,'house2arm',1,{x:c.building.x+dx,y:c.building.y+dy},'neutrals','UN Peacekeepers');
 const people=ground('HOSTAGES','Soldier M4',6,c.building,'neutrals','UN Peacekeepers');
 for(const [i,u]of Object.entries(people.units)){u.x=c.building.x+(Number(i)%3-1)*3;u.y=c.building.y+(Math.floor((Number(i)-1)/3)-0.5)*3;u.playerCanDrive=false;}
-for(const [prefix,p]of [['KEYSTONE',c.home],['TRANSPORT',c.transportPad]]){
+for(const [prefix,p]of [['FOOTHOLD',c.home],['TRANSPORT',c.transportPad],['KEYSTONE',c.alternateFarp]]){
   for(const [suffix,type,count,dx,dy]of [['FUEL','M978 HEMTT Tanker',1,85,-55],['SERVICE','M 818',3,60,65],['COMMS','Hummer',1,90,-75]]){
     const support=ground(prefix+' '+suffix,type,count,{x:p.x+dx,y:p.y+dy},'blue','USA',false);
     support.hidden=false;support.hiddenOnMFD=false;
   }
 }
-for(const [name,p,radius]of [['HOSTAGE BUILDING',c.building,50],['KNOWN STRELA',c.sam,50],['PLANNED LZ',c.plannedLZ,500],['KEYSTONE',c.home,500]])addTriggerZone(m,{name,...p,radius});
+for(const [name,p,radius]of [['HOSTAGE BUILDING',c.building,50],['KNOWN STRELA',c.sam,50],['PLANNED LZ',c.plannedLZ,500],['FOOTHOLD',c.home,500],['KEYSTONE PLANNED',c.alternateFarp,300]])addTriggerZone(m,{name,...p,radius});
 const distance=Math.hypot(c.building.x-c.home.x,c.building.y-c.home.y)/1852;
 const brief=`OPERATION OPEN DOOR
 Syria / fictional village hostage rescue / single-player OH-58D flight of four
@@ -102,25 +100,26 @@ SITUATION
 Six hostages are held in the identified village building. Satellite intelligence precisely locates the building and a Strela-10 launcher. These are fixed intelligence points, not live tracking. Other guards and reinforcements are hidden. Labels are OFF and F10 units are friendly-only. No fighter aircraft or other air support is available.
 
 FLIGHT
-Anvil 1-1: you. All four Kiowas start hot ON THE GROUND at four separate, visible native DCS helipads in FARP KEYSTONE, 60 m apart. Native hot-ground starts use zero terrain-relative altitude; no copied barometric spawn height. Lifeline has its own fifth pad. Set your physical collective fully down before Fly. Fuel tanker/depot, ammunition trucks/canopy, ground crew, command post and repair tent are present from mission start, with unlimited warehouse resources. Use Ground Crew while parked; shut down for repairs. Lead and #2 each carry two Hellfires and a .50-cal gun with 500 rounds. #3/#4 each carry the gun plus seven M151 rockets. Fuel: ${(c.fuelKg/0.45359237).toFixed(0)} lb (${c.fuelKg} kg) each (within the checked 333.69 kg capacity; hover/gross weight and endurance need cockpit verification). Lead PDU enabled. Use normal wingman radio commands. Monitor fuel and preserve a reserve; fuel-capacity compliance is not an endurance guarantee.
+Anvil 1-1: you. All four Kiowas start hot ON THE GROUND at four separate, visible native DCS helipads in FARP FOOTHOLD, 60 m apart. Native hot-ground starts use zero terrain-relative altitude; no copied barometric spawn height. Lifeline has its own fifth pad. Set your physical collective fully down before Fly. Fuel tanker/depot, ammunition trucks/canopy, ground crew, command post and repair tent are present from mission start, with unlimited warehouse resources. Use Ground Crew while parked; shut down for repairs. Lead and #2 each carry two Hellfires and a .50-cal gun with 500 rounds. #3/#4 each carry the gun plus seven M151 rockets. Fuel: ${(c.fuelKg/0.45359237).toFixed(0)} lb (${c.fuelKg} kg) each (within the checked 333.69 kg capacity; hover/gross weight and endurance need cockpit verification). Lead PDU enabled. Use normal wingman radio commands. Monitor fuel and preserve a reserve; fuel-capacity compliance is not an endurance guarantee.
 Lifeline is one built-in AI UH-60A Black Hawk on its own nearby pad. It starts following you when you lift off and holds back as you approach the village. No UH-60L mod or external scripts need installation by players.
 
 NAVIGATION / INTELLIGENCE
-WP1 KEYSTONE. WP2 IP / transport hold. WP3 STRELA-10. WP4 HOSTAGE BUILDING. WP5 PLANNED LZ. WP6 HOME.
+WP1 FOOTHOLD. WP2 IP / transport hold. WP3 PLANNED LZ. WP4 HOME (FOOTHOLD). Enemy sites are TARGET POINTS ONLY, not flight-route waypoints.
 MMS TARGET POINTS: 1T = STRELA-10 (SA13); 2T = HOSTAGE BUILDING (UNK, NO FIRE). These are separate Navigation Target Fix Points in the aircraft target database. To slew the MMS, select PREPT on its Mode Selector, use Manual/Slave as needed until the advisory reads PREPT, press R2 PPT, enter 1T or 2T on the multifunction keyboard and press Enter. Target-point loading and sensor alignment need cockpit verification; neither point is an automatic lock or authorization to fire. TIS/TV selection is independent.
-WP3 and WP4 are target reference points: do not follow the route blindly over the SAM or hostage building. Choose a terrain-masked approach. The building is a protected no-fire location. The exact hostage building and Strela are also marked on F10; all coordinates identify mission objects in DCS planar metres: building x=${c.building.x}, east=${c.building.y}; Strela x=${c.sam.x}, east=${c.sam.y}. F10 places them geographically and mission-start messages provide lat/lon when available.
-Departure to objective: ${distance.toFixed(1)} nm, about ${(distance/90*60).toFixed(0)} minutes at 90 knots. Return is the same distance: approximately 50 nm round trip before combat, holding and three minutes on the ground. Allow roughly 45-60 minutes overall. The village is an authored mission compound; terrain/scenery appearance still needs flight verification.
+Choose a terrain-masked approach. The building is a protected no-fire location. The exact hostage building and Strela are marked on F10 and stored as 1T/2T; all coordinates identify mission objects in DCS planar metres: building x=${c.building.x}, east=${c.building.y}; Strela x=${c.sam.x}, east=${c.sam.y}. F10 places them geographically and mission-start messages provide lat/lon when available.
+FOOTHOLD is now the departure and final recovery FARP, 15 nm from the village, with fixed pads that are never moved under starting aircraft. KEYSTONE remains an alternate service base about 25 nm from the village and 10 nm behind FOOTHOLD. Its complete camp footprint is checked for land, slope and scenery during initialization; it can shift by up to 1 nm to find an open site. Use the actual F10 KEYSTONE marker. KEYSTONE radio: ${c.alternateFarp.frequency.toFixed(3)} AM. Both bases offer spaced visible helipads, fuel, ammunition, ground crew and repairs with unlimited pad resources. Landing at KEYSTONE does not complete the rescue: escort Lifeline back to FOOTHOLD.
+Departure to objective: ${distance.toFixed(1)} nm, about ${(distance/90*60).toFixed(0)} minutes at 90 knots. Return is the same distance: approximately 30 nm round trip before combat, holding and three minutes on the ground. Allow roughly 30-45 minutes overall. The village is an authored mission compound; terrain/scenery appearance still needs flight verification.
 
 EXECUTION
-Clear the Strela and the guards around the compound/LZ, positively identifying targets before firing. Hostages can die from fire, explosions or destruction of their building. Continue rescuing survivors after casualties. Lifeline will never enter merely because defenders are killed: use F10 > Other > OPEN DOOR > Transport > Clear Black Hawk to land. Clearance is rejected while the known Strela or close defenders still threaten the site. The actual LZ is terrain/scenery-checked near WP5; the F10 LZ marker and requested green smoke identify it.
+Clear the Strela and the guards around the compound/LZ, positively identifying targets before firing. Hostages can die from fire, explosions or destruction of their building. Continue rescuing survivors after casualties. Lifeline will never enter merely because defenders are killed: use F10 > Other > OPEN DOOR > Transport > Clear Black Hawk to land. Clearance is rejected while the known Strela or close defenders still threaten the site. The actual LZ is terrain/scenery-checked near WP3; the F10 LZ marker and requested green smoke identify it.
 Once Lifeline is landed within 80 m of the LZ and below 1 m/s, the simulated team needs ${c.rescueSeconds} seconds to secure the survivors and board. Cover it. A local threat, movement or wave-off resets rescue progress; re-clear once safe. Ground-team movement and boarding are represented by timing/messages, not passenger animation. Neutral infantry models stand in for hostages and do not fight.
 Enemy reinforcements begin moving about three minutes after your flight enters 8 km of the compound. Defeating every enemy is optional. Keep the approaches clear while Lifeline is on the ground.
-After boarding Lifeline returns to its own pad at KEYSTONE. Escort it home. It must land there for ${c.returnSeconds} seconds to count the rescued hostages: six is full success; one to five is partial success. No survivors, Black Hawk loss or player helicopter loss is failure. Flying continues after the result.
+After boarding Lifeline returns to its own pad at FOOTHOLD. Escort it home. It must land there for ${c.returnSeconds} seconds to count the rescued hostages: six is full success; one to five is partial success. No survivors, Black Hawk loss or player helicopter loss is failure. Flying continues after the result.
 
 F10 / RADIOS
 OPEN DOOR > Transport: clearance; hold / wave off; abort and return. OPEN DOOR > Rescue: status; mark actual LZ green.
 Wave-off returns Lifeline to its hold and resets the rescue timer; it needs fresh clearance. Abort before boarding cancels the extraction and returns empty (mission failure once home). After boarding, abort/wave-off returns home with those aboard. Do not fire on the marked hostage building.
-UHF package 251.000 AM. KEYSTONE 128.500 AM; transport pad 127.500 AM. Both pads have service vehicles/warehouses; ground servicing still needs DCS confirmation.
+UHF package 251.000 AM. FOOTHOLD ${c.homeFrequency.toFixed(3)} AM; transport pad ${c.transportFrequency.toFixed(3)} AM. KEYSTONE alternate 128.500 AM. Ground servicing still needs DCS confirmation.
 
 BUILD STATUS
 Development build. Automated checks do not certify native UH-60A follow, temporary landing, takeoff/recovery, terrain placement or actual combat. Requires an in-simulator sortie. Requires Syria and OH-58D only.
@@ -130,9 +129,12 @@ const configLua='OPEN_DOOR_CONFIG = '+serializeLuaAssignment('config',c).replace
 fs.writeFileSync(path.join(base,'.build/config.lua'),configLua);
 await loadScripts(s,s.dictionary,[{filePath:path.join(base,'.build/config.lua')},{filePath:path.join(base,'src/rescue.lua')}]);
 refresh(s);const report=validateMission(s.document);assert.equal(report.errors.length,0,JSON.stringify(report));
-assert.equal(Object.keys(flight.units).length,4);assert(c.fuelKg<=333.69);assert(distance>24&&distance<26);
+assert.equal(Object.keys(flight.units).length,4);assert(c.fuelKg<=333.69);assert(distance>14&&distance<16);
 assert.equal(hawk.units[1].type,'UH-60A');assert.equal(hawk.uncontrolled,true);
-assert.equal(flight.route.points[3].x,c.sam.x);assert.equal(flight.route.points[4].x,c.building.x);
+assert.equal(flight.NavTargetPoints[1].x,c.sam.x);assert.equal(flight.NavTargetPoints[2].x,c.building.x);
+assert.equal(Object.keys(flight.route.points).length,4);
+for(const p of Object.values(flight.route.points))for(const target of [c.sam,c.building])assert(Math.hypot(p.x-target.x,p.y-target.y)>100,'Enemy site must not be a route waypoint');
+assert(Math.abs(distance-15)<0.01);
 const warehouse=()=>({coalition:'BLUE',size:100,speed:16.666666,periodicity:30,unlimitedMunitions:true,unlimitedAircrafts:true,unlimitedFuel:true,OperatingLevel_Air:10,OperatingLevel_Fuel:10,OperatingLevel_Eqp:10,aircrafts:{},weapons:{},suppliers:{},gasoline:{InitFuel:100},methanol_mixture:{InitFuel:100},diesel:{InitFuel:100},jet_fuel:{InitFuel:100},dynamicSpawn:false,dynamicCargo:false,allowHotStart:true});
 const zip=new AdmZip(s.sourceBytes);zip.updateFile('warehouses',Buffer.from(serializeLuaAssignment('warehouses',{airports:{},warehouses:Object.fromEntries(padSpecs.map(([id])=>[id,warehouse()]))})));s.sourceBytes=zip.toBuffer();
 await saveSessionAs(s,path.join(base,'dist/Operation-Open-Door-Syria-OH58D.miz'),true);

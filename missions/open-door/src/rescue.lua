@@ -41,6 +41,47 @@ local function eachGroup(fn)
 end
 local templates={}
 eachGroup(function(g,country)templates[g.name]={data=copy(g),country=country}end)
+local alternateStatics={}
+for _,country in pairs(env.mission.coalition.blue.country or{})do
+  for _,g in pairs((country.static or{}).group or{})do for _,u in pairs(g.units)do
+    if u.name:match('^KEYSTONE ')then alternateStatics[#alternateStatics+1]={data=copy(u),country=country.id}end
+  end end
+end
+local function setupAlternateFarp()
+  local footprint={}
+  for _,t in ipairs(alternateStatics)do footprint[#footprint+1]={x=t.data.x-C.alternateFarp.x,z=t.data.y-C.alternateFarp.y,radius=t.data.type=='SINGLE_HELIPAD'and 18 or 12}end
+  for name,t in pairs(templates)do if name:match('^KEYSTONE ')then for _,u in pairs(t.data.units)do footprint[#footprint+1]={x=u.x-C.alternateFarp.x,z=u.y-C.alternateFarp.y,radius=8}end end end
+  local selected=nil
+  for r=0,C.alternateFarp.searchRadius,100 do
+    for a=0,345,15 do
+      local candidate=point({x=C.alternateFarp.x+r*math.cos(math.rad(a)),y=C.alternateFarp.y+r*math.sin(math.rad(a))})
+      local centerHeight=land.getHeight({x=candidate.x+90,y=candidate.z});local suitable=true
+      for _,o in ipairs(footprint)do
+        local p=point({x=candidate.x+o.x,y=candidate.z+o.z})
+        if math.abs(p.y-centerHeight)>4 or not clear(p,o.radius,2.5)then suitable=false;break end
+      end
+      if suitable then selected=candidate;break end
+    end
+    if selected then break end
+  end
+  assert(selected,'No open, sufficiently level site for the complete KEYSTONE camp within 1 nm')
+  local dx,dz=selected.x-C.alternateFarp.x,selected.z-C.alternateFarp.y
+  -- Same names and unit IDs replace only the alternate base's planned objects;
+  -- the pad warehouse IDs remain stable. No aircraft starts at this base.
+  for _,t in ipairs(alternateStatics)do
+    local u=copy(t.data);u.x=u.x+dx;u.y=u.y+dz;u.dead=false
+    assert(coalition.addStaticObject(t.country,u),'Failed to place '..u.name)
+  end
+  for name,t in pairs(templates)do if name:match('^KEYSTONE ')then
+    local g=copy(t.data);g.x=g.x+dx;g.y=g.y+dz
+    for _,u in pairs(g.units)do u.x=u.x+dx;u.y=u.y+dz end
+    g.route.points[1].x=g.x;g.route.points[1].y=g.y
+    assert(coalition.addGroup(t.country,Group.Category.GROUND,g),'Failed to place '..name)
+  end end
+  S.alternate=selected
+  trigger.action.markToCoalition(8205,'FARP KEYSTONE - FUEL / AMMO / REPAIR - 128.500 AM',selected,2,true)
+  say('KEYSTONE ready: alternate refuel/rearm/repair base marked on F10. Use the actual marker for its location. Radio 128.500 AM.')
+end
 local function disable(n)local c=controller(n);if c then c:setOnOff(false)end end
 local function members(n)
   local t={};local g=group(n);if g then for _,u in pairs(g:getUnits()or{})do if u:isExist() and u:getLife()>0 then t[#t+1]=u end end end;return t
@@ -74,22 +115,22 @@ end
 local function returnHome(aborted)
   local bh=alive('LIFELINE-1');local ctrl=controller('LIFELINE');if not bh or not ctrl then return end
   local approach=point({x=C.transportPad.x+1800,y=C.transportPad.y+700})
-  local final=waypoint(S.home,'KEYSTONE TRANSPORT PAD',30)
+  local final=waypoint(S.home,'FOOTHOLD TRANSPORT PAD',30)
   final.type='Land';final.action='Landing';final.alt=S.home.y;final.helipadId=200;final.linkUnit=200
   ctrl:setTask({id='Mission',params={route={points={waypoint(bh:getPoint(),'EGRESS',50),waypoint(point(C.hold),'FRIENDLY CORRIDOR',50),waypoint(approach,'RECOVERY',40),final}}}})
   S.phase='return';S.rescueAt=nil;S.aborted=aborted or false
-  say(S.onboard>0 and 'Lifeline loaded and returning to KEYSTONE. Escort us home.' or 'Extraction aborted. Lifeline returning empty; hostages remain at the compound.')
+  say(S.onboard>0 and 'Lifeline loaded and returning to FOOTHOLD. Escort us home.' or 'Extraction aborted. Lifeline returning empty; hostages remain at the compound.')
 end
 local function waveOff()
   if terminal()then say('Operation has ended.');return end
   if S.boarded then returnHome(false);return end
-  if not S.launched then say('Lifeline is still at KEYSTONE.');return end
-  if S.phase=='return'then say('Lifeline is already returning to KEYSTONE.');return end
+  if not S.launched then say('Lifeline is still at FOOTHOLD.');return end
+  if S.phase=='return'then say('Lifeline is already returning to FOOTHOLD.');return end
   hold();say('Lifeline waving off to the hold. Rescue progress reset; fresh clearance required.')
 end
 local function requestLand()
   if terminal()then say('Operation has ended.');return end
-  if S.boarded or S.phase=='return'then say('Lifeline is returning to KEYSTONE.');return end
+  if S.boarded or S.phase=='return'then say('Lifeline is returning to FOOTHOLD.');return end
   if not S.launched then say('Lifeline launches when the Kiowa lead takes off.');return end
   if S.phase=='ingress' or S.phase=='rescue'then say('Lifeline already cleared; cover the landing area.');return end
   local lead=alive('LATCH-1');if not lead or distance(lead:getPoint(),point(C.building))>10000 then say('Move closer to the objective before clearing the extraction.');return end
@@ -112,7 +153,8 @@ local function status()
   if S.boarded then text=text..'Survivors aboard: '..S.onboard..'.'
   else text=text..'Hostages alive: '..livingHostages()..'.'end
   if S.rescueAt then text=text..' Rescue time remaining: '..math.max(0,C.rescueSeconds-math.floor(timer.getTime()-S.rescueAt))..' seconds.'end
-  say(text..' '..(S.phase=='holding' and 'Clear through Transport when safe.' or S.phase=='return' and 'Escort to the transport pad at KEYSTONE.' or ''))
+  text=text..(S.alternate and ' KEYSTONE services ready, 128.500 AM; see F10.' or ' KEYSTONE site preparation unavailable; use FOOTHOLD.')
+  say(text..' '..(S.phase=='holding' and 'Clear through Transport when safe.' or S.phase=='return' and 'Escort to the transport pad at FOOTHOLD.' or ''))
 end
 local function reinforcement()
   for _,name in ipairs({'RELIEF','RELIEF-TRUCKS'})do
@@ -128,6 +170,8 @@ local function reinforcement()
   S.reinforced=true;say('Movement reported on the village approaches. Maintain overwatch.')
 end
 local function setup()
+  local alternateOK,alternateError=pcall(setupAlternateFarp)
+  if not alternateOK then env.info('[OPEN_DOOR] Alternate base preparation: '..tostring(alternateError));say('KEYSTONE preparation could not find a safe complete camp. Use FOOTHOLD; do not rely on the planned alternate site.')end
   local surface=land.getSurfaceType({x=C.building.x,y=C.building.y})
   assert(surface==1 or surface==4 or surface==5,'Hostage compound is not on land')
   S.lz=findClear(C.plannedLZ,1500,false);S.home=point(C.transportPad)
@@ -137,13 +181,13 @@ local function setup()
   trigger.action.markToCoalition(8201,'SATELLITE INTEL: HOSTAGE BUILDING - NO FIRE',point(C.building),2,true)
   trigger.action.markToCoalition(8202,'SATELLITE INTEL: STRELA-10',point(C.sam),2,true)
   trigger.action.markToCoalition(8203,'EXTRACTION LZ - LIFELINE',S.lz,2,true)
-  trigger.action.markToCoalition(8204,'KEYSTONE - BLACK HAWK RECOVERY PAD',S.home,2,true)
+  trigger.action.markToCoalition(8204,'FOOTHOLD - BLACK HAWK RECOVERY PAD',S.home,2,true)
   local menu=missionCommands.addSubMenuForCoalition(2,'OPEN DOOR')
   local trans=missionCommands.addSubMenuForCoalition(2,'Transport',menu)
   local rescue=missionCommands.addSubMenuForCoalition(2,'Rescue',menu)
   missionCommands.addCommandForCoalition(2,'Clear Black Hawk to land',trans,requestLand)
   missionCommands.addCommandForCoalition(2,'Hold / wave off',trans,waveOff)
-  missionCommands.addCommandForCoalition(2,'Abort and return',trans,function()if not terminal()then if S.launched then returnHome(not S.boarded)else say('Lifeline is still at KEYSTONE.')end end end)
+  missionCommands.addCommandForCoalition(2,'Abort and return',trans,function()if not terminal()then if S.launched then returnHome(not S.boarded)else say('Lifeline is still at FOOTHOLD.')end end end)
   missionCommands.addCommandForCoalition(2,'Status',rescue,status)
   missionCommands.addCommandForCoalition(2,'Mark actual LZ (green)',rescue,smoke)
   S.phase='ready'
@@ -184,8 +228,8 @@ local function tick(_,now)
     if not bh:inAir()and speed(bh)<1 and distance(bh:getPoint(),S.home)<=120 then
       S.homeAt=S.homeAt or now
       if now-S.homeAt>=C.returnSeconds then
-        if S.onboard==C.hostages then result('complete','Full success: all six hostages safely returned to KEYSTONE.')
-        elseif S.onboard>0 then result('partial','Partial success: '..S.onboard..' of six hostages safely returned to KEYSTONE.')
+        if S.onboard==C.hostages then result('complete','Full success: all six hostages safely returned to FOOTHOLD.')
+        elseif S.onboard>0 then result('partial','Partial success: '..S.onboard..' of six hostages safely returned to FOOTHOLD.')
         else result('failed','Lifeline returned without hostages. Extraction failed.')end
       end
     else S.homeAt=nil end

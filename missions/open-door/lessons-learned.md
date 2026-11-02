@@ -19,3 +19,11 @@ The original 45 m scenery clearance and 300 m search found no LZ in the actual m
 ## Fuel versus gross weight
 
 The user reported that the 300 kg Kiowa fuel load made the armed aircraft overweight. Reduced all four Kiowas to about 400 lb (181.4 kg), using an explicit pounds-to-kilograms conversion because DCS mission payloads store kilograms. A tank-capacity check does not validate loaded aircraft weight. Treat cockpit gross weight/hover performance and fuel reserve for the 50 nm round trip as separate checks; the new fuel quantity is a user-selected starting load, not a verified endurance guarantee.
+
+## Forward base and navigation separation
+
+Check a forward camp as a complete footprint rather than placing its helipad alone on a clearing and leaving trucks/tents in trees or on a slope. Keep support within the service radius of every pad after relocation. A dynamically refined base location requires an authoritative actual-location marker; the planned navigation point can differ. Dedicated Kiowa target records need not be part of the flight route: tests now reject route points at either known enemy site. Native warehouse servicing after runtime placement remains unverified.
+
+## Promoting a forward base to departure
+
+A base that can refine its location on load must not retain that relocation behavior once aircraft start on its pads. FOOTHOLD was promoted to fixed departure/recovery, while the unoccupied KEYSTONE alternate retains whole-footprint placement checks. Update launch, return conditions, radio labels, service prefixes, route timing and regression checks together when swapping base roles.

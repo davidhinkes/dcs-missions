@@ -2,6 +2,12 @@
 
 ## Unreleased development build — 2026-11-01
 
+- Promoted FOOTHOLD to departure/recovery base, 15 nm from the village; all four Kiowas and the Black Hawk now start there. KEYSTONE remains an alternate service base.
+- Shortened route to FOOTHOLD / IP / LZ / FOOTHOLD; known enemies remain target points only. Departure pads are fixed and excluded from runtime base relocation.
+
+- Added FARP FOOTHOLD about 15 nm from the village, with four spaced helipads, fuel/ammo/repair/crew facilities, unlimited pad warehouses and whole-camp terrain/scenery checks.
+- Removed enemy sites from the flight route; retained dedicated MMS target points 1T/2T. Added FOOTHOLD as WP2 and an actual-location F10 marker.
+
 - Reduced all four Kiowas from 300 kg starting fuel to approximately 400 lb (181.4 kg) after the user reported an overweight load. Briefing now displays pounds and kilograms.
 
 - Fixed reported airborne hot-start/crash configuration: five visible single helipads, four Kiowas 60 m apart, native hot-ground starts at zero terrain-relative altitude, no copied BARO start height or parking links. Added fuel/ammo/repair/command facilities and immediate support vehicles plus all five pad warehouses.
