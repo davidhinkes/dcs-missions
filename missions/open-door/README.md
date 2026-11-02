@@ -27,6 +27,8 @@ Visible fuel depots/tankers, ammunition trucks/canopies, ground crew Hummers, co
 
 **KEYSTONE remains an alternate service base**, about 25 nm from the village and 10 nm behind FOOTHOLD. It has four pads and full fuel/ammo/repair support, with a whole-camp terrain/scenery search within 1 nm of its planned location. Use its actual F10 marker. KEYSTONE: **128.500 AM**. Landing there does not complete the rescue; escort Lifeline home to FOOTHOLD.
 
+Native trees-only scenery actions clear the five departure pads, facilities and an initial 600 m lane toward the IP at mission start. Restart the mission to apply this revision; tree appearance/collision clearance still needs an in-game check.
+
 Starting fuel remains about 400 lb per Kiowa. Park and use Ground Crew; shut down for repair. Terrain appearance, native services and the new FOOTHOLD start location still require an in-game check.
 
 ## Use the Kiowa's MMS prepoints
@@ -49,4 +51,4 @@ Route: WP1 FOOTHOLD, WP2 IP/hold, WP3 planned LZ, WP4 FOOTHOLD/home. Enemy sites
 
 ## Status and limitations
 
-All 23 printed logic scenarios and archive checks pass. These simulate DCS APIs and inspect mission data; they do not establish real AI flight/combat or terrain appearance. The new compound/transport pad, FARP services, UH-60A follow/hold/land/takeoff/recovery and Kiowa target import still need a complete sortie. Hostages use disabled neutral infantry stand-in models. See [design](design.md) and [verification](verification.md).
+All 24 printed logic scenarios and archive checks pass. These simulate DCS APIs and inspect mission data; they do not establish real AI flight/combat or terrain appearance. The new compound/transport pad, FARP services, UH-60A follow/hold/land/takeoff/recovery and Kiowa target import still need a complete sortie. Hostages use disabled neutral infantry stand-in models. See [design](design.md) and [verification](verification.md).

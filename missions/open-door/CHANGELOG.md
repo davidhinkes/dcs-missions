@@ -2,6 +2,8 @@
 
 ## Unreleased development build — 2026-11-01
 
+- Addressed reported tree-covered departure: native trees-only clearing zones cover all five starting pads, facilities and an initial 600 m departure lane toward the IP. Fixed pads, buildings and terrain remain in place. Added coverage and compiled-action order checks; native visual confirmation remains pending.
+
 - Promoted FOOTHOLD to departure/recovery base, 15 nm from the village; all four Kiowas and the Black Hawk now start there. KEYSTONE remains an alternate service base.
 - Shortened route to FOOTHOLD / IP / LZ / FOOTHOLD; known enemies remain target points only. Departure pads are fixed and excluded from runtime base relocation.
 

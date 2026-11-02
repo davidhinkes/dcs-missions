@@ -24,3 +24,7 @@ All 23 printed logic scenarios pass, including a nominal 15 nm forward site, sup
 ## FOOTHOLD departure revision
 
 All 23 printed logic scenarios and archive checks pass with 62 units. Tests confirm departure exactly 15 nm from the objective, fixed matched ground-start pads (no runtime replacement of occupied FOOTHOLD pads), optional KEYSTONE services, target-only enemy locations, and return success at FOOTHOLD. The new native FOOTHOLD spawn/terrain remains to be checked in-game.
+
+## FOOTHOLD forest-clearance revision
+
+2026-11-01: all 24 printed mock scenarios pass, including recorded native trees-only calls before both script loads. Build assertions cover five starting pads, static facilities and continuous clearance along the initial 600 m departure lane. Validator: zero errors/warnings; Mission Editor fixup: 62 units; three compiled trigger chunks valid Lua; archive/geometry checks pass. Installed archive SHA-256: ef485a5d14fb12696f11d50419638a83809b21244ce258423040c95b741f682a. The previous installed archive matched the prior deployment and was backed up before replacement. No native visual, collision or flight check was performed. Restart the mission and inspect the pads and departure lane in DCS.

@@ -193,4 +193,19 @@ reset({blockForward=true});advance(2);assert(OPEN_DOOR.alternate and math.abs(OP
 assert(marks[8205].p.x==OPEN_DOOR.alternate.x)
 assert(marks[8201].p.x==OPEN_DOOR_CONFIG.building.x and marks[8202].p.x==OPEN_DOOR_CONFIG.sam.x)
 printResult('PASS: forward camp relocates as one footprint around scenery; intel targets remain fixed')
+-- Execute the generated native action sequence with recording stubs. This
+-- checks serialization and ordering, not the engine's rendered tree removal.
+local cleared,scripts=0,0
+a_remove_scene_objects=function(id,mask)
+  assert(scripts==0 and mask==1)
+  local found=false
+  for _,z in pairs(mission.triggers.zones)do if z.zoneId==id then found=true;assert(z.name:match('FOOTHOLD'))end end
+  assert(found);cleared=cleared+1
+end
+getValueResourceByKey=function(key)return key end
+a_do_script_file=function()assert(cleared==5);scripts=scripts+1 end
+assert(loadstring(mission.trig.actions[1]))()
+assert(cleared==5 and scripts==2)
+for i=1,5 do local a=mission.trigrules[1].actions[i];assert(a.predicate=='a_remove_scene_objects' and a.objects_mask==1)end
+printResult('PASS: five native trees-only clearings execute before both mission scripts')
 printResult('ALL OPEN DOOR LOGIC TESTS PASSED (mock DCS API; not a flight test)')

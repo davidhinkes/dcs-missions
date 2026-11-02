@@ -37,3 +37,5 @@ Keep only reusable findings here. Store a mission's observed failures, coordinat
 - Build from checked-in configuration and pinned tools. Clean-checkout checks catch missing fixtures, submodules and dependencies hidden by an existing development environment.
 - The shared deploy command must stop before replacement if build/tests/verification fail. Preserve existing installed revisions, verify copy hashes, and report the actual destination. Copying does not reload a running mission.
 - Put mission-specific artifact and test paths in a per-mission manifest. Shared tooling should not select a particular mission implicitly.
+
+- Fixed departure sites need explicit forest clearance as well as terrain and pad checks. Native trees-only scenery zones can prepare a local clearing without removing buildings; verify their editor records, compiled execution order and actual in-game result. Mock scenery searches do not certify rendered forest or collision clearance.

@@ -101,6 +101,7 @@ Six hostages are held in the identified village building. Satellite intelligence
 
 FLIGHT
 Anvil 1-1: you. All four Kiowas start hot ON THE GROUND at four separate, visible native DCS helipads in FARP FOOTHOLD, 60 m apart. Native hot-ground starts use zero terrain-relative altitude; no copied barometric spawn height. Lifeline has its own fifth pad. Set your physical collective fully down before Fly. Fuel tanker/depot, ammunition trucks/canopy, ground crew, command post and repair tent are present from mission start, with unlimited warehouse resources. Use Ground Crew while parked; shut down for repairs. Lead and #2 each carry two Hellfires and a .50-cal gun with 500 rounds. #3/#4 each carry the gun plus seven M151 rockets. Fuel: ${(c.fuelKg/0.45359237).toFixed(0)} lb (${c.fuelKg} kg) each (within the checked 333.69 kg capacity; hover/gross weight and endurance need cockpit verification). Lead PDU enabled. Use normal wingman radio commands. Monitor fuel and preserve a reserve; fuel-capacity compliance is not an endurance guarantee.
+Native trees-only scenery zones clear all five departure pads, the service areas and an initial 600 m lane toward the IP at mission start. Buildings and terrain are retained. Tree clearance and ground fit still need visual confirmation in DCS.
 Lifeline is one built-in AI UH-60A Black Hawk on its own nearby pad. It starts following you when you lift off and holds back as you approach the village. No UH-60L mod or external scripts need installation by players.
 
 NAVIGATION / INTELLIGENCE
@@ -128,6 +129,32 @@ setBriefing(m,'Operation OPEN DOOR - Black Hawk Hostage Rescue',brief);m.descrip
 const configLua='OPEN_DOOR_CONFIG = '+serializeLuaAssignment('config',c).replace(/^config\s*=\s*/,'');
 fs.writeFileSync(path.join(base,'.build/config.lua'),configLua);
 await loadScripts(s,s.dictionary,[{filePath:path.join(base,'.build/config.lua')},{filePath:path.join(base,'src/rescue.lua')}]);
+// Native Mission Editor action: zone ID, objects_mask=1 (TREES ONLY).
+// Keep occupied pads fixed; clear the camp and a 600 m initial departure lane.
+// The pinned authoring library does not compile this predicate, so retain both
+// editor records and their native compiled form without modifying the submodule.
+const clearings=[
+  addTriggerZone(m,{name:'FOOTHOLD TREE CLEARING',x:c.home.x+90,y:c.home.y,radius:260}),
+  addTriggerZone(m,{name:'FOOTHOLD TRANSPORT TREE CLEARING',...c.transportPad,radius:220})
+];
+const heading=Math.atan2(c.hold.y-c.home.y,c.hold.x-c.home.x);
+for(const d of [250,400,550])clearings.push(addTriggerZone(m,{
+  name:'FOOTHOLD DEPARTURE CLEARING '+d,
+  x:c.home.x+90+Math.cos(heading)*d,y:c.home.y+Math.sin(heading)*d,radius:150
+}));
+const loader=m.trigrules[1],scriptActions=Object.values(loader.actions);
+assert.equal(loader.comment,'Load Scripts');
+loader.comment='FOOTHOLD tree clearance, then load scripts';
+loader.actions=Object.fromEntries([
+  ...clearings.map(z=>({predicate:'a_remove_scene_objects',zone:z.zoneId,objects_mask:1})),
+  ...scriptActions
+].map((a,i)=>[i+1,a]));
+m.trig.actions[1]=clearings.map(z=>`a_remove_scene_objects(${z.zoneId},1);`).join('')+m.trig.actions[1];
+const covered=p=>clearings.some(z=>Math.hypot(p.x-z.x,p.y-z.y)<z.radius-30);
+for(const [id,p]of padSpecs)if(id<400)assert(covered(p),'Starting pad requires tree clearance');
+for(const g of Object.values(usa.static.group))if(g.name.startsWith('FOOTHOLD')||g.name.startsWith('TRANSPORT'))for(const u of Object.values(g.units))assert(covered(u),'Departure facility requires tree clearance');
+for(let d=0;d<=600;d+=25)assert(covered({x:c.home.x+90+Math.cos(heading)*d,y:c.home.y+Math.sin(heading)*d}),'Departure lane requires continuous clearance');
+for(const z of clearings)assert(Math.hypot(z.x-c.building.x,z.y-c.building.y)>20000,'Clearings must remain local to departure');
 refresh(s);const report=validateMission(s.document);assert.equal(report.errors.length,0,JSON.stringify(report));
 assert.equal(Object.keys(flight.units).length,4);assert(c.fuelKg<=333.69);assert(distance>14&&distance<16);
 assert.equal(hawk.units[1].type,'UH-60A');assert.equal(hawk.uncontrolled,true);

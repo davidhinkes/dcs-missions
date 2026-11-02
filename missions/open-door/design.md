@@ -80,3 +80,7 @@ The fictional village remains at x=64200, east=20150; Strela at x=63600, east=18
 ## Verification record
 
 2026-11-01: first development build passed all 21 printed logic scenarios under installed DCS Lua; zero validator errors/warnings; Mission Editor load-fixup check (49 units); all three compiled trigger chunks valid; route/geometry checks passed. Built and deployed to the local DCS Missions folder with SHA-256 verification. No in-game sortie performed. See `verification.md`.
+
+## FOOTHOLD tree clearance
+
+After the reported tree-covered departure, five native SCENERY REMOVE OBJECTS ZONE actions (TREES ONLY, mask 1) prepare FOOTHOLD at mission start before the Lua loader. A 260 m radius clearing centered 90 m along the Kiowa pad row covers pads and facilities; a separate 220 m clearing covers Lifeline's pad/camp. Three overlapping 150 m circles extend a continuous initial 600 m departure lane toward the IP. Buildings, ground shape and occupied-pad coordinates are preserved. Native appearance/collision clearance needs a restarted DCS mission check.

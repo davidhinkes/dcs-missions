@@ -6,6 +6,7 @@ Six hostages are held in the identified village building. Satellite intelligence
 
 FLIGHT
 Anvil 1-1: you. All four Kiowas start hot ON THE GROUND at four separate, visible native DCS helipads in FARP FOOTHOLD, 60 m apart. Native hot-ground starts use zero terrain-relative altitude; no copied barometric spawn height. Lifeline has its own fifth pad. Set your physical collective fully down before Fly. Fuel tanker/depot, ammunition trucks/canopy, ground crew, command post and repair tent are present from mission start, with unlimited warehouse resources. Use Ground Crew while parked; shut down for repairs. Lead and #2 each carry two Hellfires and a .50-cal gun with 500 rounds. #3/#4 each carry the gun plus seven M151 rockets. Fuel: 400 lb (181.4 kg) each (within the checked 333.69 kg capacity; hover/gross weight and endurance need cockpit verification). Lead PDU enabled. Use normal wingman radio commands. Monitor fuel and preserve a reserve; fuel-capacity compliance is not an endurance guarantee.
+Native trees-only scenery zones clear all five departure pads, the service areas and an initial 600 m lane toward the IP at mission start. Buildings and terrain are retained. Tree clearance and ground fit still need visual confirmation in DCS.
 Lifeline is one built-in AI UH-60A Black Hawk on its own nearby pad. It starts following you when you lift off and holds back as you approach the village. No UH-60L mod or external scripts need installation by players.
 
 NAVIGATION / INTELLIGENCE

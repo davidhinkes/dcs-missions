@@ -27,3 +27,7 @@ Check a forward camp as a complete footprint rather than placing its helipad alo
 ## Promoting a forward base to departure
 
 A base that can refine its location on load must not retain that relocation behavior once aircraft start on its pads. FOOTHOLD was promoted to fixed departure/recovery, while the unoccupied KEYSTONE alternate retains whole-footprint placement checks. Update launch, return conditions, radio labels, service prefixes, route timing and regression checks together when swapping base roles.
+
+## Forest around fixed departure pads
+
+The user reported trees around FOOTHOLD after it became the departure base. Static helipads and mocked scenery checks did not establish rendered forest clearance. The installed Mission Editor defines a_remove_scene_objects with zone ID followed by objects_mask; mask 1 means TREES ONLY. The builder now writes both editor actions and matching compiled actions because the pinned authoring library does not compile this predicate. Coverage assertions protect all five pads, facilities and the initial departure lane; a recording-stub test confirms tree removal precedes both mission scripts. These checks do not prove native tree removal or terrain suitability. Do not move occupied pads during setup or use explosions to clear them.
