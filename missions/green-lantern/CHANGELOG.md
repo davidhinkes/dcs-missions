@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased — 2026-11-03
+
+- Removed the redundant mission-name F10 submenu; command categories now open directly under Other.
+
 ## Unreleased — migrated 2026-11-01
 
 - Moved mission-specific agent instructions and iteration lessons into this mission directory.

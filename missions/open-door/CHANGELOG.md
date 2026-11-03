@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased — 2026-11-03
+
+- Added generic drone target talk-ons relative to the compound and event-based Lifeline approach, halfway, interruption, airborne return and recovery reports without new menu layers.
+
+- Isolated drone API failures from rescue logic; added station entry/exit hysteresis and one-time arrival reporting, geographic target coordinates with bearing/range, and explicit lost-drone status.
+
+- Added unarmed Sentinel MQ-9: 15 nm staging, automatic mission-start transit to 20,000 ft MSL orbit, on-station laser designation (1688), target cycling/status/stop, terrain/range and hostage/friendly proximity gates. Native flight/remote acquisition pending.
+
+- Removed the redundant mission-name F10 submenu; command categories now open directly under Other.
+
 ## Unreleased development build — 2026-11-01
 
 - Addressed reported tree-covered departure: native trees-only clearing zones cover all five starting pads, facilities and an initial 600 m departure lane toward the IP. Fixed pads, buildings and terrain remain in place. Added coverage and compiled-action order checks; native visual confirmation remains pending.

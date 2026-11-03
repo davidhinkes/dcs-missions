@@ -18,7 +18,7 @@ WP3 marks an approximate last-known position. Sparrow is placed safely within 20
 
 ## F10 menu
 
-Under **Other > GREEN LANTERN**:
+Under **Other**:
 
 - **Rescue:** status / return directions, request survivor smoke (green), request recovery smoke (blue).
 - **Air Support:** launch carrier package, request CAS near me, request radar suppression, hold fire / cancel CAS.

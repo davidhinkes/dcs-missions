@@ -68,3 +68,7 @@ Migration verification is recorded in `verification.md`. Earlier user sorties es
 - Consider approximate contact reports to help locate ground vehicles without revealing exact targets.
 - Consider separate wingman overwatch/rocket support roles and simple cover-pickup / attack-designated-target / regroup commands. These are proposals requiring investigation and DCS testing.
 - Add briefing screenshots and optional voice audio after mission behavior stabilizes.
+
+## F10 menu simplification — 2026-11-03
+
+Removed the mission-name wrapper. Rescue and Air Support now open directly under F10 Other, saving one selection for every command. Command behavior and explicit clearance requirements are unchanged.

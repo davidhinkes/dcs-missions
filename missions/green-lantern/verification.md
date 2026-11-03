@@ -12,3 +12,7 @@ Date: 2026-11-01. Baseline commit: the commit introducing this document.
 - The migration build was not copied over the installed DCS mission; its gameplay configuration matches the previous build.
 
 Baseline playable file SHA-256: `0fbe81a276b0bbefa93d8ca97385d0549272085991e18399065a42d98178b5c9`. ZIP timestamps may change on a rebuild, so compare mission contents as well as binary hashes.
+
+## F10 simplification — 2026-11-03
+
+Removed the mission-name wrapper, preserving command categories and callbacks. Rebuilt artifact passes portable archive validation with zero validator errors/warnings. The complete simulated logic suite passes using Lupa 2.6 Lua 5.1 on Linux, including menu hierarchy/uniqueness checks. Confirmed the archive embeds the updated rescue script and its Lua files compile under Lua 5.1. This is not DCS luae.exe or a flight check. Native Mission Editor checks were skipped; deployment was attempted but blocked by the absent DCS Missions profile on this cloud machine. Restart the mission after installing the updated artifact.

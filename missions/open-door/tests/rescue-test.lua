@@ -20,16 +20,22 @@ local function reset(opts)
       units[u.name]=u;g.units[#g.units+1]=u
     end
     function g:getController()return {
-      setOnOff=function(_,v)self.on=v end,setTask=function(_,t)self.task=t end,
+      setOnOff=function(_,v)self.on=v end,setTask=function(_,t)if opts.droneTaskError and self.name=='SENTINEL' then error('native task error')end;self.task=t end,
       setCommand=function(_,c)self.command=c end,setOption=function(_,k,v)self.option={k,v}end
     }end
     groups[d.name]=g;return g
   end
-  for _,side in pairs(mission.coalition)do for _,country in pairs(side.country or{})do for _,cat in ipairs({'helicopter','vehicle'})do for _,g in pairs((country[cat]or{}).group or{})do addGroup(g)end end end end
+  for _,side in pairs(mission.coalition)do for _,country in pairs(side.country or{})do for _,cat in ipairs({'plane','helicopter','vehicle'})do for _,g in pairs((country[cat]or{}).group or{})do addGroup(g)end end end end
   Unit={getByName=function(n)return units[n]end}
   Group={Category={GROUND=2},getByName=function(n)return groups[n]end}
   Object={Category={SCENERY=5}}
-  land={getHeight=function()return 40 end,getSurfaceType=function()return opts.water and 3 or 1 end}
+  Spot={createLaser=function(source,offset,p,code)
+    assert(source==units['SENTINEL-1'] and code==1688);local spot={p=p,code=code}
+    function spot:destroy()self.destroyed=true end
+    function spot:setPoint(q)self.p=q end
+    return spot
+  end}
+  land={isVisible=function()return not opts.masked end,getHeight=function()return 40 end,getSurfaceType=function()return opts.water and 3 or 1 end}
   world={VolumeType={SPHERE=0},searchObjects=function(_,volume,fn)
     if opts.blockLZ and volume.params.radius==18 and math.abs(volume.params.point.x-OPEN_DOOR_CONFIG.plannedLZ.x)<(opts.blockRadius or 1)then fn({})end
     if opts.blockForward and math.abs(volume.params.point.x-OPEN_DOOR_CONFIG.alternateFarp.x)<300 then fn({})end
@@ -43,7 +49,7 @@ local function reset(opts)
     activateGroup=function(g)g.active=true;activated[g.name]=now end
   }}
   missionCommands={
-    addSubMenuForCoalition=function(_,name,parent)return (parent and parent..'/'or'')..name end,
+    addSubMenuForCoalition=function(_,name,parent)assert(parent==nil and (name=='Transport' or name=='Rescue' or name=='Drone'),'Unexpected intermediate menu');return name end,
     addCommandForCoalition=function(_,name,parent,fn)local key=parent..'/'..name;assert(not commands[key],'Duplicate menu path');commands[key]=fn end
   }
   timer={getTime=function()return now end,scheduleFunction=function(fn,arg,t)queue[#queue+1]={fn=fn,arg=arg,t=t}end}
@@ -57,14 +63,15 @@ local function advance(to)
   now=to
 end
 local function move(n,p,air,speed)local u=units[n];u.p={x=p.x,y=p.y or 40,z=p.z or p.y};u.air=air or false;u.v=speed or 0 end
-local function cmd(name)assert(commands['OPEN DOOR/'..name],'Missing menu '..name)()end
+local function cmd(name)assert(commands[name],'Missing menu '..name)()end
 local function clearThreats()
   for n,u in pairs(units)do if n:match('^WATCHTOWER')or n:match('^GUARD')then u.life=0 end end
 end
 local function launchAndHold()
-  move('LATCH-1',{x=OPEN_DOOR_CONFIG.home.x+1000,y=OPEN_DOOR_CONFIG.home.y},true,45);advance(4)
+  local launchedAt=now
+  move('LATCH-1',{x=OPEN_DOOR_CONFIG.home.x+1000,y=OPEN_DOOR_CONFIG.home.y},true,45);advance(launchedAt+2)
   assert(OPEN_DOOR.launched and groups.LIFELINE.command.id=='Start' and groups.LIFELINE.task.id=='Follow')
-  move('LATCH-1',{x=OPEN_DOOR_CONFIG.building.x-9000,y=OPEN_DOOR_CONFIG.building.y},true,45);advance(6)
+  move('LATCH-1',{x=OPEN_DOOR_CONFIG.building.x-9000,y=OPEN_DOOR_CONFIG.building.y},true,45);advance(launchedAt+4)
   assert(OPEN_DOOR.phase=='holding')
 end
 local function beginLanding()
@@ -186,9 +193,9 @@ assert(math.sqrt((destination.x-OPEN_DOOR_CONFIG.building.x)^2+(destination.y-OP
 printResult('PASS: ground reinforcement timing starts at village alert, not mission launch')
 reset();advance(2);launchAndHold();cmd('Transport/Abort and return');assert(OPEN_DOOR.phase=='return');home();assert(OPEN_DOOR.phase=='failed')
 printResult('PASS: abort before boarding returns empty and does not award success')
-reset();advance(2);local n=0;for k in pairs(commands)do n=n+1;assert(not k:match('GUARD')and not k:match('WATCHTOWER'))end;assert(n==5)
-assert(commands['OPEN DOOR/Transport/Hold / wave off']and commands['OPEN DOOR/Rescue/Status'])
-printResult('PASS: F10 hierarchy has five unique commands and discloses no internal enemy identities')
+reset();advance(2);local n=0;for k in pairs(commands)do n=n+1;assert(not k:match('GUARD')and not k:match('WATCHTOWER'))end;assert(n==8)
+assert(commands['Transport/Hold / wave off']and commands['Rescue/Status'])
+printResult('PASS: F10 hierarchy has eight unique commands and discloses no internal enemy identities')
 reset({blockForward=true});advance(2);assert(OPEN_DOOR.alternate and math.abs(OPEN_DOOR.alternate.x-OPEN_DOOR_CONFIG.alternateFarp.x)>=300)
 assert(marks[8205].p.x==OPEN_DOOR.alternate.x)
 assert(marks[8201].p.x==OPEN_DOOR_CONFIG.building.x and marks[8202].p.x==OPEN_DOOR_CONFIG.sam.x)
@@ -208,4 +215,114 @@ assert(loadstring(mission.trig.actions[1]))()
 assert(cleared==5 and scripts==2)
 for i=1,5 do local a=mission.trigrules[1].actions[i];assert(a.predicate=='a_remove_scene_objects' and a.objects_mask==1)end
 printResult('PASS: five native trees-only clearings execute before both mission scripts')
+
+reset();advance(2)
+local C=OPEN_DOOR_CONFIG
+local d=units['SENTINEL-1']
+assert(d and math.abs(math.sqrt((d.p.x-C.building.x)^2+(d.p.z-C.building.y)^2)-15*1852)<0.01)
+assert(d.p.y==6096 and OPEN_DOOR.droneDispatched)
+assert(not commands['Drone/Send drone on station'],'Dispatch must not require a menu command')
+cmd('Drone/Designate next target');assert(not OPEN_DOOR.laser)
+assert(OPEN_DOOR.droneDispatched and not OPEN_DOOR.droneOnStation)
+local route=groups.SENTINEL.task.params.route.points
+assert(route[2].x==C.building.x and route[2].y==C.building.y and route[2].alt==6096)
+assert(route[2].task.params.tasks[1].id=='Orbit')
+cmd('Drone/Designate next target');assert(not OPEN_DOOR.laser)
+move('SENTINEL-1',{x=C.building.x,y=6096,z=C.building.y},true,70);advance(4)
+assert(OPEN_DOOR.droneOnStation)
+local reports=0;for _,message in ipairs(messages)do if message:find('Sentinel on station at high altitude',1,true)then reports=reports+1 end end;assert(reports==1)
+advance(5)
+local repeated=0;for _,message in ipairs(messages)do if message:find('Sentinel on station at high altitude',1,true)then repeated=repeated+1 end end;assert(repeated==1,'Arrival report must not repeat each tick')
+cmd('Drone/Designate next target');assert(OPEN_DOOR.laserTarget=='WATCHTOWER-1')
+local spot=OPEN_DOOR.laser
+units['WATCHTOWER-1'].p.x=units['WATCHTOWER-1'].p.x+50;advance(6)
+assert(spot.p.x==units['WATCHTOWER-1'].p.x)
+units['WATCHTOWER-1'].life=0;advance(8);assert(spot.destroyed and not OPEN_DOOR.laser)
+cmd('Drone/Designate next target');assert(OPEN_DOOR.laser)
+spot=OPEN_DOOR.laser;cmd('Drone/Stop lasing');assert(spot.destroyed and not OPEN_DOOR.laser)
+cmd('Drone/Designate next target');spot=OPEN_DOOR.laser;d.life=0;advance(10)
+assert(spot.destroyed and not OPEN_DOOR.laser and OPEN_DOOR.phase~='failed')
+printResult('PASS: drone stages 15 nm away, transits automatically, gates high on-station laser, tracks targets, stops on kill/command/drone loss')
+reset({masked=true});advance(2)
+move('SENTINEL-1',{x=C.building.x,y=6096,z=C.building.y},true,70);advance(4)
+cmd('Drone/Designate next target');assert(not OPEN_DOOR.laser)
+printResult('PASS: terrain masking prevents laser designation')
+reset();advance(2)
+move('SENTINEL-1',{x=C.building.x,y=6096,z=C.building.y},true,70);advance(4)
+for name,u in pairs(units)do if name:match('^GUARD')then u.life=0 end end
+units['WATCHTOWER-1'].p=units['HOSTAGES-1'].p
+cmd('Drone/Designate next target');assert(not OPEN_DOOR.laser)
+units['WATCHTOWER-1'].p=units['LATCH-2'].p
+cmd('Drone/Designate next target');assert(not OPEN_DOOR.laser)
+printResult('PASS: hostage and friendly helicopter proximity prevents designation; inactive reinforcements are excluded')
+
+reset();advance(2)
+move('SENTINEL-1',{x=C.building.x,y=6096,z=C.building.y},true,70);advance(4)
+cmd('Drone/Designate next target');local activeSpot=OPEN_DOOR.laser;assert(activeSpot)
+move('SENTINEL-1',{x=C.building.x+4500,y=6096,z=C.building.y},true,70);advance(6)
+assert(activeSpot.destroyed and not OPEN_DOOR.laser and not OPEN_DOOR.droneOnStation)
+move('SENTINEL-1',{x=C.building.x,y=6096,z=C.building.y},true,70);advance(8)
+cmd('Drone/Designate next target');activeSpot=OPEN_DOOR.laser;assert(activeSpot)
+units['LATCH-1'].life=0;advance(10);assert(activeSpot.destroyed and not OPEN_DOOR.laser and OPEN_DOOR.phase=='failed')
+cmd('Drone/Designate next target');assert(not OPEN_DOOR.laser)
+printResult('PASS: leaving station stops lasing; terminal rescue results clean up the laser and block further designation')
+-- Optional drone failures must not stop the rescue state machine.
+reset({droneTaskError=true});advance(2);assert(OPEN_DOOR.droneDisabled and OPEN_DOOR.phase=='ready' and not flags[923])
+launchAndHold();assert(OPEN_DOOR.phase=='holding')
+reset();advance(2);move('SENTINEL-1',{x=C.building.x,y=6096,z=C.building.y},true,70);advance(4)
+Spot.createLaser=function()error('native createLaser error')end
+cmd('Drone/Designate next target');assert(OPEN_DOOR.droneDisabled and OPEN_DOOR.phase=='ready' and not flags[923])
+reset();advance(2);move('SENTINEL-1',{x=C.building.x,y=6096,z=C.building.y},true,70);advance(4)
+cmd('Drone/Designate next target');local badSpot=assert(OPEN_DOOR.laser)
+badSpot.setPoint=function()error('native setPoint error')end
+badSpot.destroy=function()error('native destroy error')end
+advance(6);assert(OPEN_DOOR.droneDisabled and not OPEN_DOOR.laser and OPEN_DOOR.phase=='ready' and not flags[923])
+launchAndHold();assert(OPEN_DOOR.phase=='holding')
+printResult('PASS: native drone task/create/update/destroy errors disable optional support while rescue continues')
+reset();advance(2);move('SENTINEL-1',{x=C.building.x,y=6096,z=C.building.y},true,70);advance(4)
+cmd('Drone/Designate next target');local stable=OPEN_DOOR.laser
+move('SENTINEL-1',{x=C.building.x+3000,y=6096,z=C.building.y},true,70);advance(6)
+assert(OPEN_DOOR.droneOnStation and OPEN_DOOR.laser==stable)
+move('SENTINEL-1',{x=C.building.x+4500,y=6096,z=C.building.y},true,70);advance(8)
+assert(not OPEN_DOOR.droneOnStation and not OPEN_DOOR.laser)
+move('SENTINEL-1',{x=C.building.x+3000,y=6096,z=C.building.y},true,70);advance(10)
+assert(not OPEN_DOOR.droneOnStation)
+move('SENTINEL-1',{x=C.building.x,y=6096,z=C.building.y},true,70);advance(12)
+assert(OPEN_DOOR.droneOnStation)
+local count=0;for _,v in ipairs(messages)do if v:find('Sentinel on station at high altitude',1,true)then count=count+1 end end
+assert(count==1)
+printResult('PASS: orbit boundary hysteresis preserves designation; arrival announced once even after re-entry')
+reset();advance(2);units['SENTINEL-1'].life=0;advance(4);cmd('Drone/Laser status')
+assert(messages[#messages]:find('lost / unavailable',1,true) and not messages[#messages]:find('in transit',1,true))
+reset();advance(2);move('SENTINEL-1',{x=C.building.x,y=6096,z=C.building.y},true,70);advance(4)
+coord={LOtoLL=function(p)return 35+p.x/100000,36+p.z/100000 end}
+cmd('Drone/Designate next target');local report=messages[#messages]
+assert(report:find('latitude',1,true) and report:find('longitude',1,true) and report:find('degrees true',1,true) and report:find('nm.',1,true))
+assert(not report:find('Target grid x',1,true))
+coord=nil;cmd('Drone/Laser status');assert(messages[#messages]:find('degrees grid',1,true))
+printResult('PASS: lost drone status is explicit; target reports include geographic coordinates and true bearing/range, with grid-bearing fallback')
+local function messageCount(fragment)
+  local n=0;for _,text in ipairs(messages)do if text:find(fragment,1,true)then n=n+1 end end;return n
+end
+reset();advance(2);move('SENTINEL-1',{x=C.building.x,y=6096,z=C.building.y},true,70);advance(4)
+cmd('Drone/Designate next target');assert(messages[#messages]:find('Vehicle,',1,true) and messages[#messages]:find('of the hostage building',1,true))
+assert(not messages[#messages]:find('WATCHTOWER',1,true))
+printResult('PASS: drone talk-on uses generic target class and position relative to the protected compound')
+beginLanding()
+move('LIFELINE-1',{x=OPEN_DOOR.lz.x+1000,y=100,z=OPEN_DOOR.lz.z},true,30);advance(now+2);advance(now+2)
+assert(messageCount('approaching the extraction LZ')==1)
+land();local started=OPEN_DOOR.rescueAt
+advance(started+88);assert(messageCount('rescue halfway complete')==0)
+advance(started+92);assert(messageCount('rescue halfway complete')==1)
+move('LIFELINE-1',OPEN_DOOR.lz,false,2);advance(now+2)
+assert(messageCount('rescue interrupted')==1)
+land();started=OPEN_DOOR.rescueAt
+advance(started+90);assert(messageCount('rescue halfway complete')==2)
+advance(started+180);assert(OPEN_DOOR.boarded and messageCount('airborne with')==0)
+move('LIFELINE-1',{x=OPEN_DOOR.lz.x,y=120,z=OPEN_DOOR.lz.z},true,40);advance(now+4)
+assert(messageCount('airborne with')==1)
+move('LIFELINE-1',{x=OPEN_DOOR.home.x+1000,y=120,z=OPEN_DOOR.home.z},true,40);advance(now+4)
+assert(messageCount('approaching FOOTHOLD recovery')==1)
+home();assert(OPEN_DOOR.phase=='complete')
+printResult('PASS: approach, halfway, interrupted rescue, actual lift-off and recovery reports follow real milestones without per-tick repeats')
 printResult('ALL OPEN DOOR LOGIC TESTS PASSED (mock DCS API; not a flight test)')

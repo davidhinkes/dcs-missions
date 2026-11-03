@@ -19,7 +19,7 @@ The desired rhythm is reconnaissance, controlled attacks, clearance, a vulnerabl
 - Kiowas defeat the guards; the extraction team conducts a timed simulated rescue rather than a scripted infantry battle.
 - The Black Hawk lands for about three minutes to deploy the team, secure six hostages and board everyone, then leaves.
 - Rescue continues if a hostage is killed. Report full or partial success according to the survivors brought home.
-- Four Kiowas and one Black Hawk only: no friendly jets or enemy aircraft.
+- Four Kiowas, one Black Hawk and one unarmed MQ-9 designator; no friendly combat jets or enemy aircraft.
 - Escort the Black Hawk back to the departure FARP FOOTHOLD for recovery.
 - Labels off and friendly-only F10 unit visibility. Precise satellite intelligence identifies the hostage building and one air-defense site; both have named preplanned navigation points, briefing coordinates and static intelligence markers. This supersedes the earlier approximate compound marker. Other enemy positions remain undisclosed.
 
@@ -84,3 +84,21 @@ The fictional village remains at x=64200, east=20150; Strela at x=63600, east=18
 ## FOOTHOLD tree clearance
 
 After the reported tree-covered departure, five native SCENERY REMOVE OBJECTS ZONE actions (TREES ONLY, mask 1) prepare FOOTHOLD at mission start before the Lua loader. A 260 m radius clearing centered 90 m along the Kiowa pad row covers pads and facilities; a separate 220 m clearing covers Lifeline's pad/camp. Three overlapping 150 m circles extend a continuous initial 600 m departure lane toward the IP. Buildings, ground shape and occupied-pad coordinates are preserved. Native appearance/collision clearance needs a restarted DCS mission check.
+
+## F10 menu simplification — 2026-11-03
+
+Removed the mission-name wrapper. Transport and Rescue now open directly under F10 Other, saving one selection for every command. Command behavior and explicit clearance requirements are unchanged.
+
+## Sentinel drone support — 2026-11-03
+
+An unarmed MQ-9 stages 15 nm from the objective at 20,000 ft MSL. It automatically heads overhead when the mission starts; no dispatch command is needed. Allow roughly seven minutes at 70 m/s; native AI flight determines actual arrival. Once within 2.5 km of the objective and 500 m of its assigned altitude, it announces readiness. High altitude reduces short-range threat exposure but does not guarantee concealment.
+
+Use **Designate next target**, **Laser status**, and **Stop lasing** in the same Drone menu. Match your Hellfire seeker to **1688**, follow the Kiowa's remote-laser engagement procedure, and positively identify the target. Requests cycle through eligible hostile ground units, starting with the known SAM. Terrain line of sight and 15 km slant range are required. Targets within 100 m of hostages/their building or 300 m of friendly helicopters are excluded; these buffers do not guarantee safe weapon effects. No auto-fire or automatic Black Hawk clearance. Target death, masking, unsafe proximity, station departure or drone loss stops lasing; request a new designation. The drone is optional and its loss does not fail the rescue. Native orbit, obstruction by structures/vegetation and remote laser acquisition need an actual DCS flight check.
+
+### Drone reliability and target reports
+
+Optional drone tasking or laser API errors disable Sentinel support without failing the rescue. Sentinel announces its initial arrival once. It enters station within 2.5 km / 500 m of assigned altitude and remains on station until beyond 4 km / 750 m; leaving the envelope stops designation. Laser status explicitly reports a lost/unavailable drone. Target reports give decimal-degree latitude/longitude and true bearing/range in nautical miles from the lead Kiowa. If geographic conversion is unavailable, bearing is explicitly labeled grid. Native orbit and remote-laser engagement still need a DCS flight check.
+
+### Target talk-ons and Lifeline progress
+
+Sentinel's laser reports describe a generic vehicle/infantry target and its approximate grid direction/distance from the hostage building, followed by coordinates and Kiowa-relative bearing/range. They do not claim unverified road or scenery landmarks. Lifeline reports final approach within 1.5 km, landed rescue start, halfway through each uninterrupted rescue attempt, timer interruption, actual airborne return with survivor count, and recovery approach within 2 km. These are on-screen messages, not recorded voice audio. Existing menus and explicit landing clearance are unchanged.

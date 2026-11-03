@@ -6,7 +6,7 @@
 - Keep native trees-only clearing actions for all five FOOTHOLD departure pads, facilities and the initial departure lane; maintain both editor and compiled forms until the pinned authoring dependency supports the predicate. Do not clear buildings or move occupied pads. Native visual confirmation remains required.
 - Both sites have native helipads, fuel/ammo/repair/crew facilities and unlimited warehouses. Departure services must exist from mission start, independently of extraction initialization.
 - All four Kiowas start at approximately 400 lb fuel (181.4 kg). Lead/#2 have two Hellfires plus gun; #3/#4 gun and seven M151 rockets. Validate weight/performance/endurance separately.
-- Village opposition: scattered guards, ground reinforcements, heavy machine guns and one Strela-10. No friendly jets or enemy aircraft.
+- Village opposition: scattered guards, ground reinforcements, heavy machine guns and one Strela-10. One unarmed MQ-9 provides player-requested laser designation from a high orbit after an automatic mission-start transit from 15 nm staging, reporting when on station; no friendly combat jets or enemy aircraft.
 - Black Hawk is built-in AI UH-60A. It must wait for explicit F10 clearance before extraction; guard defeat alone never grants clearance. Preserve wave-off/retry and abort/return behavior.
 - Six vulnerable hostages; three-minute simulated rescue after landing. Continue after casualties, counting full/partial success on return to FOOTHOLD. Do not promise passenger or assault-team animation.
 - Labels off, friendly-only map. Known building/SAM intelligence uses fixed markers and separate Kiowa target points 1T|1|SA13 and 2T|1|UNK. Enemy assets must not appear in the flight route.

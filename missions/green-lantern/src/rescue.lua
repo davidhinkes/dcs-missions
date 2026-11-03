@@ -248,7 +248,7 @@ local function updateCAS(now)
     end
   end
   if not near then return end
-  if not S.casOnStation then S.casOnStation=true;say('Bruiser: within tasking range. Request CAS near your position through F10 GREEN LANTERN.') end
+  if not S.casOnStation then S.casOnStation=true;say('Bruiser: within tasking range. Request CAS near your position through F10 Other > Air Support.') end
   if S.casTarget and alive(S.casTarget) then return end
   S.casTarget=nil
   if S.boarded or S.phase=='complete' or S.phase=='failed' then return end
@@ -433,9 +433,8 @@ local function initialize()
   trigger.action.markToCoalition(8101,'SPARROW SEARCH AREA - within 200 m of WP3; request green smoke when nearby',ground(42000,16000),2,true)
   trigger.action.markToCoalition(8102,'FARP LANTERN - medical handover / BLUE smoke / land within 100 m, hold 15 s / ATC 127.500 AM',home,2,true)
   smoke()
-  local menu=missionCommands.addSubMenuForCoalition(2,'GREEN LANTERN')
-  local rescueMenu=missionCommands.addSubMenuForCoalition(2,'Rescue',menu)
-  local airMenu=missionCommands.addSubMenuForCoalition(2,'Air Support',menu)
+  local rescueMenu=missionCommands.addSubMenuForCoalition(2,'Rescue')
+  local airMenu=missionCommands.addSubMenuForCoalition(2,'Air Support')
   missionCommands.addCommandForCoalition(2,'Status / return directions',rescueMenu,status)
   missionCommands.addCommandForCoalition(2,'Request survivor smoke (green)',rescueMenu,requestPilotSmoke)
   missionCommands.addCommandForCoalition(2,'Request recovery smoke (blue)',rescueMenu,smoke)

@@ -39,5 +39,19 @@
     "searchRadius": 1852
   },
   "homeFrequency": 129.5,
-  "transportFrequency": 129
+  "transportFrequency": 129,
+  "drone": {
+    "laserCode": 1688,
+    "altitude": 6096,
+    "speed": 70,
+    "maxRange": 15000,
+    "protectedRadius": 100,
+    "friendlyRadius": 300,
+    "stationRadius": 2500,
+    "staging": {
+      "x": 37602.803907456924,
+      "y": 12130.177058387668
+    },
+    "stationExitRadius": 4000
+  }
 }

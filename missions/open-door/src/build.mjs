@@ -56,6 +56,17 @@ const hawk=heli('LIFELINE','UH-60A',1,c.transportPad,'High');hawk.uncontrolled=t
 hawk.units[1].payload={pylons:{},fuel:c.blackHawkFuelKg,flare:30,chaff:0,gun:100};hawk.units[1].livery_id='standard';
 hawk.route.points[2]=wp(c.hold,'SAFE HOLD - AWAIT CLEARANCE',200,50);
 hawk.route.points[2].task={id:'ComboTask',params:{tasks:{1:{number:1,enabled:true,auto:false,id:'Orbit',params:{pattern:'Circle',altitude:600,speed:40}}}}};
+// Unarmed airborne designator; native orbit controls flight, Lua controls its laser.
+const dronePos=c.drone.staging;
+assert(Math.abs(Math.hypot(dronePos.x-c.building.x,dronePos.y-c.building.y)-15*1852)<0.01);
+const drone=addAircraftGroup(m,'plane',{name:'SENTINEL',type:'MQ-9 Reaper',count:1,side:'blue',country:'USA',...dronePos,altitudeMetres:c.drone.altitude,heading:0,skill:'Excellent',task:'Reconnaissance'});
+Object.assign(drone.units[1],{speed:c.drone.speed,payload:{pylons:{},fuel:1300,flare:0,chaff:0,gun:0},callsign:{1:1,2:1,3:1,name:'Enfield11'}});
+drone.route.points={1:wp(dronePos,'SENTINEL START - AUTOMATIC TRANSIT',c.drone.altitude,c.drone.speed)};
+Object.assign(drone.route.points[1],{alt_type:'BARO',ETA_locked:true});
+drone.route.points[1].task.params.tasks={
+  1:{number:1,enabled:true,auto:false,id:'WrappedAction',params:{action:{id:'Option',params:{name:0,value:4}}}},
+  2:{number:2,enabled:true,auto:false,id:'Orbit',params:{pattern:'Circle',speed:c.drone.speed,altitude:c.drone.altitude}}
+};
 const usa=Object.values(m.coalition.blue.country).find(x=>x.name==='USA');
 usa.static={group:{}};
 const padSpecs=[...[1,2,3,4].map(i=>[99+i,{x:c.home.x+(i-1)*60,y:c.home.y},'FOOTHOLD PAD '+i,c.homeFrequency]),[200,c.transportPad,'FOOTHOLD TRANSPORT PAD',c.transportFrequency],...[1,2,3,4].map(i=>[399+i,{x:c.alternateFarp.x+(i-1)*60,y:c.alternateFarp.y},'KEYSTONE PAD '+i,c.alternateFarp.frequency])];
@@ -112,7 +123,7 @@ FOOTHOLD is now the departure and final recovery FARP, 15 nm from the village, w
 Departure to objective: ${distance.toFixed(1)} nm, about ${(distance/90*60).toFixed(0)} minutes at 90 knots. Return is the same distance: approximately 30 nm round trip before combat, holding and three minutes on the ground. Allow roughly 30-45 minutes overall. The village is an authored mission compound; terrain/scenery appearance still needs flight verification.
 
 EXECUTION
-Clear the Strela and the guards around the compound/LZ, positively identifying targets before firing. Hostages can die from fire, explosions or destruction of their building. Continue rescuing survivors after casualties. Lifeline will never enter merely because defenders are killed: use F10 > Other > OPEN DOOR > Transport > Clear Black Hawk to land. Clearance is rejected while the known Strela or close defenders still threaten the site. The actual LZ is terrain/scenery-checked near WP3; the F10 LZ marker and requested green smoke identify it.
+Clear the Strela and the guards around the compound/LZ, positively identifying targets before firing. Hostages can die from fire, explosions or destruction of their building. Continue rescuing survivors after casualties. Lifeline will never enter merely because defenders are killed: use F10 > Other > Transport > Clear Black Hawk to land. Clearance is rejected while the known Strela or close defenders still threaten the site. The actual LZ is terrain/scenery-checked near WP3; the F10 LZ marker and requested green smoke identify it.
 Once Lifeline is landed within 80 m of the LZ and below 1 m/s, the simulated team needs ${c.rescueSeconds} seconds to secure the survivors and board. Cover it. A local threat, movement or wave-off resets rescue progress; re-clear once safe. Ground-team movement and boarding are represented by timing/messages, not passenger animation. Neutral infantry models stand in for hostages and do not fight.
 Enemy reinforcements begin moving about three minutes after your flight enters 8 km of the compound. Defeating every enemy is optional. Keep the approaches clear while Lifeline is on the ground.
 After boarding Lifeline returns to its own pad at FOOTHOLD. Escort it home. It must land there for ${c.returnSeconds} seconds to count the rescued hostages: six is full success; one to five is partial success. No survivors, Black Hawk loss or player helicopter loss is failure. Flying continues after the result.
@@ -121,6 +132,12 @@ F10 / RADIOS
 OPEN DOOR > Transport: clearance; hold / wave off; abort and return. OPEN DOOR > Rescue: status; mark actual LZ green.
 Wave-off returns Lifeline to its hold and resets the rescue timer; it needs fresh clearance. Abort before boarding cancels the extraction and returns empty (mission failure once home). After boarding, abort/wave-off returns home with those aboard. Do not fire on the marked hostage building.
 UHF package 251.000 AM. FOOTHOLD ${c.homeFrequency.toFixed(3)} AM; transport pad ${c.transportFrequency.toFixed(3)} AM. KEYSTONE alternate 128.500 AM. Ground servicing still needs DCS confirmation.
+
+PROGRESS REPORTS
+Lifeline reports final approach, rescue start/halfway, interruptions, actual airborne return with survivor count and recovery approach. Reports appear as text; no recorded voice audio. Sentinel describes targets relative to the hostage building using approximate grid directions before giving coordinates and Kiowa-relative bearing/range.
+
+DRONE LASER SUPPORT
+Sentinel is an unarmed MQ-9 staged 15 nm from the objective at 20,000 ft MSL (${c.drone.altitude} m). It automatically transits to orbit above the village at mission start and reports when on station. Initial on-station entry requires being within ${c.drone.stationRadius/1000} km and 500 m of assigned altitude. After arrival, the orbit envelope extends to ${c.drone.stationExitRadius/1000} km and 750 m altitude difference to prevent boundary interruptions. Arrival is announced only once. At ${c.drone.speed} m/s, allow roughly seven minutes for transit; arrival depends on native AI flight. The high orbit reduces exposure to short-range defenses, but does not guarantee concealment or survival. F10 > Other > Drone commands: Designate next target, Laser status, Stop lasing. Laser status reports a lost/unavailable drone explicitly. Target reports provide decimal-degree latitude/longitude plus true bearing/range in nautical miles from your Kiowa (explicit grid-bearing fallback when geographic conversion is unavailable). Drone API faults disable optional support while the rescue continues. Match your Hellfire seeker to laser code ${c.drone.laserCode}; use the Kiowa's appropriate remote-laser engagement procedure and positively identify the target before firing. No automatic weapons release or extraction clearance. Requests cycle through eligible hostile ground units, prioritizing the known SAM. Lasing requires terrain line of sight and a ${c.drone.maxRange/1000} km slant range; buildings/vegetation can still obstruct the beam. Targets within ${c.drone.protectedRadius} m of the hostage building/survivors or ${c.drone.friendlyRadius} m of friendly helicopters are excluded. Moving or masked targets can lose designation; request again. These buffers do not guarantee safe weapon effects. Drone loss does not fail the rescue. Native orbit, laser visibility and remote Hellfire acquisition require flight verification.
 
 BUILD STATUS
 Development build. Automated checks do not certify native UH-60A follow, temporary landing, takeoff/recovery, terrain placement or actual combat. Requires an in-simulator sortie. Requires Syria and OH-58D only.

@@ -32,7 +32,17 @@ local function reset(water)
     outTextForCoalition=function(_,t)table.insert(messages,t)end,
     setUserFlag=function(k,v)flags[k]=v end,smoke=function(_,color)if color==4 then table.insert(blueSmokeTimes,now)end;if color==0 then table.insert(greenSmokeTimes,now)end end,markToCoalition=function(id,text,p)markers[id]={text=text,p=p}end,removeMark=function()end,
     activateGroup=function(g)for n,o in pairs(groups)do if o==g then activated[n]=now end end end}}
-  missionCommands={addSubMenuForCoalition=function()return{}end,addCommandForCoalition=function(_,name,_,fn)commands[name]=fn end}
+  missionCommands={
+    addSubMenuForCoalition=function(_,name,parent)
+      assert(parent==nil and (name=='Rescue' or name=='Air Support'),'Unexpected intermediate menu')
+      return name
+    end,
+    addCommandForCoalition=function(_,name,parent,fn)
+      local rescue=name=='Status / return directions' or name=='Request survivor smoke (green)' or name=='Request recovery smoke (blue)'
+      assert(parent==(rescue and 'Rescue' or 'Air Support'),'Wrong command category')
+      assert(not commands[name],'Duplicate command');commands[name]=fn
+    end
+  }
   timer={getTime=function()return now end,scheduleFunction=function(fn,arg,t)table.insert(queue,{fn=fn,arg=arg,t=t})end}
   for _,side in pairs(mission.coalition)do for _,c in pairs(side.country or {})do for _,cat in ipairs({'plane','helicopter','vehicle'})do for _,g in pairs((c[cat]or{}).group or{})do addGroup(g) end end end end
   units['RESCUE-1'].air=false;units['RESCUE-2'].air=false;units['RESCUE-3'].air=false
@@ -61,6 +71,8 @@ world.searchObjects=function(_,volume,callback)
 end
 advance(2)
 assert(GREEN_LANTERN.phase=='ingress' and groups['HUNTER-EAST'] and not flags[903])
+local commandCount=0;for _ in pairs(commands)do commandCount=commandCount+1 end;assert(commandCount==7)
+originalPrint('PASS: seven unique commands directly under Rescue and Air Support; no mission-name wrapper')
 originalPrint('PASS: patrol spawns where scenery prevents a helicopter-size clearing')
 reset();advance(600);assert(GREEN_LANTERN.phase=='ingress' and not GREEN_LANTERN.huntAt and not activated.GUARDIAN)
 originalPrint('PASS: ten minutes at FARP does not start the hunt or air package')

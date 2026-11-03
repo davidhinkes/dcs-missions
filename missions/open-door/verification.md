@@ -28,3 +28,23 @@ All 23 printed logic scenarios and archive checks pass with 62 units. Tests conf
 ## FOOTHOLD forest-clearance revision
 
 2026-11-01: all 24 printed mock scenarios pass, including recorded native trees-only calls before both script loads. Build assertions cover five starting pads, static facilities and continuous clearance along the initial 600 m departure lane. Validator: zero errors/warnings; Mission Editor fixup: 62 units; three compiled trigger chunks valid Lua; archive/geometry checks pass. Installed archive SHA-256: ef485a5d14fb12696f11d50419638a83809b21244ce258423040c95b741f682a. The previous installed archive matched the prior deployment and was backed up before replacement. No native visual, collision or flight check was performed. Restart the mission and inspect the pads and departure lane in DCS.
+
+## F10 simplification — 2026-11-03
+
+Removed the mission-name wrapper, preserving command categories and callbacks. Rebuilt artifact passes portable archive validation with zero validator errors/warnings. The complete simulated logic suite passes using Lupa 2.6 Lua 5.1 on Linux, including menu hierarchy/uniqueness checks. Confirmed the archive embeds the updated rescue script and its Lua files compile under Lua 5.1. This is not DCS luae.exe or a flight check. Native Mission Editor checks were skipped; deployment was attempted but blocked by the absent DCS Missions profile on this cloud machine. Restart the mission after installing the updated artifact.
+
+## Sentinel laser drone — 2026-11-03
+
+Open Door rebuilt with unarmed MQ-9 Sentinel staging exactly 15 nm from the objective at 6096 m MSL (20,000 ft). Native orbit holds staging; F10 dispatch assigns a transit route and orbit above the village. Complete logic suite passes under Lupa 2.6 Lua 5.1, including dispatch/arrival gating, spot creation/tracking, terrain masking, hostage/friendly exclusions, inactive reinforcement exclusion, target loss, drone loss, manual shutdown, station departure and terminal cleanup. Portable archive verifier reports zero errors/warnings; embedded updated script and archive Lua syntax confirmed. Native Mission Editor checks skipped because DCS luae.exe is absent. Deployment attempted and blocked by missing DCS Missions profile. Drone AI orbit/transit, actual laser visibility/occlusion, remote Hellfire acquisition and threat exposure need an in-simulator sortie. No claim of stealth or deployment.
+
+### Automatic Sentinel transit
+
+Updated Sentinel to dispatch automatically during mission initialization; removed the dispatch F10 command. Rebuilt and reran the complete Lua 5.1 simulated logic suite and portable archive checks successfully. Regression checks confirm automatic tasking without player input, no dispatch command, arrival-gated lasing, and a single on-station report rather than a message every tick. Native flight remains unverified; deployment is still blocked by the absent DCS Missions profile.
+
+### Drone review fixes
+
+Rebuilt after isolating optional drone calls, adding station hysteresis and one-time reporting, geographic coordinates/true bearing/range, and explicit loss status. Complete Lua 5.1 mock suite passes, including injected native task, createLaser, setPoint and destroy failures while rescue logic continues; boundary departure/re-entry, report uniqueness, lost status, geographic conversion and grid-bearing fallback. Portable archive checks and embedded script syntax checks pass. Native Mission Editor/flight checks remain unavailable; deployment attempted but blocked by missing DCS profile.
+
+### Drone talk-ons and Lifeline progress — 2026-11-03
+
+Rebuilt and passed complete Lua 5.1 simulated suite, including generic compound-relative target descriptions, single final-approach report, halfway timing/reset after interruption, no premature airborne report, actual lift-off and recovery reporting through successful completion. Portable archive checks pass; updated script embedding and Lua syntax verified. No new menu commands. Reports are text only. Native DCS checks remain unrun; deployment attempted but blocked by missing DCS Missions profile.
