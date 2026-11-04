@@ -66,3 +66,7 @@ These are proposals, not capabilities already implemented by the project. A sort
 ## Automation updates
 
 The shared runner now reads artifact/test paths from each mission's `mission.json`. A `deploy` command builds once, runs logic and archive checks, backs up the installed file and verifies the copy into DCS. A clean-checkout CI job and the other proposed checks above remain future work.
+
+## Moving the carrier closer
+
+The 2026-11-04 change reduces the initial range from 90 to 70 nm on the same bearing. Translate the ship track, aircraft starts, relative climb points and linked recoveries together while preserving fixed tactical stations. At 230 m/s, the Guardian route estimate falls from 12.1 to 9.4 minutes before launch/climb. Keep early launch and the IP hold because actual AI launch timing is unmeasured. Added build checks cover all carrier flights; those checks exposed generic formation offsets on two deck-start wingmen, now aligned to the ship with parking fields retained.

@@ -27,9 +27,9 @@ Single-player reconnaissance and rescue in an OH-58D, with useful AI wingmen and
 | Checkpoint / reinforcements | Two BRDMs + two trucks; two technicals + two trucks reinforce after 240 s |
 | Coastal air defense | SA-6 radar + three launchers; separate Strela-10; support trucks |
 
-USS Stennis is initially 90 nm northwest of extraction, moving west at 25 kt. Carrier flights are linked to it for departure/recovery. TACAN 74X, ICLS 11, ATC 127.500 AM. Main package frequency 251.000 AM; HAVEN 128.500 AM; LANTERN 127.500 AM.
+USS Stennis is initially 70 nm northwest of extraction, moving west at 25 kt. Carrier flights are linked to it for departure/recovery. TACAN 74X, ICLS 11, ATC 127.500 AM. Main package frequency 251.000 AM; HAVEN 128.500 AM; LANTERN 127.500 AM.
 
-Shorter helicopter departure means early carrier launch and an IP hold are needed for coordination. Allow roughly 15–20 minutes for launch/climb/transit; this is a planning estimate, not a measured guarantee. BRUISER requests select a 5 km snapshot area around the player's call position and queue until jets are within 20 km. Target assignment requires 700 m separation from Sparrow and all three Kiowas. Released weapons cannot be recalled. HARM success reports confirm a previously seen tracking radar's destruction, not elimination of every threat.
+Shorter helicopter departure means early carrier launch and an IP hold are needed for coordination. Allow roughly 12–18 minutes for launch/climb/transit; this is a planning estimate, not a measured guarantee. BRUISER requests select a 5 km snapshot area around the player's call position and queue until jets are within 20 km. Target assignment requires 700 m separation from Sparrow and all three Kiowas. Released weapons cannot be recalled. HARM success reports confirm a previously seen tracking radar's destruction, not elimination of every threat.
 
 ## Rescue state
 
@@ -72,3 +72,7 @@ Migration verification is recorded in `verification.md`. Earlier user sorties es
 ## F10 menu simplification — 2026-11-03
 
 Removed the mission-name wrapper. Rescue and Air Support now open directly under F10 Other, saving one selection for every command. Command behavior and explicit clearance requirements are unchanged.
+
+## Closer carrier — 2026-11-04
+
+Moved STENNIS along its existing bearing from 90 to 70 nm from extraction (x=129830.706068462, east=-79353.53518100645). The westbound 40 km track translates with the ship; all four carrier flights retain linked launches/recoveries and updated deck positions. Guardian/Bruiser climb points remain relative to the carrier, while coastal SEAD and AWACS stations stay geographically fixed. Guardian's outbound route is about 70.01 nm / 9.4 minutes at 230 m/s versus 90.01 nm / 12.1 minutes previously, excluding launch/climb. Allow 12–18 minutes as an unmeasured launch/climb/transit planning range; BRUISER still launches 180 seconds later. Native ship placement and carrier flight operations require DCS acceptance.

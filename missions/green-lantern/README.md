@@ -23,6 +23,8 @@ Under **Other**:
 - **Rescue:** status / return directions, request survivor smoke (green), request recovery smoke (blue).
 - **Air Support:** launch carrier package, request CAS near me, request radar suppression, hold fire / cancel CAS.
 
+STENNIS starts 70 nm northwest of extraction, 20 nm closer than before. Allow roughly 12–18 minutes for launch, climb and transit; actual AI timing varies.
+
 Request the carrier package before departure and hold at WP2 if cover has not arrived. Takeoff automatically launches it as a fallback. CAS requires your clearance. Normal wingman radio commands control your two Kiowas.
 
 ## Development status

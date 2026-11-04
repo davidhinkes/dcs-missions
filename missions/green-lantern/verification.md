@@ -16,3 +16,7 @@ Baseline playable file SHA-256: `0fbe81a276b0bbefa93d8ca97385d0549272085991e1839
 ## F10 simplification — 2026-11-03
 
 Removed the mission-name wrapper, preserving command categories and callbacks. Rebuilt artifact passes portable archive validation with zero validator errors/warnings. The complete simulated logic suite passes using Lupa 2.6 Lua 5.1 on Linux, including menu hierarchy/uniqueness checks. Confirmed the archive embeds the updated rescue script and its Lua files compile under Lua 5.1. This is not DCS luae.exe or a flight check. Native Mission Editor checks were skipped; deployment was attempted but blocked by the absent DCS Missions profile on this cloud machine. Restart the mission after installing the updated artifact.
+
+## Carrier moved closer — 2026-11-04
+
+STENNIS now starts exactly 70 nm from extraction on the prior bearing, 20 nm closer. Build assertions check range and every carrier aircraft's deck coordinates, launch/recovery position and ship linkage. Generic formation offsets on BRUISER/WEASEL wingmen were removed so deck starts match the ship before native parking allocation. All 25 printed mock scenarios pass; validator has zero errors/warnings; editor fixup covers 49 units; three compiled trigger chunks and archive geometry checks pass. Installed SHA-256: dc254b4b830506038710fb1f1d85de79ff423b78f25c74d42be472fbf973e4bf. Previous installed file matched the prior deployment and was backed up. No native sea/flight-operations or measured arrival check was performed.

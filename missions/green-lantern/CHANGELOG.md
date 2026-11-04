@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased — 2026-11-04
+
+- Moved STENNIS 20 nm toward extraction, from 90 to 70 nm on the same offshore bearing. Deck starts, carrier-relative climb points, recovery routes and the ship's westbound track follow the new position. Early launch, three-minute CAS delay and objective-based enemy activation remain as configured. Revised support timing estimate to 12–18 minutes.
+
 ## Unreleased — 2026-11-03
 
 - Removed the redundant mission-name F10 submenu; command categories now open directly under Other.
