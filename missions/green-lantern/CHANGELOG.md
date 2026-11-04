@@ -2,6 +2,8 @@
 
 ## Unreleased — 2026-11-04
 
+- Corrected reported overlapping Kiowa starts: four visible individual helipads 60 m apart, explicit matching aircraft coordinates, zero-AGL hot-ground starts and no shared parking allocation. Added warehouses for all four pads, all-pad service proximity checks, trees-only departure clearance and aligned Longbow recall.
+
 - Reorganized Kiowas into RESCUE and LONGBOW, two aircraft each; Longbow is an Excellent-skill Hellfire pair starting on HAVEN pads 3/4, launching on player takeoff for a 3 nm southern overwatch area.
 - Added controlled F10 one-target Hellfire tasking, range/sight-line/separation gates, attack time/distance limits, hold-fire and HAVEN recall; CAS protects all four aircraft.
 - Fixed LANTERN directly at cockpit WP4 and removed recovery smoke and its menu command. Survivor green smoke remains.

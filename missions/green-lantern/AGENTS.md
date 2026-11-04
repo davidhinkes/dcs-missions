@@ -3,6 +3,7 @@
 Read this mission's design, player README, changelog and lessons before editing it. Apply the repository's shared build/deploy workflow.
 
 - Preserve two flights of two hot-start Kiowas on distinct HAVEN pads: RESCUE uses pads 1/2 (player Hellfires/gun, wingman rockets/gun); LONGBOW uses pads 3/4 (two Hellfires/gun each, Excellent skill). All retain 270 kg fuel; player PDU enabled. LONGBOW is a separate AI group, not a normal player wingman.
+- Start pads are four fixed SINGLE_HELIPAD/FARP objects, IDs 100–103, 60 m apart. Each aircraft must have unique matching pad coordinates, alt=0/RADIO and TakeOffGroundHot / From Ground Area Hot, without parking/helipad start links. Never relocate occupied pads; preserve native trees-only clearance before script loading, warehouses for every pad and services within 150 m. Longbow recall links to pad 102.
 - Labels are off and F10 is friendly-only. Custom threat replies must not reveal enemy unit identities or counts.
 - Randomize Sparrow within 200 m of the approximate search waypoint. Allow pickup within 400 m with the documented approach/boarding time. Recover to the separate FARP LANTERN.
 - Preserve the Rescue / Air Support menu grouping and manual CAS clearance.

@@ -278,7 +278,7 @@ readyOverwatch();commands['Engage vehicles near me']();advance(8);commands['Hold
 assert(not GREEN_LANTERN.owArea and not GREEN_LANTERN.owTarget and groups.LONGBOW.option==4)
 assert(groups.LONGBOW.task.params.route.points[2].task.params.tasks[1].id=='Orbit')
 commands['Return to HAVEN']();assert(GREEN_LANTERN.owReturning)
-assert(groups.LONGBOW.task.params.route.points[2].type=='Land' and groups.LONGBOW.task.params.route.points[2].linkUnit==100)
+assert(groups.LONGBOW.task.params.route.points[2].type=='Land' and groups.LONGBOW.task.params.route.points[2].linkUnit==102)
 commands['Engage vehicles near me']();assert(not GREEN_LANTERN.owArea)
 originalPrint('PASS: overwatch hold-fire restores orbit; recall links to HAVEN and blocks later attacks')
 readyOverwatch();land.isVisible=function()return false end;commands['Engage vehicles near me']();advance(8);assert(not groups.LONGBOW.attacks)
@@ -298,9 +298,34 @@ originalPrint('PASS: optional overwatch API failure does not fail the rescue')
 reset();advance(2)
 for _,side in pairs(mission.coalition)do for _,country in pairs(side.country or{})do for _,g in pairs((country.helicopter or{}).group or{})do
  if g.name=='RESCUE' then assert(#g.units==2 and not g.units[3]);local wp=g.route.points[4];assert(wp.x==GREEN_LANTERN.home.x and wp.y==GREEN_LANTERN.home.z)end
- if g.name=='LONGBOW' then assert(#g.units==2 and g.uncontrolled and g.units[1].parking=='3' and g.units[2].parking=='4')end
+ if g.name=='LONGBOW' then assert(#g.units==2 and g.uncontrolled and not g.units[1].parking and not g.units[2].parking)end
 end end end
 assert(not commands['Request recovery smoke (blue)'] and #blueSmokeTimes==0)
 originalPrint('PASS: two two-ship flights use distinct HAVEN pads; fixed cockpit WP4 equals actual medical landing location')
+
+
+reset();advance(2)
+local starts,pads={},{}
+for _,country in pairs(mission.coalition.blue.country)do
+ for _,g in pairs((country.static or{}).group or{})do for _,u in pairs(g.units)do if u.name:match('HAVEN PAD')then pads[#pads+1]=u;assert(u.type=='SINGLE_HELIPAD' and u.shape_name=='FARP')end end end
+ for _,g in pairs((country.helicopter or{}).group or{})do if g.name=='RESCUE' or g.name=='LONGBOW' then
+  local p=g.route.points[1];assert(p.type=='TakeOffGroundHot' and p.action=='From Ground Area Hot' and p.alt==0 and p.alt_type=='RADIO' and not p.helipadId and not p.linkUnit)
+  assert(p.x==g.units[1].x and p.y==g.units[1].y)
+  for _,u in pairs(g.units)do starts[#starts+1]=u;assert(u.alt==0 and u.alt_type=='RADIO' and not u.parking and not u.parking_id)end
+ end end
+end
+assert(#starts==4 and #pads==4)
+for i,u in ipairs(starts)do
+ local matches=0;for _,p in ipairs(pads)do if p.x==u.x and p.y==u.y then matches=matches+1 end end;assert(matches==1)
+ for j=i+1,#starts do local v=starts[j];assert(math.sqrt((u.x-v.x)^2+(u.y-v.y)^2)>=59.999)end
+end
+for _,suffix in ipairs({'FUEL','SERVICE','COMMS'})do for _,u in pairs(groups['HAVEN '..suffix].units)do
+ for _,p in ipairs(pads)do local v=u:getPoint();assert(math.sqrt((v.x-p.x)^2+(v.z-p.y)^2)<150)end
+end end
+local calls=0;a_remove_scene_objects=function(id,mask)assert(mask==1);calls=calls+1 end
+getValueResourceByKey=function(k)return k end;a_do_script_file=function()assert(calls==1)end
+assert(loadstring(mission.trig.actions[1]))();assert(calls==1)
+assert(mission.trigrules[1].actions[1].objects_mask==1)
+originalPrint('PASS: four physically separated zero-AGL starts match four visible pads; every pad is serviced and native tree clearing precedes scripts')
 
 originalPrint('ALL MISSION LOGIC TESTS PASSED (mock DCS world; not a flight test)')

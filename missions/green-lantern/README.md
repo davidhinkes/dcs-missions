@@ -8,6 +8,7 @@ A Syria CSAR mission: recover downed pilot Sparrow while enemy vehicles hunt him
 
 - **Anvil / RESCUE:** player plus one normal AI wingman, hot on HAVEN pads 1/2. Player has two Hellfires and gun; wingman has seven M151 rockets and gun. Use normal radio commands for your wingman.
 - **Longbow / LONGBOW:** separate Excellent-skill AI pair on pads 3/4, two Hellfires and gun each. They launch when you take off and hold in an area centered 3 nm south of WP3. Scripted attacks use missiles only. They return to HAVEN after pickup.
+- Each aircraft now sits on its own visible native SINGLE_HELIPAD, arranged in a 60 m-spaced square. Starts use zero-AGL hot ground mode and explicit separated coordinates; shared parking allocation is not used. Native trees-only clearing prepares the departure area. Each pad has warehouse resources, and service vehicles remain within 150 m of all four pads.
 - All four Kiowas retain 270 kg fuel and 30 flares; check loaded performance and fuel reserve in the cockpit. Lead has the PDU.
 
 ## Rescue and medical delivery

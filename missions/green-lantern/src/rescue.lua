@@ -100,24 +100,32 @@ local function spawnGround(name,p)
 end
 local function serviceFarp(prefix,pad)
   local occupied={}
+  local function clearOfPads(p)
+    if prefix~='HAVEN' then return true end
+    for _,offset in ipairs({{-30,-30},{30,-30},{-30,30},{30,30}})do
+      local d=distance(p,{x=pad.x+offset[1],z=pad.z+offset[2]})
+      if d<30 or d>125 then return false end -- reserve 25 m for vehicle formation offsets
+    end
+    return true
+  end
   local function servicePoint(angle)
     -- Keep logistics within the FARP service radius while clearing the pads.
-    for r=85,105,10 do
+    for r=prefix=='HAVEN' and 70 or 85,prefix=='HAVEN' and 80 or 105,10 do
       for a=angle-20,angle+20,10 do
         local t=math.rad(a)
         local p=clearPoint(pad.x+r*math.cos(t),pad.z+r*math.sin(t),true)
-        local free=p~=nil
+        local free=p~=nil and clearOfPads(p)
         if p then for _,q in ipairs(occupied) do if distance(p,q)<30 then free=false end end end
         if free then occupied[#occupied+1]=p;return p end
       end
     end
     -- An assigned sector may be forested or sloping. Search other bearings
     -- rather than abandon every remaining service object at this FARP.
-    for r=70,90,10 do
+    for r=70,prefix=='HAVEN' and 80 or 90,10 do
       for a=0,350,10 do
         local t=math.rad(a)
         local p=clearPoint(pad.x+r*math.cos(t),pad.z+r*math.sin(t),true)
-        local free=p~=nil
+        local free=p~=nil and clearOfPads(p)
         if p then for _,q in ipairs(occupied) do if distance(p,q)<30 then free=false end end end
         if free then occupied[#occupied+1]=p;return p end
       end
@@ -307,8 +315,8 @@ local function owReturn()
   S.owArea=nil;S.owReturning=true;S.owTarget=nil
   local g=owGroup();local u=alive('LONGBOW-1') or alive('LONGBOW-2');if not g or not u then return end
   local first=waypoint(u:getPoint(),45);first.action='Turning Point'
-  local landing=waypoint(ground(19948.236328125,6806.8149414062),45)
-  landing.type='Land';landing.action='Landing';landing.helipadId=100;landing.linkUnit=100
+  local landing=waypoint(ground(19918.236328125,6836.8149414062),45)
+  landing.type='Land';landing.action='Landing';landing.helipadId=102;landing.linkUnit=102
   g:getController():setOption(0,4);g:getController():setTask({id='Mission',params={route={points={first,landing}}}})
   say('Longbow: returning to HAVEN. Released weapons cannot be recalled.')
 end
