@@ -133,12 +133,6 @@ local function serviceFarp(prefix,pad)
   end
   env.info('[GREEN_LANTERN] '..prefix..' logistics created: fuel, repair, rearm, power and communications')
 end
-local function smoke()
-  if home then
-    trigger.action.smoke(home,trigger.smokeColor.Blue)
-    S.lastHomeSmoke=timer.getTime()
-  end
-end
 local function requestPilotSmoke()
   if S.boarded then say('Sparrow is already aboard. Proceed to LANTERN.');return end
   if S.phase=='failed' or S.phase=='complete' then return end
@@ -158,7 +152,7 @@ local function havenNavigation(u)
     local lat,lon=coord.LOtoLL(home)
     text=text..string.format(' Position %.5f N, %.5f E.',lat,lon)
   end
-  return text..' Use the F10 LANTERN marker and BLUE smoke for the final landing; WP4 marks the general area.'
+  return text..' WP4 is the actual LANTERN landing pad; land within 100 m and hold 15 seconds.'
 end
 local function fail(reason)
   S.phase='failed';trigger.action.setUserFlag(903,1);say('MISSION FAILED: '..reason,40)
@@ -267,7 +261,7 @@ local function updateCAS(now)
             if jet and distance(jet:getPoint(),point)<=20000 then inRange=true end
           end
           local separated=S.boarded or distance(point,pickup)>700
-          for _,friendly in ipairs({'RESCUE-1','RESCUE-2','RESCUE-3'}) do
+          for _,friendly in ipairs({'RESCUE-1','RESCUE-2','LONGBOW-1','LONGBOW-2'}) do
             local helo=alive(friendly)
             if helo and distance(point,helo:getPoint())<=700 then separated=false end
           end
@@ -291,6 +285,104 @@ local function updateCAS(now)
     say('Bruiser: no further eligible targets in the requested area. Request another search if needed.')
   end
 end
+-- Separate two-ship support flight. Native AI still flies and guides its weapons.
+local owStation={x=36444,z=16000}
+local rescueAircraft={'RESCUE-1','RESCUE-2','LONGBOW-1','LONGBOW-2'}
+local function owGroup()return Group.getByName('LONGBOW')end
+local function owHold()
+  local g=owGroup();if not g then return end
+  local altitude=land.getHeight({x=owStation.x,y=owStation.z})+300
+  for dx=-1500,1500,500 do for dz=-1500,1500,500 do
+    altitude=math.max(altitude,land.getHeight({x=owStation.x+dx,y=owStation.z+dz})+300)
+  end end
+  local u=alive('LONGBOW-1') or alive('LONGBOW-2');if not u then return end
+  local first=waypoint(u:getPoint(),45);first.action='Turning Point'
+  local hold=waypoint({x=owStation.x,z=owStation.z,y=altitude},35);hold.action='Turning Point'
+  hold.task={id='ComboTask',params={tasks={{number=1,enabled=true,auto=false,id='Orbit',params={pattern='Circle',speed=35,altitude=altitude}}}}}
+  g:getController():setOption(0,4)
+  g:getController():setTask({id='Mission',params={route={points={first,hold}}}})
+  S.owTarget=nil;S.owAttackAt=nil;S.owHolding=true
+end
+local function owReturn()
+  S.owArea=nil;S.owReturning=true;S.owTarget=nil
+  local g=owGroup();local u=alive('LONGBOW-1') or alive('LONGBOW-2');if not g or not u then return end
+  local first=waypoint(u:getPoint(),45);first.action='Turning Point'
+  local landing=waypoint(ground(19948.236328125,6806.8149414062),45)
+  landing.type='Land';landing.action='Landing';landing.helipadId=100;landing.linkUnit=100
+  g:getController():setOption(0,4);g:getController():setTask({id='Mission',params={route={points={first,landing}}}})
+  say('Longbow: returning to HAVEN. Released weapons cannot be recalled.')
+end
+local function owRequest()
+  if S.boarded or S.phase=='complete' or S.phase=='failed' or S.owReturning or S.owDisabled then say('Longbow: attack support unavailable.');return end
+  local u=alive(S.playerName or 'RESCUE-1');if not u then return end
+  S.owArea=copy(u:getPoint())
+  say('Longbow: one vehicle attack requested within 2 km of your call position. Holding for range, sight line and friendly separation; no automatic follow-on attacks.')
+end
+local function owCancel()
+  S.owArea=nil
+  if S.owAirborne and not S.owReturning then owHold() end
+  say('Longbow: hold fire and resume overwatch. Released missiles cannot be recalled.')
+end
+local function owSafe(point)
+  if distance(point,pickup)<=700 then return false end
+  for _,name in ipairs(rescueAircraft)do local u=alive(name);if u and distance(point,u:getPoint())<=700 then return false end end
+  return true
+end
+local function owTick(_,now)
+  if S.owDisabled then return nil end
+  if not pickup then return now+2 end
+  if S.boarded or S.phase=='complete' or S.phase=='failed' then
+    if S.owLaunched and not S.owReturning then owReturn() end
+    return nil
+  end
+  local g=owGroup();local lead=alive('LONGBOW-1') or alive('LONGBOW-2')
+  if not g or not lead then if not S.owLost then S.owLost=true;say('Longbow unavailable; continue the rescue.');end;return nil end
+  local player=alive(S.playerName or 'RESCUE-1')
+  if not S.owLaunched and player and player:inAir() then
+    g:getController():setCommand({id='Start'});S.owLaunched=true
+    say('Longbow: launching for overwatch, three nautical miles south of the search area. Hellfires available through F10 Other > Overwatch.')
+  end
+  if not S.owLaunched or S.owReturning or not lead:inAir() then return now+2 end
+  if not S.owAirborne then S.owAirborne=true;owHold() end
+  if distance(lead:getPoint(),owStation)<1000 and not S.owReady then S.owReady=true;say('Longbow: in the overwatch area. Holding fire; request a vehicle attack when needed.') end
+  if S.owTarget then
+    local target=alive(S.owTarget)
+    if not target or not owSafe(target:getPoint()) or distance(lead:getPoint(),{x=42000,z=16000})<4000 or now-S.owAttackAt>=90 then
+      say(not target and 'Longbow: assigned vehicle destroyed; returning to overwatch.' or 'Longbow: breaking off; attack conditions or time limit reached.')
+      owHold()
+    end
+    return now+2
+  end
+  if not S.owReady or not S.owArea then return now+2 end
+  local shooter,missiles
+  for _,name in ipairs({'LONGBOW-1','LONGBOW-2'})do
+    local u=alive(name)
+    if u and u:inAir() then
+      local ammo=u.getAmmo and u:getAmmo() or {};local count=0
+      for _,a in pairs(ammo or {})do if a.desc and a.desc.category==1 then count=count+(a.count or 0) end end
+      if count>0 then shooter=u;missiles=count;break end
+    end
+  end
+  if not shooter then S.owArea=nil;say('Longbow: no airborne Hellfire shooter available.');return now+2 end
+  local best,bestRange
+  for patrol,count in pairs(patrolCounts)do for i=1,count do
+    local u=alive(patrol..'-'..i)
+    if u then local p=u:getPoint();local range=distance(p,S.owArea)
+      local start=shooter:getPoint();local aim={x=p.x,y=p.y+2,z=p.z}
+      local slant=math.sqrt(distance(p,start)^2+(aim.y-start.y)^2)
+      if range<=2000 and (not bestRange or range<bestRange) and slant<=6500 and owSafe(p) and land.isVisible and land.isVisible(start,aim) then best=u;bestRange=range end
+    end
+  end end
+  if best then
+    g:getController():setOption(0,2)
+    g:getController():pushTask({id='AttackUnit',params={unitId=best:getID(),groupAttack=true,weaponType=131072,attackQtyLimit=true,attackQty=1,expend='One',altitudeEnabled=false,directionEnabled=false}})
+    S.owTarget=best:getName();S.owAttackAt=now;S.owArea=nil
+    say('Longbow: engaging a hostile vehicle with Hellfires. Keep clear; native AI controls the firing position.')
+  elseif not S.owUnableNotice or now-S.owUnableNotice>=30 then
+    S.owUnableNotice=now;say('Longbow: no eligible vehicle with clear terrain sight line, missile range and friendly separation. Request remains pending; cancel through Overwatch to hold fire.')
+  end
+  return now+2
+end
 local function status()
   local u=alive('RESCUE-1'); local text='Phase: '..S.phase
   if u and pickup and not S.boarded then text=text..string.format('. WP3 search area %.1f km away.',distance(u:getPoint(),{x=42000,z=16000})/1000) end
@@ -299,6 +391,7 @@ local function status()
   if S.coverAt then text=text..' Guardian released from STENNIS.' else text=text..' Guardian launches at your takeoff, or via F10 launch request.' end
   text=text..(S.radarCleared and ' Coastal SA-6 tracking radar destroyed.' or S.seadAt and ' Weasel working coastal radar threat.' or ' Weasel SEAD waiting for package launch.')
   text=text..(S.casOnStation and ' Bruiser CAS in range.' or S.casAt and ' Bruiser CAS inbound.' or ' Bruiser CAS is wave 2, three minutes behind Guardian.')
+  text=text..(S.owReturning and ' Longbow returning to HAVEN.' or S.owTarget and ' Longbow attacking.' or S.owReady and ' Longbow overwatch ready.' or ' Longbow staging/inbound.')
   say(text,25)
 end
 local function speed(u)
@@ -332,7 +425,6 @@ local function tick(_,now)
   end
   S.playerMissingAt=nil
   local pos=u:getPoint();local range=distance(pos,pickup)
-  if S.boarded and (not S.lastHomeSmoke or now-S.lastHomeSmoke>=240) then smoke() end
   if not S.huntAt and range<=8000 then hunt(now) end
   if S.huntAt and not S.reinforcementAttempted and not S.boarded and now-S.huntAt>=240 then
     S.reinforcementAttempted=true
@@ -384,7 +476,6 @@ local function tick(_,now)
       if now-S.pickupAt>=S.pickupDuration then
         S.boarded=true;S.phase='return';pilot:destroy();trigger.action.setUserFlag(901,1)
         trigger.action.removeMark(8101)
-        smoke()
         say('Sparrow aboard! '..havenNavigation(u)..' Land within 100 m of the pad and hold 15 seconds for medical handover.',40)
       end
     else
@@ -404,8 +495,8 @@ local function tick(_,now)
 end
 local function initialize()
   pickup=randomPickup()
-  home=findClear(-1802.8537883092722,1000,1500)
-  -- Build the receiving FARP on the actual terrain-checked landing point.
+  home=ground(-1802.8537883092722,1000) -- Fixed pad: must match cockpit WP4 exactly.
+  -- Build the receiving FARP at the fixed WP4 landing point; never relocate it.
   assert(coalition.addStaticObject(2,{
     name='FARP LANTERN',unitId=200,type='SINGLE_HELIPAD',shape_name='FARP',category='Heliports',
     x=home.x,y=home.z,heading=0,dead=false,
@@ -431,22 +522,34 @@ local function initialize()
   S.phase='ingress';S.pickup=pickup;S.home=home
   env.info(string.format('[GREEN_LANTERN] LANTERN landing point x=%.3f z=%.3f',home.x,home.z))
   trigger.action.markToCoalition(8101,'SPARROW SEARCH AREA - within 200 m of WP3; request green smoke when nearby',ground(42000,16000),2,true)
-  trigger.action.markToCoalition(8102,'FARP LANTERN - medical handover / BLUE smoke / land within 100 m, hold 15 s / ATC 127.500 AM',home,2,true)
-  smoke()
+  trigger.action.markToCoalition(8102,'FARP LANTERN - medical handover / WP4 landing pad / land within 100 m, hold 15 s / ATC 127.500 AM',home,2,true)
   local rescueMenu=missionCommands.addSubMenuForCoalition(2,'Rescue')
   local airMenu=missionCommands.addSubMenuForCoalition(2,'Air Support')
+  local owMenu=missionCommands.addSubMenuForCoalition(2,'Overwatch')
+  missionCommands.addCommandForCoalition(2,'Engage vehicles near me',owMenu,owRequest)
+  missionCommands.addCommandForCoalition(2,'Hold fire / resume overwatch',owMenu,owCancel)
+  missionCommands.addCommandForCoalition(2,'Return to HAVEN',owMenu,owReturn)
   missionCommands.addCommandForCoalition(2,'Status / return directions',rescueMenu,status)
   missionCommands.addCommandForCoalition(2,'Request survivor smoke (green)',rescueMenu,requestPilotSmoke)
-  missionCommands.addCommandForCoalition(2,'Request recovery smoke (blue)',rescueMenu,smoke)
   missionCommands.addCommandForCoalition(2,'Launch carrier package',airMenu,launchGuardian)
   missionCommands.addCommandForCoalition(2,'Request CAS near me',airMenu,requestCAS)
   missionCommands.addCommandForCoalition(2,'Request radar suppression',airMenu,requestSEAD)
   missionCommands.addCommandForCoalition(2,'Hold fire / cancel CAS',airMenu,holdCAS)
-  say('Anvil: WP3 is Sparrow\'s approximate search area, not his exact position. Search within 200 m and request GREEN smoke using F10 when nearby. After pickup, deliver him to LANTERN, WP4 BLUE smoke. Overlord 251 AM; F10 can launch the air package earlier.',30)
+  say('Anvil: WP3 is Sparrow\'s approximate search area, not his exact position. Search within 200 m and request GREEN smoke using F10 when nearby. After pickup, deliver him to LANTERN, WP4 landing pad. Overlord 251 AM; F10 can launch the air package earlier.',30)
   timer.scheduleFunction(function(_,now)
     local ok,nextTime=pcall(tick,nil,now)
     if not ok then env.error('[GREEN_LANTERN] '..tostring(nextTime));fail('Mission script error; see dcs.log.');return nil end
     return nextTime
+  end,nil,timer.getTime()+2)
+  timer.scheduleFunction(function(_,now)
+    local ok,result=pcall(owTick,nil,now)
+    if not ok then
+      S.owDisabled=true;pcall(owCancel)
+      env.info('[GREEN_LANTERN] Optional overwatch disabled: '..tostring(result))
+      say('Longbow tasking unavailable; rescue continues.')
+      return nil
+    end
+    return result
   end,nil,timer.getTime()+2)
 end
 timer.scheduleFunction(function()

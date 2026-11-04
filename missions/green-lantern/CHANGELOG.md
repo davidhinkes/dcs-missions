@@ -2,6 +2,10 @@
 
 ## Unreleased — 2026-11-04
 
+- Reorganized Kiowas into RESCUE and LONGBOW, two aircraft each; Longbow is an Excellent-skill Hellfire pair starting on HAVEN pads 3/4, launching on player takeoff for a 3 nm southern overwatch area.
+- Added controlled F10 one-target Hellfire tasking, range/sight-line/separation gates, attack time/distance limits, hold-fire and HAVEN recall; CAS protects all four aircraft.
+- Fixed LANTERN directly at cockpit WP4 and removed recovery smoke and its menu command. Survivor green smoke remains.
+
 - Moved STENNIS 20 nm toward extraction, from 90 to 70 nm on the same offshore bearing. Deck starts, carrier-relative climb points, recovery routes and the ship's westbound track follow the new position. Early launch, three-minute CAS delay and objective-based enemy activation remain as configured. Revised support timing estimate to 12–18 minutes.
 
 ## Unreleased — 2026-11-03

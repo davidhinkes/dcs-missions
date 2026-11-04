@@ -70,3 +70,9 @@ The shared runner now reads artifact/test paths from each mission's `mission.jso
 ## Moving the carrier closer
 
 The 2026-11-04 change reduces the initial range from 90 to 70 nm on the same bearing. Translate the ship track, aircraft starts, relative climb points and linked recoveries together while preserving fixed tactical stations. At 230 m/s, the Guardian route estimate falls from 12.1 to 9.4 minutes before launch/climb. Keep early launch and the IP hold because actual AI launch timing is unmeasured. Added build checks cover all carrier flights; those checks exposed generic formation offsets on two deck-start wingmen, now aligned to the ship with parking fields retained.
+
+## Independent overwatch and fixed delivery
+
+Separate support tasking belongs to a separate AI group so a scripted Mission/AttackUnit does not replace the player group's flight orders. Fill all four HAVEN parking slots uniquely; account for both support helicopters in CAS and own-fire separation. ATGM mask 131072 is defined in the installed editor and excludes gun/rocket attacks from the scripted task. Native attack positioning and missile guidance still require flight checks. A 3 nm staging point does not guarantee a stationary shot at that distance.
+
+If a cockpit waypoint must identify the actual landing pad, keep that pad fixed; a runtime terrain search that shifts it invalidates cockpit navigation. Remove obsolete smoke commands, automatic smoke and briefing directions together. Terrain fit must be checked in DCS rather than inferred from coordinate equality.

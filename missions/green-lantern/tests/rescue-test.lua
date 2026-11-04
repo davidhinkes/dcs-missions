@@ -5,6 +5,8 @@ local function makeUnit(d)
   local u={name=d.name,p={x=d.x,y=d.alt or 0,z=d.y},life=100,air=d.type=='OH58D' or d.type=='FA-18C_hornet' or d.type=='MiG-29 Fulcrum',velocity={x=0,y=0,z=0}}
   function u:isExist() return self.life>0 end
   function u:getID() return d.unitId end
+  function u:getName()return self.name end
+  function u:getAmmo()return {{count=self.missiles or 2,desc={category=1}}}end
   function u:getLife() return self.life end
   function u:getPoint() return self.p end
   function u:inAir() return self.air end
@@ -15,7 +17,7 @@ end
 local function addGroup(d)
   local g={units={},hidden=d.hidden,hiddenOnMFD=d.hiddenOnMFD};for i,u in pairs(d.units)do g.units[i]=makeUnit(u) end
   function g:getUnit(i)return self.units[i]end
-  function g:getController()return {setOnOff=function()end,pushTask=function(_,t)self.attacks=self.attacks or {};table.insert(self.attacks,t)end,resetTask=function()self.attacks={}end,setTask=function(_,t) self.task=t end,setOption=function(_,k,v)self.option=v end}end
+  function g:getController()return {setCommand=function(_,cmd)self.command=cmd end,setOnOff=function()end,pushTask=function(_,t)self.attacks=self.attacks or {};table.insert(self.attacks,t)end,resetTask=function()self.attacks={}end,setTask=function(_,t) self.task=t end,setOption=function(_,k,v)self.option=v end}end
   groups[d.name]=g;return g
 end
 local function reset(water)
@@ -25,7 +27,7 @@ local function reset(water)
   Unit={getByName=function(n)return units[n]end}
   Group={Category={GROUND=2},getByName=function(n)return groups[n]end}
   Object={Category={SCENERY=5}}
-  land={getHeight=function()return 40 end,getSurfaceType=function()return water and 3 or 1 end}
+  land={getHeight=function()return 40 end,getSurfaceType=function()return water and 3 or 1 end,isVisible=function()return true end}
   world={VolumeType={SPHERE=0},searchObjects=function()end}
   coalition={addGroup=function(_,_,g)return addGroup(g)end,addStaticObject=function(_,s)statics[s.name]=s;return s end}
   trigger={smokeColor={Green=0,Blue=4},action={
@@ -34,18 +36,19 @@ local function reset(water)
     activateGroup=function(g)for n,o in pairs(groups)do if o==g then activated[n]=now end end end}}
   missionCommands={
     addSubMenuForCoalition=function(_,name,parent)
-      assert(parent==nil and (name=='Rescue' or name=='Air Support'),'Unexpected intermediate menu')
+      assert(parent==nil and (name=='Rescue' or name=='Air Support' or name=='Overwatch'),'Unexpected intermediate menu')
       return name
     end,
     addCommandForCoalition=function(_,name,parent,fn)
-      local rescue=name=='Status / return directions' or name=='Request survivor smoke (green)' or name=='Request recovery smoke (blue)'
-      assert(parent==(rescue and 'Rescue' or 'Air Support'),'Wrong command category')
+      local rescue=name=='Status / return directions' or name=='Request survivor smoke (green)'
+      local overwatch=name=='Engage vehicles near me' or name=='Hold fire / resume overwatch' or name=='Return to HAVEN'
+      assert(parent==(rescue and 'Rescue' or overwatch and 'Overwatch' or 'Air Support'),'Wrong command category')
       assert(not commands[name],'Duplicate command');commands[name]=fn
     end
   }
   timer={getTime=function()return now end,scheduleFunction=function(fn,arg,t)table.insert(queue,{fn=fn,arg=arg,t=t})end}
   for _,side in pairs(mission.coalition)do for _,c in pairs(side.country or {})do for _,cat in ipairs({'plane','helicopter','vehicle'})do for _,g in pairs((c[cat]or{}).group or{})do addGroup(g) end end end end
-  units['RESCUE-1'].air=false;units['RESCUE-2'].air=false;units['RESCUE-3'].air=false
+  units['RESCUE-1'].air=false;units['RESCUE-2'].air=false;units['LONGBOW-1'].air=false;units['LONGBOW-2'].air=false
   assert(loadfile('src/rescue.lua'))()
 end
 local function advance(to)
@@ -71,8 +74,8 @@ world.searchObjects=function(_,volume,callback)
 end
 advance(2)
 assert(GREEN_LANTERN.phase=='ingress' and groups['HUNTER-EAST'] and not flags[903])
-local commandCount=0;for _ in pairs(commands)do commandCount=commandCount+1 end;assert(commandCount==7)
-originalPrint('PASS: seven unique commands directly under Rescue and Air Support; no mission-name wrapper')
+local commandCount=0;for _ in pairs(commands)do commandCount=commandCount+1 end;assert(commandCount==9)
+originalPrint('PASS: nine unique commands directly under Rescue, Air Support and Overwatch; no mission-name wrapper')
 originalPrint('PASS: patrol spawns where scenery prevents a helicopter-size clearing')
 reset();advance(600);assert(GREEN_LANTERN.phase=='ingress' and not GREEN_LANTERN.huntAt and not activated.GUARDIAN)
 originalPrint('PASS: ten minutes at FARP does not start the hunt or air package')
@@ -165,11 +168,14 @@ units['COAST-SA6-NORTH-1']:destroy();advance(8);assert(GREEN_LANTERN.radarCleare
 originalPrint('PASS: SEAD package launch, HARM-only radar target, Hind patrol activation and confirmed SA-6 destruction')
 reset();advance(2)
 move('RESCUE-1',GREEN_LANTERN.pickup,false,0);advance(24)
-assert(GREEN_LANTERN.boarded and #blueSmokeTimes==2 and blueSmokeTimes[2]==24)
-advance(262);assert(#blueSmokeTimes==2)
-advance(264);assert(#blueSmokeTimes==3 and blueSmokeTimes[3]==264)
+assert(GREEN_LANTERN.boarded and #blueSmokeTimes==0)
+advance(262);assert(#blueSmokeTimes==0)
+advance(264);assert(#blueSmokeTimes==0)
 commands['Status / return directions']();assert(messages[#messages]:find('grid bearing') and messages[#messages]:find('range'))
-originalPrint('PASS: blue smoke refresh at boarding and every 240 s, with bearing/range in status')
+assert(not commands['Request recovery smoke (blue)'])
+assert(GREEN_LANTERN.home.x==-1802.8537883092722 and GREEN_LANTERN.home.z==1000)
+assert(statics['FARP LANTERN'].x==GREEN_LANTERN.home.x and statics['FARP LANTERN'].y==GREEN_LANTERN.home.z)
+originalPrint('PASS: fixed WP4 recovery location; no recovery smoke or menu; bearing/range in status')
 reset()
 world.searchObjects=function(_,volume,callback)
  local p=volume.params.point
@@ -191,9 +197,9 @@ local p=GREEN_LANTERN.pickup
 move('BRUISER-1',{x=p.x+10000,z=p.z},true)
 move('HUNTER-NORTH-1',{x=p.x+1500,z=p.z},false)
 move('HUNTER-NORTH-2',{x=p.x+1500,z=p.z+20},false)
-move('RESCUE-3',{x=p.x+1500,z=p.z+50},true)
+move('LONGBOW-2',{x=p.x+1500,z=p.z+50},true)
 commands['Request CAS near me']();advance(188);assert(not groups.BRUISER.attacks)
-originalPrint('PASS: CAS clearance also protects the third Kiowa')
+originalPrint('PASS: CAS clearance protects the independent overwatch flight')
 local locations={}
 for seed=1,20 do
  math.randomseed(seed);reset();advance(2)
@@ -246,4 +252,55 @@ move('RESCUE-1',{x=p.x+300,z=p.z},false,0);advance(20)
 move('RESCUE-1',{x=p.x+401,z=p.z},false,0);advance(22)
 assert(not GREEN_LANTERN.pickupAt and not GREEN_LANTERN.pickupDuration and not GREEN_LANTERN.boarded)
 originalPrint('PASS: 400 m pickup takes 120 s; moving outside pickup radius resets approach')
+
+-- Explicitly fly the mock support pair; no native flight dynamics are simulated.
+local function readyOverwatch()
+ reset();advance(2);units['RESCUE-1'].air=true;advance(4)
+ assert(groups.LONGBOW.command.id=='Start')
+ move('RESCUE-1',{x=41000,z=18000},true)
+ move('LONGBOW-1',{x=36444,z=16000,y=400},true,35)
+ move('LONGBOW-2',{x=36444,z=16100,y=400},true,35)
+ advance(6);assert(GREEN_LANTERN.owReady and not groups.LONGBOW.attacks)
+ isolateCAS('HUNTER-NORTH')
+ move('HUNTER-NORTH-1',{x=41000,z=16000},false)
+ move('HUNTER-NORTH-2',{x=44000,z=16000},false)
+ move('RESCUE-1',{x=41000,z=18000},true)
+end
+reset();advance(600);assert(not groups.LONGBOW.command and not GREEN_LANTERN.owLaunched)
+readyOverwatch();commands['Engage vehicles near me']();advance(8)
+assert(groups.LONGBOW.attacks[1].params.weaponType==131072)
+assert(groups.LONGBOW.attacks[1].params.unitId==units['HUNTER-NORTH-1']:getID())
+assert(groups.LONGBOW.attacks[1].params.attackQty==1)
+units['HUNTER-NORTH-1']:destroy();advance(10);assert(not GREEN_LANTERN.owTarget and groups.LONGBOW.option==4)
+advance(30);assert(#groups.LONGBOW.attacks==1,'No automatic follow-on attacks')
+originalPrint('PASS: overwatch waits at FARP, launches on takeoff, holds 3 nm south and attacks one requested target using ATGM-only mask')
+readyOverwatch();commands['Engage vehicles near me']();advance(8);commands['Hold fire / resume overwatch']()
+assert(not GREEN_LANTERN.owArea and not GREEN_LANTERN.owTarget and groups.LONGBOW.option==4)
+assert(groups.LONGBOW.task.params.route.points[2].task.params.tasks[1].id=='Orbit')
+commands['Return to HAVEN']();assert(GREEN_LANTERN.owReturning)
+assert(groups.LONGBOW.task.params.route.points[2].type=='Land' and groups.LONGBOW.task.params.route.points[2].linkUnit==100)
+commands['Engage vehicles near me']();assert(not GREEN_LANTERN.owArea)
+originalPrint('PASS: overwatch hold-fire restores orbit; recall links to HAVEN and blocks later attacks')
+readyOverwatch();land.isVisible=function()return false end;commands['Engage vehicles near me']();advance(8);assert(not groups.LONGBOW.attacks)
+land.isVisible=function()return true end
+move('RESCUE-2',{x=41000,z=16050},true);advance(10);assert(not groups.LONGBOW.attacks)
+move('RESCUE-2',{x=19948,z=6807},false);move('HUNTER-NORTH-1',{x=42000,z=16000},false);advance(12);assert(not groups.LONGBOW.attacks)
+move('HUNTER-NORTH-1',{x=41000,z=16000},false);units['LONGBOW-1'].missiles=0;units['LONGBOW-2'].missiles=0;advance(14);assert(not groups.LONGBOW.attacks and not GREEN_LANTERN.owArea)
+originalPrint('PASS: overwatch rejects masked shots, friendly/survivor proximity and empty missile loads')
+readyOverwatch();commands['Engage vehicles near me']();advance(8)
+move('LONGBOW-1',{x=39000,z=16000,y=400},true);advance(10);assert(not GREEN_LANTERN.owTarget and groups.LONGBOW.option==4)
+readyOverwatch();commands['Engage vehicles near me']();advance(8);advance(98);assert(not GREEN_LANTERN.owTarget and groups.LONGBOW.option==4)
+readyOverwatch();GREEN_LANTERN.boarded=true;advance(8);assert(GREEN_LANTERN.owReturning)
+originalPrint('PASS: overwatch breaks off inside 4 km or after 90 seconds and returns after boarding')
+readyOverwatch();groups.LONGBOW.getController=function()error('injected native API failure')end
+commands['Engage vehicles near me']();advance(8);assert(GREEN_LANTERN.owDisabled and GREEN_LANTERN.phase~='failed')
+originalPrint('PASS: optional overwatch API failure does not fail the rescue')
+reset();advance(2)
+for _,side in pairs(mission.coalition)do for _,country in pairs(side.country or{})do for _,g in pairs((country.helicopter or{}).group or{})do
+ if g.name=='RESCUE' then assert(#g.units==2 and not g.units[3]);local wp=g.route.points[4];assert(wp.x==GREEN_LANTERN.home.x and wp.y==GREEN_LANTERN.home.z)end
+ if g.name=='LONGBOW' then assert(#g.units==2 and g.uncontrolled and g.units[1].parking=='3' and g.units[2].parking=='4')end
+end end end
+assert(not commands['Request recovery smoke (blue)'] and #blueSmokeTimes==0)
+originalPrint('PASS: two two-ship flights use distinct HAVEN pads; fixed cockpit WP4 equals actual medical landing location')
+
 originalPrint('ALL MISSION LOGIC TESTS PASSED (mock DCS world; not a flight test)')

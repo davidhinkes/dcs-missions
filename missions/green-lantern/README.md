@@ -1,32 +1,35 @@
 # Operation Green Lantern
 
-A fictional Syria rescue mission: lead a flight of three OH-58Ds from FARP HAVEN, recover downed pilot Sparrow while enemy vehicles hunt him, then return to the separate FARP LANTERN. Carrier fighters, SEAD and CAS support the extraction; MiGs and Hinds contest the area.
-
-Requires **DCS World, Syria and OH-58D**. Single-player lead with two AI wingmen. No external mission framework, DCS-MCP installation or additional aircraft purchase is required to play.
+A Syria CSAR mission: recover downed pilot Sparrow while enemy vehicles hunt him. Two flights of two OH-58Ds operate from HAVEN, with carrier fighter/SEAD/CAS and AWACS support. Requires DCS World, Syria and OH-58D; no additional aircraft purchase, MCP hook or external mission framework is needed to play.
 
 ## Install and fly
 
-[Download the mission file](https://github.com/davidhinkes/dcs-missions/raw/refs/heads/main/missions/green-lantern/dist/Operation-Green-Lantern-Syria-OH58D.miz), copy it into `%USERPROFILE%\Saved Games\DCS\Missions` (or your DCS profile's `Missions` folder), then open it through DCS's **Missions** screen. Steam and standalone DCS use the same mission file. No developer setup, submodules or Lua hook is needed by players.
+[Download the mission](https://github.com/davidhinkes/dcs-missions/raw/refs/heads/main/missions/green-lantern/dist/Operation-Green-Lantern-Syria-OH58D.miz), copy it into your DCS Saved Games Missions folder and open it through Missions. Restart the mission after updates.
 
-All three helicopters start hot on separate pads at HAVEN. Lead and #2 carry two Hellfires and a .50-cal gun; #3 carries a .50-cal gun and seven M151 rockets. All carry 270 kg fuel. Lead has the PDU enabled.
+- **Anvil / RESCUE:** player plus one normal AI wingman, hot on HAVEN pads 1/2. Player has two Hellfires and gun; wingman has seven M151 rockets and gun. Use normal radio commands for your wingman.
+- **Longbow / LONGBOW:** separate Excellent-skill AI pair on pads 3/4, two Hellfires and gun each. They launch when you take off and hold in an area centered 3 nm south of WP3. Scripted attacks use missiles only. They return to HAVEN after pickup.
+- All four Kiowas retain 270 kg fuel and 30 flares; check loaded performance and fuel reserve in the cockpit. Lead has the PDU.
 
-Read the [full briefing](dist/Operation-Green-Lantern-Briefing.txt) for timing, radios and threats. Departure is about 13 nm from the search area; return to LANTERN is about 25 nm. Labels are off and the F10 map shows friendly assets only.
+## Rescue and medical delivery
 
-## Rescue
+Fly WP2 then WP3, about 13 nm from HAVEN. WP3 is an approximate search center; Sparrow is randomized within 200 m. Request green smoke when within 2 km, locate him and land within 400 m at less than 1 m/s. Boarding takes 20 seconds within 100 m and up to two minutes at 400 m; movement resets progress.
 
-WP3 marks an approximate last-known position. Sparrow is placed safely within 200 m. Request green smoke once within 2 km, locate him, and land within 400 m at less than 1 m/s. Remain still: boarding takes 20 seconds within 100 m and up to two minutes at 400 m. After pickup, follow blue smoke at WP4 to LANTERN's actual pad and remain landed within 100 m for 15 seconds.
+After boarding, fly to **WP4: the exact fixed LANTERN landing pad**, about 25 nm southwest. Land within 100 m and remain still for 15 seconds. The F10 LANTERN marker identifies the same pad. There is no recovery smoke or recovery-smoke command. Fuel, rearm and repair facilities are configured at both FARPs; native services and terrain fit still require flight acceptance.
 
-## F10 menu
+## F10 assignments
 
-Under **Other**:
+Under Other:
 
-- **Rescue:** status / return directions, request survivor smoke (green), request recovery smoke (blue).
-- **Air Support:** launch carrier package, request CAS near me, request radar suppression, hold fire / cancel CAS.
+- **Rescue:** Status / return directions; Request survivor smoke (green).
+- **Overwatch:** Engage vehicles near me; Hold fire / resume overwatch; Return to HAVEN.
+- **Air Support:** Launch carrier package; Request CAS near me; Request radar suppression; Hold fire / cancel CAS.
 
-STENNIS starts 70 nm northwest of extraction, 20 nm closer than before. Allow roughly 12–18 minutes for launch, climb and transit; actual AI timing varies.
+For Longbow, get within 2 km of the vehicles you want attacked, then select **Overwatch > Engage vehicles near me**. This requests one target near your call position, without exposing enemy names or a target list. Longbow waits for an airborne shooter with missiles, terrain sight line and 6.5 km slant range, and excludes targets within 700 m of Sparrow or any of the four Kiowas. Requests can remain pending; cancel explicitly if needed. One target request does not authorize automatic follow-on attacks.
 
-Request the carrier package before departure and hold at WP2 if cover has not arrived. Takeoff automatically launches it as a fallback. CAS requires your clearance. Normal wingman radio commands control your two Kiowas.
+Longbow holds around a staging point, not a guaranteed stationary firing position. Native AI may maneuver to fire; the script breaks off if its leader closes within 4 km of WP3, when separation becomes unsafe, on target destruction or after 90 seconds. Hold fire cannot recall a released missile. Accuracy, guidance, vegetation/building masking and native aircraft behavior require a DCS flight check.
+
+STENNIS starts 70 nm northwest of extraction. Request the carrier package before departure; takeoff launches it as a fallback. Allow roughly 12–18 minutes for fighter launch/climb/transit; Bruiser launches three minutes later and needs CAS clearance. Hold at WP2 if cover has not arrived. Labels are off; F10 shows friendly units only.
 
 ## Development status
 
-This is a development build. Previous versions were flown successfully by the owner; the latest combined revision still needs a full sortie. Offline validation and simulated logic checks do not prove AI tactics, FARP servicing or the newest hot-start behavior. See [design](design.md) for details and outstanding work.
+Mock mission logic and archive checks verify configuration and state transitions, not native AI combat or terrain. The four-pad launch, new Longbow attack behavior, fixed recovery pad and complete sortie need in-game acceptance. Read the [full briefing](dist/Operation-Green-Lantern-Briefing.txt), [design](design.md) and [verification record](verification.md).

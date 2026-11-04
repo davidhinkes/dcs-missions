@@ -6,11 +6,11 @@ Single-player reconnaissance and rescue in an OH-58D, with useful AI wingmen and
 
 ## Start, route and aircraft
 
-- Three hot-start Kiowas on numbered pads 1–3 of four-pad FARP HAVEN. Lead is `RESCUE-1` / Anvil 1-1, with PDU; wingmen High skill.
-- Lead and #2: two Hellfires and M3P .50-cal gun / 500 rounds. #3: gun plus seven M151 rockets. Fuel 270 kg each; tank capacity checked, gross weight/hover/endurance not certified.
+- Two two-ship OH-58D flights fill HAVEN pads 1–4. RESCUE: player with PDU and one High-skill AI wingman on pads 1/2. LONGBOW: separate Excellent-skill AI pair on pads 3/4.
+- RESCUE lead and both LONGBOW aircraft: two Hellfires and M3P .50-cal gun / 500 rounds. RESCUE wingman: gun plus seven M151 rockets. Fuel 270 kg each; capacity checked, gross weight/hover/endurance not certified.
 - HAVEN: DCS planar x=19948.236328125, y=6806.8149414062, ground altitude 33.384346008301 m. Mission-table y corresponds to world z.
 - WP2 IP (36000,13000); WP3 approximate search center (42000,16000); departure about 12.9 nm from search center, about nine minutes at 90 kt.
-- WP4 LANTERN medical handover, about 25 nm southwest of extraction. Final pad is terrain-cleared dynamically; marker, smoke and status directions identify it.
+- WP4 LANTERN medical handover, about 25 nm southwest of extraction. WP4 is exactly the fixed landing pad at x=-1802.8537883092722, east=1000; it is never relocated. F10 marker and status directions identify the same site; no recovery smoke.
 - Both FARPs have configured logistics support and warehouses. Actual ground-service behavior remains part of flight acceptance.
 
 ## Forces and coordination
@@ -29,7 +29,7 @@ Single-player reconnaissance and rescue in an OH-58D, with useful AI wingmen and
 
 USS Stennis is initially 70 nm northwest of extraction, moving west at 25 kt. Carrier flights are linked to it for departure/recovery. TACAN 74X, ICLS 11, ATC 127.500 AM. Main package frequency 251.000 AM; HAVEN 128.500 AM; LANTERN 127.500 AM.
 
-Shorter helicopter departure means early carrier launch and an IP hold are needed for coordination. Allow roughly 12–18 minutes for launch/climb/transit; this is a planning estimate, not a measured guarantee. BRUISER requests select a 5 km snapshot area around the player's call position and queue until jets are within 20 km. Target assignment requires 700 m separation from Sparrow and all three Kiowas. Released weapons cannot be recalled. HARM success reports confirm a previously seen tracking radar's destruction, not elimination of every threat.
+Shorter helicopter departure means early carrier launch and an IP hold are needed for coordination. Allow roughly 12–18 minutes for launch/climb/transit; this is a planning estimate, not a measured guarantee. BRUISER requests select a 5 km snapshot area around the player's call position and queue until jets are within 20 km. Target assignment requires 700 m separation from Sparrow and all four Kiowas. Released weapons cannot be recalled. HARM success reports confirm a previously seen tracking radar's destruction, not elimination of every threat.
 
 ## Rescue state
 
@@ -37,7 +37,7 @@ Shorter helicopter departure means early carrier launch and an IP hold are neede
 2. Hunt: player crosses 8 km; ground patrols and Hinds activate. Air opposition uses the separate 6 km gate. Carrier early launch does not trigger pursuit.
 3. Search: no survivor smoke until requested within 2 km of the search area. Green smoke indicates the actual site.
 4. Pickup: landed, speed below 1 m/s, within 400 m. Hold 20 s within 100 m; beyond 100 m add `ceil((distance-100)/3)` seconds, maximum 120 s. Movement, flight or leaving radius resets the timer. Running/boarding is simulated, with no physical passenger animation.
-5. Return: boarding removes survivor unit, sets flag 901, marks recovery with blue smoke and renews it every 240 s. Status offers return directions.
+5. Return: boarding removes survivor unit, sets flag 901, directs recovery at the fixed WP4 pad. Status offers return directions; no recovery smoke.
 6. Complete: landed/stationary within 100 m of actual LANTERN pad for 15 s; flag 902. Failure flag 903 on player/survivor loss, capture (enemy within 80 m for 20 s), or 25 minutes after hunt starts without pickup. Flying continues after the result.
 
 Implementation detail lives in `src/rescue.lua`; update these notes when changing behavior.
@@ -45,10 +45,10 @@ Implementation detail lives in `src/rescue.lua`; update these notes when changin
 ## Information and realism decisions
 
 - Labels OFF; friendly-only F10 map. No exact survivor unit icon. Exact enemy names/counts are not exposed through custom menus.
-- F10 has Rescue and Air Support submenus. Smoke requests are separate for survivor and recovery.
+- F10 has Rescue, Air Support and Overwatch submenus. Only survivor smoke is offered.
 - FARP departure and separate FARP medical handover are preferred to a nearby airfield delivery.
 - Larger pickup radius represents the survivor running to a safe landing site. This rescue is deliberately an abstraction in the Kiowa.
-- Spotting dots were discussed but not enabled. New wingman tactics and approximate contact reports were proposed but not implemented.
+- Spotting dots were discussed but not enabled. Longbow overwatch is implemented as described below; sensor-specific target handoff and approximate contact reports remain unimplemented.
 
 ## Acceptance and verification
 
@@ -66,7 +66,7 @@ Migration verification is recorded in `verification.md`. Earlier user sorties es
 
 - Flight-check the latest combined revision before public release.
 - Consider approximate contact reports to help locate ground vehicles without revealing exact targets.
-- Consider separate wingman overwatch/rocket support roles and simple cover-pickup / attack-designated-target / regroup commands. These are proposals requiring investigation and DCS testing.
+- Flight-test the Longbow overwatch implementation below. Sensor-specific attack-designated-target and regroup interfaces remain proposals.
 - Add briefing screenshots and optional voice audio after mission behavior stabilizes.
 
 ## F10 menu simplification — 2026-11-03
@@ -76,3 +76,11 @@ Removed the mission-name wrapper. Rescue and Air Support now open directly under
 ## Closer carrier — 2026-11-04
 
 Moved STENNIS along its existing bearing from 90 to 70 nm from extraction (x=129830.706068462, east=-79353.53518100645). The westbound 40 km track translates with the ship; all four carrier flights retain linked launches/recoveries and updated deck positions. Guardian/Bruiser climb points remain relative to the carrier, while coastal SEAD and AWACS stations stay geographically fixed. Guardian's outbound route is about 70.01 nm / 9.4 minutes at 230 m/s versus 90.01 nm / 12.1 minutes previously, excluding launch/climb. Allow 12–18 minutes as an unmeasured launch/climb/transit planning range; BRUISER still launches 180 seconds later. Native ship placement and carrier flight operations require DCS acceptance.
+
+## Two two-ship flights and fixed delivery — 2026-11-04
+
+Longbow is a distinct two-unit AI group, uncontrolled hot until player takeoff starts its engines/flight. Runtime tasking sends it to an orbit centered 3 nm south of the approximate extraction point (x=36444, east=16000), at least 300 m above the sampled local terrain. This is an area orbit, not a precision hover or verified masked firing position. Normal wingman commands continue to control RESCUE-2 only.
+
+The F10 Overwatch menu offers one requested vehicle attack within 2 km of the player call position, hold-fire/resume orbit and return to HAVEN. Tasking requires an airborne missile-equipped shooter, 6.5 km slant range, terrain visibility and more than 700 m from Sparrow/all four Kiowas. ATGM-only mask 131072 is confirmed in the installed Mission Editor action database. Native group attack uses one missile per participating shooter; duplicate shots and actual accuracy are not guaranteed. No automatic follow-on target is authorized. Watchdog cancels on unsafe proximity, target loss, 90 seconds elapsed or leader inside 4 km of search center. Boarding/terminal result recalls Longbow; support loss/API errors do not fail the rescue. Pending requests and released weapons have distinct cancellation behavior.
+
+The medical pad is fixed at WP4. Removed automatic blue smoke and its F10 command; retained green survivor smoke, marker/navigation cues and 15-second delivery hold. Logistics may seek nearby clear sectors, but never moves the pad itself. Native terrain fit, starts, orbit/attack geometry, missile guidance and recovery require a DCS sortie.
