@@ -13,11 +13,11 @@ A compact cat-and-mouse helicopter duel on Syria. The Kiowa pilot balances hunti
 - Exact enemy-vehicle prepoint; Hind location unknown.
 - Player carries Stingers and guns.
 - Hind hunts the friendly defended vehicle, engaging the player if encountered.
-- Win requires both enemy assets destroyed. Own defended-vehicle destruction means immediate failure.
+- Revised rule: first opponent ground-target destruction wins immediately; killing the enemy helicopter is optional. Own defended-vehicle destruction means immediate failure.
 
 ## Requirements and starts
 
-Syria and OH-58D only; built-in AI Mi-24V. One helicopter per side, no wingmen or combat support. Fixed visible SINGLE_HELIPAD/FARP objects IDs 200/201 match explicit zero-AGL native hot-ground starts. Each start is on its own coordinates, without conflicting parking/helipad start links. Local 160 m trees-only clearings run before mission Lua. Buildings and hunting-area scenery are preserved. Pad warehouses exist, but without support trucks the mission does not promise ground servicing.
+Syria and OH-58D only; built-in AI Mi-24V. One helicopter per side, no wingmen or combat support. Fixed visible SINGLE_HELIPAD/FARP objects IDs 200/201 match explicit zero-AGL native hot-ground starts. Each start is on its own coordinates, without conflicting parking/helipad start links. Local 160 m trees-only clearings run before mission Lua. Buildings and hunting-area scenery are preserved. Unlimited pad warehouses, unarmed M 818/Ural-375 ammunition service trucks about 86 m from each pad and nearby FARP Ammo Dump Coating objects are present from mission start. Ground Crew rearming is configured; interaction and replenishment still require DCS confirmation. Logistics are not combat objectives.
 
 Kiowa: two right-side Stingers, left M3P gun/500 rounds, 30 flares, PDU and 181.4 kg fuel. This matches the installed native OH58D payload preset. Hind: High skill, two B-8V20 S-8 rocket pods plus native gun, 192 flares, 900 kg fuel. Omitting ATGMs is a first-slice balance choice; native weapon use and fairness need a sortie. Tank capacity is not loaded weight, hover capability or endurance verification.
 
@@ -33,7 +33,7 @@ NEEDLE: player Kiowa. FANG: one uncontrolled hot-start AI Hind. BLUE-OBJECTIVE/R
 
 All four combat units must be acquired before ready. Initial missing units are not kills. Player takeoff releases the Hind once using Start and opens its ROE. Native enroute tasks combine EngageGroup against the known friendly vehicle with EngageTargetsInZone for helicopters in the duel area. The script does not task the Hind directly against live player coordinates. Both sides know the fixed vehicle locations; air sensing and terrain masking remain native. A release message differs from the one-time report when inAir confirms the Hind airborne.
 
-Ground-vehicle defense is active from mission start. Destroying either enemy sets its confirmed-loss state but does not win alone. Both destroyed plus surviving player/friendly asset yields success. Friendly defended-vehicle loss is immediate failure and precedes enemy-loss evaluation. Acquired player disappearance has a 10-second grace; no victory is awarded while the player is missing. Results are final once announced. Optional recovery is WP3; no smoke, boarding or landing requirement.
+Ground-vehicle defense is active from mission start. The first ground-objective death ends the round: enemy technical destruction yields success, friendly technical destruction yields failure. Hind destruction is optional and does not end the round. Native DEAD/UNIT_LOST events resolve observed ordering and latch the result immediately; later deaths cannot reverse it. Polling remains a fallback, with friendly-loss precedence when both targets disappear without ordered events. Acquired player disappearance has a 10-second grace; no victory is awarded while the player is missing. Results are final once announced. Optional recovery is WP3; no smoke, boarding or landing requirement.
 
 Flags: 950 success, 951 failure, 952 enemy vehicle destroyed, 953 enemy Hind destroyed. A mandatory site/controller error reports mission failure and the log reason. This does not certify AI flight or attacks just because native task calls succeeded.
 
@@ -45,11 +45,11 @@ One menu path: F10 Other > Duel > Status / objectives. It reports readiness, fri
 
 ## First playable slice and native checks
 
-Spawn/idle → takeoff and native Hind departure → Stinger helicopter engagement and gun attack on technical → both-enemy destruction with friendly survival. Separately verify friendly-loss failure and either kill order. See flight-checklist.md for starts, terrain, combat and fuel acceptance. Native AI behavior and concealment are central unverified mechanics.
+Spawn/idle → takeoff and native Hind departure → optional Stinger helicopter engagement → enemy technical destruction and immediate win. Separately verify immediate friendly-target defeat, event ordering and rearming at both FARPs. See flight-checklist.md for starts, terrain, combat and fuel acceptance. Native AI behavior and concealment are central unverified mechanics.
 
 ## Regression and acceptance
 
-Mock checks cover waiting indefinitely on the pad, one-time release versus actual takeoff, either kill order, no single-kill success, friendly-loss precedence, delayed/renamed player, acquired player loss, initial enemy absence, mandatory controller error, land/slope rejection, exact target record, routes/pads/loadout and non-disclosing status. Compiled native trees-only actions must precede both embedded scripts. Archive checks and native flight results are separate evidence.
+Mock checks cover waiting indefinitely on the pad, one-time release versus actual takeoff, ground-only immediate victory, optional helicopter kill, ordered event races, logistics-loss exclusion, polling friendly-loss precedence, delayed/renamed player, acquired player loss, initial enemy absence, mandatory controller error, land/slope rejection, exact target record, routes/pads/loadout and non-disclosing status. Compiled native trees-only actions must precede both embedded scripts. Archive checks and native flight results are separate evidence.
 
 - [ ] Build/archive and relevant mock checks recorded in verification.md.
 - [ ] Both native ground starts, rotor/forest clearance and loadout performance accepted.

@@ -1,5 +1,11 @@
 # Changelog
 
+## Ground-target race and rearm support — 2026-11-05
+
+- Changed victory to first ground-target destruction: red technical lost wins immediately, blue technical lost fails immediately; Hind kills are optional. Native target-death events resolve the race in observed order, with a final latched result and best-effort AI ceasefire.
+- Added unarmed ammunition trucks and ammo canopies at both FARPs alongside unlimited warehouses. Logistics losses do not count as objective losses.
+- Added race-order, ground-only win, Hind-only continuation and service-placement regression checks; native rearm interaction remains a flight check.
+
 ## First development test slice — 2026-11-05
 
 - Added Syria Kiowa-versus-Hind duel with one armed technical objective per side, 8 nm apart.

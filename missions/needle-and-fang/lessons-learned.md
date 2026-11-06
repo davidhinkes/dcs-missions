@@ -5,3 +5,5 @@
 - An 8 nm duel with a gun-armed Kiowa needs a gun-vulnerable objective. A DShK technical supplies return fire without introducing an armored target or extra air-defense unit. Actual gun effectiveness/fairness remains a flight check.
 - Enemy unit absence during loading must not count as destruction. Acquire all mandatory units first, separate startup waiting from player loss, and evaluate friendly loss before awarding simultaneous enemy-kill success.
 - Native attack tasks and release messages are not evidence of launch, detection, weapon release or a fair opponent. Verify the distinctive AI duel in DCS before adding complexity. Fixed target intelligence cannot silently follow a runtime-relocated asset.
+
+- A first-target race needs event ordering rather than only periodic casualty snapshots: two target losses between polls can otherwise reverse the actual first kill. Native death events now latch the result; polling is a fallback with an explicit unresolved-simultaneous-loss policy. Warehouses alone do not establish native FARP rearming: nearby ammo-service vehicles and stock are configured, and real replenishment remains an in-game check.

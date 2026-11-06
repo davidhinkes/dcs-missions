@@ -63,6 +63,16 @@ for(const [id,name,side,p,frequency]of pads){
  const country=Object.values(m.coalition[side].country)[0];country.static??={group:{}};
  country.static.group[id]={name,groupId:id,x:p.x,y:p.y,heading:0,dead:false,route:{points:{1:{x:p.x,y:p.y,alt:0,speed:0,type:'',action:''}}},units:{1:{name,unitId:id,type:'SINGLE_HELIPAD',shape_name:'FARP',category:'Heliports',x:p.x,y:p.y,heading:0,heliport_frequency:frequency,heliport_modulation:0,heliport_callsign_id:side==='blue'?2:1,canCargo:false}}};
 }
+// Unarmed logistics are service assets, never additional duel objectives.
+for(const [i,[,name,side,p]]of pads.entries()){
+ const support=addGroundGroup(m,'vehicle',{name:name+' AMMO SERVICE',type:side==='blue'?'M 818':'Ural-375',side,country:side==='blue'?'USA':'Russia',count:1,x:p.x+70,y:p.y-50,heading:0,skill:'Average'});
+ support.route.points[1].speed=0;support.hidden=side==='red';support.hiddenOnMFD=side==='red';support.units[1].playerCanDrive=false;
+ assert(Math.hypot(support.units[1].x-p.x,support.units[1].y-p.y)<150);
+}
+for(const [i,[,name,side,p]]of pads.entries()){
+ const id=300+i,x=p.x+70,y=p.y+50,country=Object.values(m.coalition[side].country)[0];
+ country.static.group[id]={name:name+' AMMO CANOPY',groupId:id,x,y,heading:0,dead:false,route:{points:{1:{x,y,alt:0,speed:0,type:'',action:''}}},units:{1:{name:name+' AMMO CANOPY',unitId:id,type:'FARP Ammo Dump Coating',category:'Fortifications',x,y,heading:0,canCargo:false}}};
+}
 // Fictional outbuildings supply local cover; they are not additional objectives.
 for(const [prefix,p]of [['BLUE',c.blueAsset],['RED',c.redAsset]]){
  const g=addGroundGroup(m,'vehicle',{name:prefix+' COVER',type:'house1arm',side:'neutrals',country:'UN Peacekeepers',countryId:7,count:1,x:p.x+45,y:p.y+35,heading:0,skill:'Average'});
@@ -74,10 +84,10 @@ const brief=`OPERATION NEEDLE AND FANG - DEVELOPMENT DUEL
 Syria / 08:00 local / one player OH-58D versus one AI Mi-24V
 
 OBJECTIVE
-Destroy BOTH the enemy Hind and its defended DShK technical. Protect your own DShK technical. Loss of your aircraft or defended vehicle means immediate failure; merely destroying one enemy does not win. Friendly losses take precedence if both sides are destroyed in the same evaluation interval. Victory is assessed on destruction, without a required recovery. Flying continues after the result.
+Destroy the enemy defended DShK technical to win immediately. If your technical is destroyed first, you lose immediately. Killing the Hind is optional and does not end the round. Native target-death event order decides the race; if both targets vanish between checks without an ordered event, friendly loss takes precedence. Loss of your aircraft also fails the mission. The first result is final, without a required recovery. Flying remains possible after the round ends.
 
 START / LOADOUT
-You are Anvil 1-1, NEEDLE, hot on a visible single helipad at BLUE FARP. FANG starts hot on its own RED FARP. Both use fixed zero-AGL ground starts; no stacked parking allocations. Two Stingers and an M3P .50-cal gun with 500 rounds, 30 flares, ${c.playerFuelKg} kg fuel (about 400 lb). Use Stingers against the Hind and the gun against the unarmored enemy technical. There are no Hellfires, wingmen, jets or additional combat units. The technical can shoot back; avoid a prolonged stationary hover in its sight line. Check actual gross weight, hover capability and fuel reserve in the cockpit. Pad warehouses are configured, but ground-service capability is not claimed without service vehicles/native acceptance.
+You are Anvil 1-1, NEEDLE, hot on a visible single helipad at BLUE FARP. FANG starts hot on its own RED FARP. Both use fixed zero-AGL ground starts; no stacked parking allocations. Two Stingers and an M3P .50-cal gun with 500 rounds, 30 flares, ${c.playerFuelKg} kg fuel (about 400 lb). Use Stingers against the Hind and the gun against the unarmored enemy technical. There are no Hellfires, wingmen, jets or additional combat units. Each FARP has an unarmed ammunition service truck and ammo canopy, separate from the defended target. The technical can shoot back; avoid a prolonged stationary hover in its sight line. Check actual gross weight, hover capability and fuel reserve in the cockpit. Both FARPs have unlimited ammunition warehouses, a nearby ammunition truck and ammo canopy from mission start. Land and park on your pad, then use Ground Crew > Rearm & Refuel to replenish Stingers and gun ammunition. Ground Crew rearm interaction still needs native DCS confirmation; only the defended technical decides the round, not logistics losses.
 
 GEOGRAPHY / INTELLIGENCE
 The defended vehicles are ${distance.toFixed(1)} nm apart, roughly five to six minutes at 90 kt before searching or combat. FARPs are near their own objectives; allow about 15-25 minutes for the duel, without a mission deadline. Both vehicles remain at their briefing-time positions beside authored outbuildings; terrain/forest concealment and landing fit require flight inspection. Your map shows friendly units only and labels are off. The exact RED OBJECTIVE marker and Kiowa target point 1T are fixed intelligence; the Hind's position is unknown. No live enemy tracking, scripted spotting or automatic aircraft coordinates are provided.
@@ -89,7 +99,7 @@ ENEMY BEHAVIOR
 The Hind's native launch is released after your first takeoff; waiting on the pad does not start its attack. It then hunts your defended vehicle and may engage your Kiowa if detected. Both sides know the fixed objective locations. Native sensing controls the air encounter: the script never feeds your live aircraft coordinates to the Hind. The Hind carries two S-8 rocket pods and its native gun, without ATGMs, High skill and ${c.hindFuelKg} kg fuel. Launch, terrain masking, attack behavior and firing effectiveness need a DCS sortie; a launch request is not proof of takeoff. Ground objectives may defend themselves from mission start.
 
 CONTROL / REPORTS
-F10 Other > Duel > Status / objectives is the only mission command. Status reports your asset's condition and confirmed enemy losses, without giving Hind location or enemy group names. One-time reports announce engagement release, observed Hind takeoff and confirmed destroyed objectives. Loss of the Hind before it launches counts only after that unit has actually been acquired. Missing enemy units at initial loading never award a victory. Objective or mandatory AI task setup failure reports failure instead of a false success. No recovery smoke.
+F10 Other > Duel > Status / objectives is the only mission command. Status reports your asset's condition and confirmed enemy losses, without giving Hind location or enemy group names. One-time reports announce engagement release, observed Hind takeoff and confirmed destroyed objectives. A confirmed Hind kill is optional and never ends the round by itself. Missing enemy units at initial loading never award a victory. Objective or mandatory AI task setup failure reports failure instead of a false success. No recovery smoke.
 
 RADIOS / FIRST FLIGHT CHECK
 Package 251.000 AM; BLUE FARP ${c.blueFrequency.toFixed(3)} AM. Requires Syria and OH-58D only; AI Mi-24V is a built-in asset. No external framework or hook is needed to play. Inspect both starts/pads, ground-unit/building fit and both FARP clearings, then observe the Hind's real departure and ability to attack your technical/engage your Kiowa. Verify Stinger acquisition, gun effectiveness, terrain and fuel. This first slice has not been flown; archive/mock checks do not establish a fair or playable native dogfight. Restart the mission after updates.

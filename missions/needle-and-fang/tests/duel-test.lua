@@ -1,8 +1,8 @@
 -- State/contract tests under DCS Lua 5.1; not a native AI combat simulation.
 local output=print
-local now,queue,units,groups,flags,messages,commands,marks,c
+local now,queue,units,groups,flags,messages,commands,marks,c,eventHandler
 local function reset(opts)
- opts=opts or {};now=0;queue={};units={};groups={};flags={};messages={};commands={};marks={}
+ opts=opts or {};eventHandler=nil;now=0;queue={};units={};groups={};flags={};messages={};commands={};marks={}
  dofile('.build/config.lua');dofile('.build/mission.lua');c=NEEDLE_FANG_CONFIG
  env={mission=mission,info=function()end}
  for _,side in pairs(mission.coalition)do for _,country in pairs(side.country or {})do for _,cat in ipairs({'helicopter','vehicle'})do for _,d in pairs((country[cat]or{}).group or{})do
@@ -19,6 +19,7 @@ local function reset(opts)
  end end end end
  Unit={getByName=function(n)return units[n]end};Group={getByName=function(n)return groups[n]end}
  coalition={getPlayers=function()return opts.renamed and {units['Other pilot']}or{}end}
+ world={event={S_EVENT_DEAD=8,S_EVENT_UNIT_LOST=30},addEventHandler=function(h)eventHandler=h end}
  land={getHeight=function(p)if opts.slope and p.x==c.blueFarp.x+15 then return 100 end;return 40 end,getSurfaceType=function()return opts.water and 3 or 1 end}
  trigger={action={outTextForCoalition=function(_,text)messages[#messages+1]=text end,setUserFlag=function(k,v)flags[k]=v end,markToCoalition=function(id,text,p)marks[id]={text=text,p=p}end}}
  missionCommands={addSubMenuForCoalition=function(_,name,parent)assert(name=='Duel'and not parent);return name end,addCommandForCoalition=function(_,name,parent,fn)assert(parent=='Duel'and name=='Status / objectives'and not commands[name]);commands[name]=fn end}
@@ -29,20 +30,26 @@ local function advance(to)
  while true do table.sort(queue,function(a,b)return a.t<b.t end);local item=queue[1];if not item or item.t>to then break end;table.remove(queue,1);now=item.t;local nt=item.fn(item.arg,now);if nt then item.t=nt;queue[#queue+1]=item end end
  now=to
 end
-local function kill(n)units[n].life=0 end
+local function kill(n,emit)units[n].life=0;if emit then eventHandler:onEvent({id=world.event.S_EVENT_DEAD,initiator=units[n]})end end
 reset();advance(600);assert(NEEDLE_FANG.phase=='ready'and not groups.FANG.command and not flags[950]and not flags[951])
 units['NEEDLE-1'].air=true;advance(601);assert(groups.FANG.command.id=='Start'and groups.FANG.starts==1)
 advance(650);assert(groups.FANG.starts==1 and not NEEDLE_FANG.airborneReported)
 units['FANG-1'].air=true;advance(651);assert(NEEDLE_FANG.airborneReported)
 local count=#messages;advance(670);assert(#messages==count)
 output('PASS: no pad timer; player takeoff releases Hind once; actual airborne report is distinct and not repeated')
-reset();advance(1);kill('RED-OBJECTIVE-1');advance(2);assert(flags[952]and not flags[950]and NEEDLE_FANG.phase=='ready')
-kill('FANG-1');advance(3);assert(flags[953]and flags[950]and NEEDLE_FANG.phase=='won')
+reset();advance(1);kill('RED-OBJECTIVE-1');advance(2);assert(flags[952]and flags[950]and NEEDLE_FANG.phase=='won'and units['FANG-1'].life>0)
 count=#messages;advance(30);assert(#messages==count)
-output('PASS: ground-first then Hind destruction wins once without requiring recovery')
-reset();advance(1);kill('FANG-1');advance(2);assert(flags[953]and not flags[950])
+output('PASS: enemy ground target alone wins immediately; no Hind kill or recovery required')
+reset();advance(1);kill('FANG-1');advance(2);assert(flags[953]and not flags[950]and NEEDLE_FANG.phase=='ready')
 kill('RED-OBJECTIVE-1');advance(3);assert(flags[950])
-output('PASS: Hind-first then ground destruction also wins; either single kill alone is insufficient')
+output('PASS: Hind kill alone never ends round; subsequent ground target kill wins')
+reset();advance(1);kill('RED-OBJECTIVE-1',true);assert(flags[950]);kill('BLUE-OBJECTIVE-1',true);advance(2);assert(flags[950]and not flags[951])
+reset();advance(1);kill('BLUE-OBJECTIVE-1',true);assert(flags[951]);kill('RED-OBJECTIVE-1',true);advance(2);assert(flags[951]and not flags[950])
+output('PASS: first observed ground-target death ends the race immediately and later losses cannot reverse it')
+reset();advance(1);kill('NEEDLE-1',true);kill('RED-OBJECTIVE-1',true);assert(flags[951]and not flags[950])
+output('PASS: confirmed player death ends the round; a later ground kill cannot award a posthumous win')
+reset();advance(1);kill('BLUE FARP AMMO SERVICE-1',true);kill('RED FARP AMMO SERVICE-1',true);advance(2);assert(not flags[950]and not flags[951])
+output('PASS: unarmed FARP logistics losses are not duel objectives')
 reset();advance(1);kill('BLUE-OBJECTIVE-1');kill('RED-OBJECTIVE-1');kill('FANG-1');advance(2)
 assert(flags[951]and not flags[950]and NEEDLE_FANG.phase=='failed')
 output('PASS: friendly defended-vehicle loss fails immediately and wins no simultaneous destruction tie')
@@ -86,5 +93,10 @@ local cleared,scripts=0,0
 a_remove_scene_objects=function(id,mask)assert(mask==1 and scripts==0);local found=false;for _,z in pairs(mission.triggers.zones)do if z.zoneId==id then found=true;assert(z.radius==160)end end;assert(found);cleared=cleared+1 end
 getValueResourceByKey=function(key)return key end;a_do_script_file=function()assert(cleared==2);scripts=scripts+1 end
 assert(loadstring(mission.trig.actions[1]))();assert(cleared==2 and scripts==2)
-output('PASS: two local trees-only FARP clearings execute before both mission scripts')
+for _,entry in ipairs({{'BLUE FARP',c.blueFarp,'M 818'},{'RED FARP',c.redFarp,'Ural-375'}})do
+ local g=groups[entry[1]..' AMMO SERVICE'];assert(g and not g.data.lateActivation and g.units[1].type==entry[3])
+ local p=g.units[1].p;assert(math.sqrt((p.x-entry[2].x)^2+(p.z-entry[2].y)^2)<150)
+ local found=false;for _,side in pairs(mission.coalition)do for _,country in pairs(side.country or{})do for _,st in pairs((country.static or{}).group or{})do if st.name==entry[1]..' AMMO CANOPY'then assert(st.units[1].type=='FARP Ammo Dump Coating');found=true end end end end;assert(found)
+end
+output('PASS: both FARPs have immediate nearby ammunition trucks/canopies; trees-only clearings precede scripts')
 output('ALL NEEDLE AND FANG TESTS PASSED (simulated APIs; not native AI combat)')

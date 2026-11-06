@@ -15,12 +15,16 @@ local function finish(success,reason)
   if S.phase=='won' or S.phase=='failed' then return end
   S.phase=success and 'won' or 'failed'
   trigger.action.setUserFlag(success and 950 or 951,1)
+  -- End native AI firing as a best-effort ceasefire; released weapons remain live.
+  for _,name in ipairs({'FANG','BLUE-OBJECTIVE','RED-OBJECTIVE'})do
+    pcall(function()local g=Group.getByName(name);if g then g:getController():setOption(0,4)end end)
+  end
   say((success and 'MISSION SUCCESS: ' or 'MISSION FAILED: ')..reason)
 end
 local function status()
   if S.phase=='waiting' then say('Waiting for all four duel units to load. No victory is awarded for missing initial units.');return end
   if S.phase=='failed' then say('Mission failed. Restart for another attempt.');return end
-  if S.phase=='won' then say('Both enemy assets destroyed; your defended vehicle survived. Optional recovery is at WP3.');return end
+  if S.phase=='won' then say('Enemy ground target destroyed; round won. Optional recovery/rearm is at WP3.');return end
   say((S.launched and 'Duel active. ' or 'Take off when ready to release the opposing helicopter. ')
     ..'Defended vehicle: '..(unit(names.friendly) and 'alive. ' or 'lost. ')
     ..'Enemy vehicle: '..(S.vehicleDestroyed and 'confirmed destroyed. ' or 'not confirmed destroyed. ')
@@ -68,17 +72,16 @@ local function tick(_,now)
     local g=Group.getByName('FANG');assert(g,'Mandatory Hind group unavailable')
     g:getController():setOption(0,4) -- hold fire until the launch release
     for _,n in ipairs({'BLUE COVER','RED COVER'})do local cover=Group.getByName(n);if cover then cover:getController():setOnOff(false)end end
-    say('Ready. Two Stingers and gun; protect your technical and destroy BOTH enemy assets. Enemy vehicle is 1T. Take off to begin the hunt.')
+    say('Ready. Protect your technical; destroying the enemy ground target wins immediately. The helicopter kill is optional. Enemy target is 1T; take off to begin the hunt. Rearm at your FARP through Ground Crew.')
   end
   if not enemy and not S.vehicleDestroyed then
     S.vehicleDestroyed=true;trigger.action.setUserFlag(952,1)
-    say('Enemy defended vehicle confirmed destroyed. The opposing helicopter must also be destroyed.')
+    finish(true,'Enemy ground target destroyed. Round over; the helicopter kill is optional.');return nil
   end
   if not hind and not S.hindDestroyed then
     S.hindDestroyed=true;trigger.action.setUserFlag(953,1)
-    say('Enemy helicopter confirmed destroyed. The defended ground vehicle must also be destroyed.')
+    say('Enemy helicopter confirmed destroyed. The round continues: destroy the enemy ground target and protect yours.')
   end
-  if S.vehicleDestroyed and S.hindDestroyed then finish(true,'Both enemy assets destroyed and your defended vehicle is alive. Optional recovery at WP3.');return nil end
   if not S.launched and player and player:inAir() then
     S.launched=true;S.phase='active'
     if hind then
@@ -91,6 +94,22 @@ local function tick(_,now)
     S.airborneReported=true;say('Opposing helicopter airborne. Defend your asset; use cover and watch the approaches.')
   end
   return now+1
+end
+-- Death events resolve the race in observed event order, rather than making a
+-- later friendly loss reverse an earlier ground-target kill between poll ticks.
+if world and world.addEventHandler and world.event then
+  world.addEventHandler({onEvent=function(_,e)
+    if S.phase=='won' or S.phase=='failed' then return end
+    if e.id~=world.event.S_EVENT_DEAD and e.id~=world.event.S_EVENT_UNIT_LOST then return end
+    local ok,name=pcall(function()return e.initiator:getName()end)
+    if not ok then return end
+    if name==(S.playerName or names.player) and S.seen.player then finish(false,'Your Kiowa was destroyed. Round over.')
+    elseif name==names.friendly then finish(false,'Your defended ground target was destroyed. Round over.')
+    elseif name==names.enemy then
+      S.vehicleDestroyed=true;trigger.action.setUserFlag(952,1)
+      finish(true,'Enemy ground target destroyed. Round over; the helicopter kill is optional.')
+    end
+  end})
 end
 local menu=missionCommands.addSubMenuForCoalition(2,'Duel')
 missionCommands.addCommandForCoalition(2,'Status / objectives',menu,status)

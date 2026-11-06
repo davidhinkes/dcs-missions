@@ -1,6 +1,6 @@
 # Operation Needle and Fang
 
-A compact Syria duel: **your OH-58D against an AI Hind**. Each side defends an armed technical. Destroy **both** the Hind and its technical while keeping yours alive. Losing your vehicle or helicopter fails the mission. No required landing after the win.
+A compact Syria duel: **your OH-58D against an AI Hind**. Each side defends an armed technical. Destroy **the enemy technical first** to win immediately. Killing the Hind is optional and does not end the round. Losing your vehicle or helicopter fails the mission. No required landing after the win.
 
 Requires **Syria and OH-58D**. The Mi-24V is a built-in AI asset; no Hind purchase, mod, MCP server or hook is needed to play. This is a development test slice, with native combat/terrain acceptance pending.
 
@@ -15,6 +15,6 @@ Requires **Syria and OH-58D**. The Mi-24V is a built-in AI asset; no Hind purcha
 - Your exact enemy-vehicle prepoint is **1T**. On the MMS, select PREPT, R2 PPT, enter 1T and press Enter. The F10 marker identifies the same fixed position. Sensor import/alignment still needs cockpit verification.
 - Labels are off and the F10 map shows friendly units only, except for the deliberate fixed enemy-objective intelligence marker. No live enemy tracking.
 
-**F10 Other > Duel > Status / objectives** reports the objective state, not the Hind's location. Either kill order works; one kill alone does not win. Both friendly and enemy losses in the same evaluation interval count as failure. Flying continues after the result; WP3 marks optional home recovery. Pad resources are configured, but refuel/rearm/repair service is not claimed without service vehicles and a native check.
+**F10 Other > Duel > Status / objectives** reports the objective state, not the Hind's location. The first ground-target death event decides the round and later losses cannot reverse it. If both targets disappear without ordered events between checks, friendly loss takes precedence. Flying continues after the result; WP3 marks optional home recovery. Both FARPs have ammunition trucks, ammo canopies and unlimited ammunition stocks. Land/park on your pad and use **Ground Crew > Rearm & Refuel** to replenish Stingers and gun ammunition. Logistics are separate from the defended objectives. Actual rearming still needs a native check.
 
 Allow roughly **15–25 minutes**, depending on tactics. There is no deadline. The native AI may fail to launch, detect or attack as intended; the [flight checklist](flight-checklist.md) identifies the checks needed before calling this a validated duel. See [design](design.md) and [verification](verification.md).

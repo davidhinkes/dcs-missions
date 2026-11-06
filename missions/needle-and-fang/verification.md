@@ -15,3 +15,11 @@ First development slice built from repository base f1e803b with the new mission 
 No actual sortie or DCS GUI inspection was performed. Full site/coast/terrain and authored cover fit, forest removal/rotor clearance, both stable hot starts, Hind startup/route/terrain avoidance/vehicle attack/player encounter, Stinger acquisition, gun effectiveness, ground-unit defensive fire, cockpit target import, fuel/gross-weight/hover and fair duel timing remain unrun. No DCS version or successful flight can be reported. Runtime fixed-site checks can reject inappropriate land/slope; their existence does not prove the selected sites pass in DCS.
 
 Follow flight-checklist.md before expanding the scenario. Record actual launch, sightings, weapons/damage and objective results separately from requested native tasks and text announcements.
+
+## Ground-target race and FARP rearm revision — 2026-11-05
+
+All 14 printed mock scenario groups pass. Revised tests verify immediate ground-only victory, Hind-only continuation, native death-event ordering and final-result latching, confirmed player-death handling, unresolved polling ties, logistics-loss exclusion and start-time ammunition trucks/canopies within 150 m of both pads. Existing unlimited warehouse entries remain for pads 200/201. Both helicopters and combat objectives retain their previous loadouts/geometry.
+
+Validator: zero errors/warnings; editor fixup: 12 units; three compiled trigger chunks and archive checks pass. Shared deployment installed and hash-verified the final artifact, SHA-256 55c366313473573c73992be2e8b773c8dc6525f6dc5b73c8b0028a9f0ac57c1c. Previous installed revisions were preserved by the deploy workflow. Native death events are observed in engine order; polling retains friendly-loss precedence if both targets disappear without ordered events. Best-effort AI ceasefire follows the final result; released weapons cannot be recalled.
+
+No native sortie or rearming interaction was performed. Ground Crew menu availability and actual Stinger/gun ammunition replenishment must be confirmed in DCS, along with the previously listed terrain/start/AI/combat checks. No repair/refuel service claim is added.
