@@ -1,0 +1,26 @@
+{
+  "ship": {
+    "x": 42000,
+    "y": -25000,
+    "speed": 6
+  },
+  "carrier": {
+    "x": 50000,
+    "y": -33000,
+    "speed": 10
+  },
+  "lz": {
+    "x": 42000,
+    "y": 16000
+  },
+  "hold": {
+    "x": 42000,
+    "y": -10000
+  },
+  "fuelKg": 181.4,
+  "insertionSeconds": 60,
+  "recoverySeconds": 20,
+  "lzRadius": 80,
+  "shipRadius": 180,
+  "teamSize": 6
+}

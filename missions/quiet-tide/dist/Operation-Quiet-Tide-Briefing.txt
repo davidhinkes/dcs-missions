@@ -1,0 +1,24 @@
+OPERATION QUIET TIDE - FIRST PLAYABLE TEST SLICE
+Syria, 15 June 2026, 05:45 local. Requires OH-58D and Syria; AI UH-60A, Tarawa and Stennis are built-in assets. No helicopter mod or Supercarrier requirement intended. Native deck compatibility is NOT YET VERIFIED.
+
+TASK
+Lead two hot-start Kiowas from TARAWA, scout a coastal approach, clear a safe insertion for six SEALs aboard LIFELINE, then escort the empty Black Hawk back to TARAWA and land yourself. The team remains ashore. Insertion is a 60-second landed abstraction; no infantry movement or passenger animation is promised. This first slice has one LZ and a small ground opposition; alternate LZ selection and dynamic alarm/escalation are not implemented.
+
+DEPARTURE AND TIMING
+Anvil lead and wingman occupy TARAWA slots 1/2; LIFELINE uses slot 3. Deck spacing, height and AI launch sequencing need actual DCS validation. Let the Hornets launch, take off carefully, and keep clear of LIFELINE. Lead has gun/two Hellfires; wingman gun/seven rockets; both 181.4 kg fuel (about 400 lb). Capacity checked only; gross weight, deck hover performance and endurance require cockpit checks. Ships proceed north on steady courses. Direct initial ship-to-LZ distance 22.1 nm: roughly 15 min each way at 90 kt, plus scouting/insertion/recovery. Plan 35-45 minutes, not a guaranteed endurance. Ships move; use their actual markers and linked recovery rather than initial WP4 coordinates.
+
+CONTROL
+F10 Other > Insertion: Status / next action; Clear transport to insert; Wave off / hold; Abort / return to ship. No mission-name wrapper. LIFELINE launches automatically after your takeoff, then holds offshore. It NEVER enters the LZ without explicit clearance. Stay within 8 km of the actual LZ to clear it; known hostile ground units within 500 m block clearance. Terrain clearance is a bounded runtime search within 1 km of planned WP3; actual marker is authoritative. A clear site is not proof of real rotor/forest clearance. Cover one continuous landed minute within 80 m at below 1 m/s; takeoff/motion or danger resets the insertion. After insertion, SEALs remain ashore and no further strike requests are accepted. Success requires LIFELINE and lead Kiowa landed near the actual moving TARAWA for 20 seconds with ship-relative horizontal speed below 2 m/s. Land on the deck; native inAir must report landed. Abort before insertion yields an aborted result on recovery, not success. Loss of lead/transport/TARAWA fails the mission; delayed initial unit availability is tolerated.
+
+HORNET SUPPORT
+SWORD's two Hornets launch automatically from STENNIS after mission initialization, orbit near the coast within tasking range, and hold fire until F10 Other > Air Support > Request one strike near LZ. Cancel / hold fire stops pending/assigned attacks; Return Hornets to carrier recalls them. Requests require a live flight within 20 km of the objective, select one known hostile vehicle/infantry unit within 2.5 km of actual LZ and outside 700 m of all three friendly helicopters. One request authorizes one target; pending requests time out after 90 seconds. Recheck safety during assignment, but released weapons cannot be recalled. Attack success and native AI timing require a sortie. Hornet loss or API faults do not fail insertion. No dynamic alarm system is implemented in this test slice; this is not a proven stealth simulation.
+
+RADIOS AND INFORMATION
+Package 251.000 AM; TARAWA 128.500 AM; STENNIS 127.500 AM. Labels off; friendly-only map. Planned LZ is briefing intelligence; ground enemies remain hidden. Reports are text only. No automatic sensor spotting or scripted AI copilot. Restart after installing updates.
+
+FLIGHT CHECK ORDER
+1. Spawn on deck: verify three separate helicopter slots, blade/obstacle clearance and stationary support start.
+2. Observe Hornet departure; lift off and observe Black Hawk departure/offshore hold.
+3. Scout actual LZ, explicitly clear insertion, verify native AI landing and timed deployment.
+4. Observe empty transport departure and recovery onto moving TARAWA; land and verify result. Check fuel reserve.
+5. Test wave-off/retry, abort and optional support loss. Builds and mocked tests do not certify these behaviors.
