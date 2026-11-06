@@ -75,13 +75,14 @@ assert(player.units[1].payload.fuel==181.4)
 assert(math.abs(math.sqrt((c.redAsset.x-c.blueAsset.x)^2+(c.redAsset.y-c.blueAsset.y)^2)/1852-8)<0.0001)
 assert(player.NavTargetPoints[1].x==c.redAsset.x and player.NavTargetPoints[1].y==c.redAsset.y and player.NavTargetPoints[1].text_comment=='1T|1|UNK')
 for _,p in pairs(player.route.points)do assert(math.sqrt((p.x-c.redAsset.x)^2+(p.y-c.redAsset.y)^2)>500)end
-for _,g in ipairs({player,hind})do local p=g.route.points[1];local u=g.units[1];assert(p.type=='TakeOffGroundHot'and p.action=='From Ground Area Hot'and p.alt==0 and p.alt_type=='RADIO'and not p.linkUnit and not p.helipadId and not u.parking and u.alt==0 and u.alt_type=='RADIO')end
+local p=player.route.points[1];assert(p.type=='TakeOffParkingHot'and p.action=='From Parking Area Hot'and p.linkUnit==200 and p.helipadId==200 and player.units[1].parking=='1'and player.units[1].parking_id=='1'and player.units[1].alt_type=='BARO')
+local p=hind.route.points[1];local u=hind.units[1];assert(p.type=='TakeOffGroundHot'and p.action=='From Ground Area Hot'and p.alt==0 and p.alt_type=='RADIO'and not p.linkUnit and not p.helipadId and not u.parking and u.alt==0 and u.alt_type=='RADIO')
 local pads=0;for _,side in pairs(mission.coalition)do for _,country in pairs(side.country or{})do for _,g in pairs((country.static or{}).group or{})do for _,u in pairs(g.units)do
- if u.type=='SINGLE_HELIPAD'then pads=pads+1;local p=u.unitId==200 and c.blueFarp or c.redFarp;assert(u.shape_name=='FARP'and u.x==p.x and u.y==p.y)end
+ if u.type=='SINGLE_HELIPAD'or u.type=='FARP'then pads=pads+1;local p=u.unitId==200 and c.blueFarp or c.redFarp;assert(u.shape_name==(u.unitId==200 and 'FARPS'or'FARP')and u.x==p.x and u.y==p.y)end
 end end end end;assert(pads==2)
 assert(groups['BLUE-OBJECTIVE'].data.units[1].type=='tt_DSHK'and groups['RED-OBJECTIVE'].data.units[1].type=='tt_DSHK')
 assert(groups['RED-OBJECTIVE'].data.hidden and mission.forcedOptions.labels==0 and mission.forcedOptions.optionsView=='optview_onlyallies')
-output('PASS: gun/Stinger loadout, two exact visible ground-start pads, 8 nm spacing and target-only prepoint match the mission contract')
+output('PASS: gun/Stinger loadout, native linked BLUE FARP parking and separate RED ground-start pad, 8 nm spacing and target-only prepoint match the mission contract')
 local tasks=hind.route.points[1].task.params.tasks
 assert(tasks[1].id=='EngageTargetsInZone'and tasks[1].params.targetTypes[1]=='Helicopters')
 assert(tasks[2].id=='EngageGroup'and tasks[2].params.groupId==groups['BLUE-OBJECTIVE'].data.groupId and tasks[2].params.weaponType==9663676414)
@@ -90,7 +91,7 @@ commands['Status / objectives']();local text=messages[#messages];assert(text:fin
 assert(marks[8202].p.x==c.redAsset.x and marks[8202].p.z==c.redAsset.y)
 output('PASS: Hind has native vehicle attack and helicopter encounter tasks; status gives no aircraft coordinates or internal enemy names')
 local cleared,scripts=0,0
-a_remove_scene_objects=function(id,mask)assert(mask==1 and scripts==0);local found=false;for _,z in pairs(mission.triggers.zones)do if z.zoneId==id then found=true;assert(z.radius==160)end end;assert(found);cleared=cleared+1 end
+a_remove_scene_objects=function(id,mask)assert(mask==1 and scripts==0);local found=false;for _,z in pairs(mission.triggers.zones)do if z.zoneId==id then found=true;assert(z.radius==(z.name:find('BLUE')and 200 or 160))end end;assert(found);cleared=cleared+1 end
 getValueResourceByKey=function(key)return key end;a_do_script_file=function()assert(cleared==2);scripts=scripts+1 end
 assert(loadstring(mission.trig.actions[1]))();assert(cleared==2 and scripts==2)
 for _,entry in ipairs({{'BLUE FARP',c.blueFarp,'M 818'},{'RED FARP',c.redFarp,'Ural-375'}})do
@@ -116,4 +117,8 @@ assert(not next(structures))
 assert(groups.NEEDLE.data.units[1].Radio[2].channels[1]==c.blueFrequency)
 output('PASS: BLUE departure FARP has same-side ammo, command, fuel, ground-power and repair support plus unlimited packed stocks and matching VHF preset')
 
+reset();advance(1);commands['Status / objectives']();assert(messages[#messages]:find('LANDED')and messages[#messages]:find('local/intercom'))
+units['NEEDLE-1'].air=true;commands['Status / objectives']();assert(messages[#messages]:find('AIRBORNE')and messages[#messages]:find('Ground Crew will be hidden'))
+kill('RED-OBJECTIVE-1',true);units['NEEDLE-1'].air=false;commands['Status / objectives']();assert(messages[#messages]:find('LANDED')and messages[#messages]:find('round won'))
+output('PASS: Ground Crew diagnostic distinguishes native landed/airborne state and remains available after the round')
 output('ALL NEEDLE AND FANG TESTS PASSED (simulated APIs; not native AI combat)')

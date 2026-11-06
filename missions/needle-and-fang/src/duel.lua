@@ -22,10 +22,12 @@ local function finish(success,reason)
   say((success and 'MISSION SUCCESS: ' or 'MISSION FAILED: ')..reason)
 end
 local function status()
+  local player=unit(S.playerName or names.player)
+  local groundState=player and (player:inAir() and 'DCS reports your aircraft AIRBORNE: Ground Crew will be hidden until landed. ' or 'DCS reports your aircraft LANDED. Use the local/intercom Communications menu > Ground Crew, not a FARP radio-frequency call. ') or ''
   if S.phase=='waiting' then say('Waiting for all four duel units to load. No victory is awarded for missing initial units.');return end
-  if S.phase=='failed' then say('Mission failed. Restart for another attempt.');return end
-  if S.phase=='won' then say('Enemy ground target destroyed; round won. Optional recovery/rearm is at WP3.');return end
-  say((S.launched and 'Duel active. ' or 'Take off when ready to release the opposing helicopter. ')
+  if S.phase=='failed' then say(groundState..'Mission failed. Restart for another attempt.');return end
+  if S.phase=='won' then say(groundState..'Enemy ground target destroyed; round won. Optional recovery/rearm is at WP3.');return end
+  say(groundState..(S.launched and 'Duel active. ' or 'Take off when ready to release the opposing helicopter. ')
     ..'Defended vehicle: '..(unit(names.friendly) and 'alive. ' or 'lost. ')
     ..'Enemy vehicle: '..(S.vehicleDestroyed and 'confirmed destroyed. ' or 'not confirmed destroyed. ')
     ..'Enemy helicopter: '..(S.hindDestroyed and 'confirmed destroyed.' or 'not confirmed destroyed; position unknown.'))
@@ -73,6 +75,12 @@ local function tick(_,now)
     g:getController():setOption(0,4) -- hold fire until the launch release
     for _,n in ipairs({'BLUE COVER','RED COVER'})do local cover=Group.getByName(n);if cover then cover:getController():setOnOff(false)end end
     say('Ready. Protect your technical; destroying the enemy ground target wins immediately. The helicopter kill is optional. Enemy target is 1T; take off to begin the hunt. Rearm at your FARP through Ground Crew.')
+    -- Read-only native state evidence for a missing Ground Crew menu. It does
+    -- not claim that a stocked warehouse has delivered ammunition.
+    pcall(function()
+      local base=Airbase and Airbase.getByName and Airbase.getByName('BLUE FARP')
+      env.info('[NEEDLE_FANG] Departure services: playerInAir='..tostring(player:inAir())..', registeredFarp='..tostring(base~=nil)..', farpCoalition='..tostring(base and base:getCoalition() or 'unavailable'))
+    end)
   end
   if not enemy and not S.vehicleDestroyed then
     S.vehicleDestroyed=true;trigger.action.setUserFlag(952,1)

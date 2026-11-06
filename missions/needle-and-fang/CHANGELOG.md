@@ -1,5 +1,11 @@
 # Changelog
 
+## Native departure-base/contact correction — 2026-11-05
+
+- User reports full-service single-helipad revision still lacks Ground Crew contact. Replaced BLUE single pad with conventional FARP and explicitly linked the one Kiowa to native hot parking slot 1; preserve support camp and duel rules.
+- Corrected contact instructions to local/intercom Communications > F8 Ground Crew; VHF 128.500 is ATC, not a Ground Crew workaround.
+- Added native landed-state status after the round and startup base-registration/coalition diagnostics. Native FARP spawn/contact/rearming remain unverified.
+
 ## Departure FARP service correction — 2026-11-05
 
 - User reported rearming unavailable in the installed ammo-only revision. Added command Hummer/post, M978 tanker/fuel depot, separate M818 power/repair trucks and repair tent around the existing BLUE departure pad. All are same-coalition, active at start and within 150 m.

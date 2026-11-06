@@ -33,6 +33,13 @@ function helicopter(name,type,side,pos,template,skill){
  return g;
 }
 const player=helicopter('NEEDLE','OH58D','blue',c.blueFarp,t.oh58,'Player');
+// Use native FARP parking for the player, rather than an unlinked ground-area
+// spawn. This base has only one aircraft/group, so slot 1 is unambiguous.
+// Terrain altitude comes from the previously observed HAVEN location at this
+// same anchor; native parking/linkage is responsible for final pad placement.
+const departureGroundAltitude=33.384346008301;
+Object.assign(player.units[1],{alt:departureGroundAltitude,alt_type:'BARO',parking:'1',parking_id:'1'});
+Object.assign(player.route.points[1],{alt:departureGroundAltitude,alt_type:'BARO',type:'TakeOffParkingHot',action:'From Parking Area Hot',helipadId:200,linkUnit:200,name:'BLUE FARP - NATIVE HOT PARKING 1'});
 player.units[1].payload={pylons:{1:{CLSID:'OH58D_M3P_L500'},5:{CLSID:'OH58D_FIM_92_R'}},fuel:c.playerFuelKg,flare:30,chaff:0,gun:100};
 player.units[1].AddPropAircraft??={};player.units[1].AddPropAircraft.PDU=true;player.units[1].Radio[1].channels[1]=251;
 player.units[1].Radio[2].channels[1]=c.blueFrequency; // VHF AM preset for the departure FARP
@@ -62,7 +69,7 @@ hind.route.points[1].task.params.tasks={
 const pads=[[200,'BLUE FARP','blue',c.blueFarp,c.blueFrequency],[201,'RED FARP','red',c.redFarp,c.redFrequency]];
 for(const [id,name,side,p,frequency]of pads){
  const country=Object.values(m.coalition[side].country)[0];country.static??={group:{}};
- country.static.group[id]={name,groupId:id,x:p.x,y:p.y,heading:0,dead:false,route:{points:{1:{x:p.x,y:p.y,alt:0,speed:0,type:'',action:''}}},units:{1:{name,unitId:id,type:'SINGLE_HELIPAD',shape_name:'FARP',category:'Heliports',x:p.x,y:p.y,heading:0,heliport_frequency:frequency,heliport_modulation:0,heliport_callsign_id:side==='blue'?2:1,canCargo:false}}};
+ country.static.group[id]={name,groupId:id,x:p.x,y:p.y,heading:0,dead:false,route:{points:{1:{x:p.x,y:p.y,alt:0,speed:0,type:'',action:''}}},units:{1:{name,unitId:id,type:side==='blue'?'FARP':'SINGLE_HELIPAD',shape_name:side==='blue'?'FARPS':'FARP',category:'Heliports',x:p.x,y:p.y,heading:0,heliport_frequency:frequency,heliport_modulation:0,heliport_callsign_id:side==='blue'?2:1,canCargo:false}}};
 }
 // Unarmed logistics are service assets, never additional duel objectives.
 for(const [i,[,name,side,p]]of pads.entries()){
@@ -104,7 +111,7 @@ OBJECTIVE
 Destroy the enemy defended DShK technical to win immediately. If your technical is destroyed first, you lose immediately. Killing the Hind is optional and does not end the round. Native target-death event order decides the race; if both targets vanish between checks without an ordered event, friendly loss takes precedence. Loss of your aircraft also fails the mission. The first result is final, without a required recovery. Flying remains possible after the round ends.
 
 START / LOADOUT
-You are Anvil 1-1, NEEDLE, hot on a visible single helipad at BLUE FARP. FANG starts hot on its own RED FARP. Both use fixed zero-AGL ground starts; no stacked parking allocations. Two Stingers and an M3P .50-cal gun with 500 rounds, 30 flares, ${c.playerFuelKg} kg fuel (about 400 lb). Use Stingers against the Hind and the gun against the unarmored enemy technical. There are no Hellfires, wingmen, jets or additional combat units. Each FARP has an unarmed ammunition service truck and ammo canopy, separate from the defended target. The technical can shoot back; avoid a prolonged stationary hover in its sight line. Check actual gross weight, hover capability and fuel reserve in the cockpit. BLUE FARP is your serviced departure/recovery base: ammunition truck/canopy, command Hummer/post, M978 fuel tanker/depot, M818 ground-power/repair trucks and repair tent are all present from mission start within 150 m, with unlimited pad warehouse resources. RED FARP retains its ammunition service. Land and park on your pad, then use Ground Crew > Rearm & Refuel to replenish Stingers and gun ammunition. VHF AM preset 1 is BLUE FARP 128.500; package UHF remains 251.000. Rearm/refuel interaction still needs native DCS confirmation after this service revision; only the defended technical decides the round, not logistics losses.
+You are Anvil 1-1, NEEDLE, hot in native parking slot 1 of a conventional four-pad BLUE FARP. FANG starts hot on its own RED FARP. Your start is linked to BLUE FARP ID 200 using From Parking Area Hot and parking slot 1; only your one aircraft uses that FARP. The Hind retains its separate zero-AGL ground start on RED FARP. Two Stingers and an M3P .50-cal gun with 500 rounds, 30 flares, ${c.playerFuelKg} kg fuel (about 400 lb). Use Stingers against the Hind and the gun against the unarmored enemy technical. There are no Hellfires, wingmen, jets or additional combat units. Each FARP has an unarmed ammunition service truck and ammo canopy, separate from the defended target. The technical can shoot back; avoid a prolonged stationary hover in its sight line. Check actual gross weight, hover capability and fuel reserve in the cockpit. BLUE FARP is your serviced departure/recovery base: ammunition truck/canopy, command Hummer/post, M978 fuel tanker/depot, M818 ground-power/repair trucks and repair tent are all present from mission start within 150 m, with unlimited pad warehouse resources. RED FARP retains its ammunition service. Land and park on your pad, then use Ground Crew > Rearm & Refuel to replenish Stingers and gun ammunition. Ground Crew uses the local/intercom Communications menu, not a call on the FARP ATC frequency. Use the Communications menu binding, then F8 Ground Crew > Rearm & Refuel. VHF AM preset 1 is BLUE FARP ATC 128.500; package UHF remains 251.000. Duel Status reports native LANDED/AIRBORNE state if Ground Crew is missing. Rearm/refuel interaction still needs native DCS confirmation after this service revision; only the defended technical decides the round, not logistics losses.
 
 GEOGRAPHY / INTELLIGENCE
 The defended vehicles are ${distance.toFixed(1)} nm apart, roughly five to six minutes at 90 kt before searching or combat. FARPs are near their own objectives; allow about 15-25 minutes for the duel, without a mission deadline. Both vehicles remain at their briefing-time positions beside authored outbuildings; terrain/forest concealment and landing fit require flight inspection. Your map shows friendly units only and labels are off. The exact RED OBJECTIVE marker and Kiowa target point 1T are fixed intelligence; the Hind's position is unknown. No live enemy tracking, scripted spotting or automatic aircraft coordinates are provided.
@@ -125,14 +132,14 @@ setBriefing(m,'Operation NEEDLE AND FANG - Kiowa versus Hind',brief);m.descripti
 fs.writeFileSync(path.join(base,'.build/config.lua'),serializeLuaAssignment('NEEDLE_FANG_CONFIG',c));
 await loadScripts(s,s.dictionary,[{filePath:path.join(base,'.build/config.lua')},{filePath:path.join(base,'src/duel.lua')}]);
 // Native trees-only clearance is local to the two starting FARPs, not the hunt area.
-const zones=[c.blueFarp,c.redFarp].map((p,i)=>addTriggerZone(m,{name:(i?'RED':'BLUE')+' FARP TREES ONLY',...p,radius:160}));
+const zones=[c.blueFarp,c.redFarp].map((p,i)=>addTriggerZone(m,{name:(i?'RED':'BLUE')+' FARP TREES ONLY',...p,radius:i?160:200}));
 const loader=m.trigrules[1];loader.actions=Object.fromEntries([...zones.map(z=>({predicate:'a_remove_scene_objects',zone:z.zoneId,objects_mask:1})),...Object.values(loader.actions)].map((a,i)=>[i+1,a]));
 m.trig.actions[1]=zones.map(z=>`a_remove_scene_objects(${z.zoneId},1);`).join('')+m.trig.actions[1];
 refresh(s);const report=validateMission(s.document);assert.equal(report.errors.length,0,JSON.stringify(report));
 assert(Math.abs(distance-8)<1e-8);assert(c.playerFuelKg<=333.69);
-for(const [g,p]of [[player,c.blueFarp],[hind,c.redFarp]]){
- const u=g.units[1],w=g.route.points[1];assert.equal(u.x,p.x);assert.equal(u.y,p.y);assert.equal(u.alt,0);assert.equal(u.alt_type,'RADIO');assert.equal(w.type,'TakeOffGroundHot');assert(!u.parking&&!u.parking_id&&!w.linkUnit&&!w.helipadId);
-}
+assert.equal(player.route.points[1].type,'TakeOffParkingHot');assert.equal(player.route.points[1].helipadId,200);assert.equal(player.route.points[1].linkUnit,200);assert.equal(player.units[1].parking,'1');
+assert.equal(player.units[1].x,c.blueFarp.x);assert.equal(player.units[1].y,c.blueFarp.y);
+assert.equal(hind.units[1].alt,0);assert.equal(hind.units[1].alt_type,'RADIO');assert.equal(hind.route.points[1].type,'TakeOffGroundHot');assert(!hind.units[1].parking&&!hind.route.points[1].linkUnit);
 assert.equal(player.units[1].skill,'Player');assert(hind.uncontrolled);
 assert.equal(player.NavTargetPoints[1].x,c.redAsset.x);
 for(const p of Object.values(player.route.points))assert(Math.hypot(p.x-c.redAsset.x,p.y-c.redAsset.y)>500);
