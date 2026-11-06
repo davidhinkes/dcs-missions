@@ -39,3 +39,13 @@ Keep only reusable findings here. Store a mission's observed failures, coordinat
 - Put mission-specific artifact and test paths in a per-mission manifest. Shared tooling should not select a particular mission implicitly.
 
 - Fixed departure sites need explicit forest clearance as well as terrain and pad checks. Native trees-only scenery zones can prepare a local clearing without removing buildings; verify their editor records, compiled execution order and actual in-game result. Mock scenery searches do not certify rendered forest or collision clearance.
+
+## Preventing design and integration rework
+
+See [mission rework review](mission-rework-review.md) for evidence and the staged workflow.
+
+- Define the player-visible support contract before adding an asset: starting location, automatic versus requested travel, arrival criteria, available commands and loss/fallback reporting. Do not add dispatch steps merely because a new asset exists.
+- Separate optional support errors from mandatory mission failure, including menu callbacks and cleanup. Use fault injection to demonstrate the objective continues after support faults.
+- Distinguish one-time milestone announcements from continuously changing availability. Use separate entry/exit thresholds when orbit or motion can repeatedly cross a boundary.
+- Design information and menus alongside mission phases. Prefer geographic coordinates and explicitly labeled true/grid bearing/range over internal engine coordinates; avoid unsupported scenery descriptions.
+- Validate the playable foundation and the distinctive native mechanic before treating added features as readiness. Document unrun DCS checks and the next flight experiment rather than accumulating ambiguous claims of verification.

@@ -1,6 +1,7 @@
 # Working on this mission collection
 
 - Read `docs/lessons-learned.md` and the selected mission's `AGENTS.md`, `design.md`, `README.md`, `CHANGELOG.md` and `lessons-learned.md` (when present) before changing it.
+- For a new mission, use `docs/mission-design-template.md` and the staged workflow in `docs/mission-rework-review.md`. Define support activation and player feedback before implementing them; identify the first playable slice and native DCS checks. Record unavailable checks as pending, not passed.
 - Source belongs in `missions/<slug>/src`; mission tests in `tests`; playable builds and player briefings in `dist`.
 - Use the project-local DCS-MCP submodule at the parent repository's pinned commit. Do not add global installations, or dependencies on personal Saved Games missions, for authoring. `npm run setup` initializes the submodule and installs/builds its packages locally.
 - Update source and design together. Never silently overwrite manual Mission Editor changes with a generated build; inspect and reconcile them first.
