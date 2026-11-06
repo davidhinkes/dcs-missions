@@ -6,6 +6,7 @@ A collection of authored DCS World missions, their design decisions, source scri
 
 | Mission | Aircraft / terrain | Status |
 | --- | --- | --- |
+| [Operation Needle and Fang](missions/needle-and-fang/README.md) | OH-58D vs AI Hind / Syria | Compact duel test slice; native AI/terrain acceptance pending |
 | [Operation Green Lantern](missions/green-lantern/README.md) | OH-58D / Syria | Playable development build; latest revision awaits a full flight check |
 | [Operation Quiet Tide](missions/quiet-tide/README.md) | OH-58D + AI Black Hawk / Syria, Tarawa and Stennis | Development test slice; native deck/AI acceptance pending |
 | [Operation Open Door](missions/open-door/README.md) | OH-58D + AI Black Hawk / Syria | Playable development build; Black Hawk flight/cockpit checks pending |

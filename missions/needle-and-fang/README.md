@@ -1,0 +1,20 @@
+# Operation Needle and Fang
+
+A compact Syria duel: **your OH-58D against an AI Hind**. Each side defends an armed technical. Destroy **both** the Hind and its technical while keeping yours alive. Losing your vehicle or helicopter fails the mission. No required landing after the win.
+
+Requires **Syria and OH-58D**. The Mi-24V is a built-in AI asset; no Hind purchase, mod, MCP server or hook is needed to play. This is a development test slice, with native combat/terrain acceptance pending.
+
+## Install and fly
+
+[Download the mission](https://github.com/davidhinkes/dcs-missions/raw/refs/heads/main/missions/needle-and-fang/dist/Operation-Needle-and-Fang-Syria-OH58D.miz), copy it into your DCS Saved Games Missions folder and open it through Missions. Restart after updates. Read the [full briefing](dist/Operation-Needle-and-Fang-Briefing.txt).
+
+- Start hot on your own visible BLUE FARP pad. The Hind starts hot on a separate RED FARP and waits for your first takeoff to release its attack.
+- You carry **two Stingers and a .50-cal gun with 500 rounds**, 30 flares and about 400 lb fuel. Use Stingers against the Hind and the gun against the unarmored technical. Check actual loaded weight, hover performance and reserve in the cockpit.
+- The defended vehicles are **8 nm apart**. Both can shoot back. Each is stationary near an authored outbuilding; sight lines, trees and terrain need an actual DCS check.
+- The Hind has rockets and its gun, with no long-range antitank missiles. It hunts your defended vehicle and may engage your Kiowa if it detects you. Its position is not shown or reported by coordinates.
+- Your exact enemy-vehicle prepoint is **1T**. On the MMS, select PREPT, R2 PPT, enter 1T and press Enter. The F10 marker identifies the same fixed position. Sensor import/alignment still needs cockpit verification.
+- Labels are off and the F10 map shows friendly units only, except for the deliberate fixed enemy-objective intelligence marker. No live enemy tracking.
+
+**F10 Other > Duel > Status / objectives** reports the objective state, not the Hind's location. Either kill order works; one kill alone does not win. Both friendly and enemy losses in the same evaluation interval count as failure. Flying continues after the result; WP3 marks optional home recovery. Pad resources are configured, but refuel/rearm/repair service is not claimed without service vehicles and a native check.
+
+Allow roughly **15–25 minutes**, depending on tactics. There is no deadline. The native AI may fail to launch, detect or attack as intended; the [flight checklist](flight-checklist.md) identifies the checks needed before calling this a validated duel. See [design](design.md) and [verification](verification.md).
