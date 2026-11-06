@@ -23,3 +23,11 @@ All 14 printed mock scenario groups pass. Revised tests verify immediate ground-
 Validator: zero errors/warnings; editor fixup: 12 units; three compiled trigger chunks and archive checks pass. Shared deployment installed and hash-verified the final artifact, SHA-256 55c366313473573c73992be2e8b773c8dc6525f6dc5b73c8b0028a9f0ac57c1c. Previous installed revisions were preserved by the deploy workflow. Native death events are observed in engine order; polling retains friendly-loss precedence if both targets disappear without ordered events. Best-effort AI ceasefire follows the final result; released weapons cannot be recalled.
 
 No native sortie or rearming interaction was performed. Ground Crew menu availability and actual Stinger/gun ammunition replenishment must be confirmed in DCS, along with the previously listed terrain/start/AI/combat checks. No repair/refuel service claim is added.
+
+## Reported rearm failure: complete BLUE departure service camp — 2026-11-05
+
+User reports the duel was enjoyable but rearming was unavailable. Installed SHA-256 matched the preceding deployment. DCS logs contain readiness, hunt release and player-loss events, but no conclusive ground-crew failure cause. This is evidence of failed rearming in the previous revision, not a proven single root cause.
+
+Added same-side active-at-start command Hummer/post, M978 tanker/fuel depot, separate M818 ground-power/repair trucks and repair tent alongside existing ammo truck/canopy. All BLUE support is within 150 m of the unchanged starting pad and clear of the aircraft; VHF AM preset 1 matches BLUE FARP 128.500. No objective/weapon/fuel/start-position changes. Official DCS User Manual printed p313 documents separate communications/ammo/fuel/power service roles; see mission lessons for the source.
+
+All 15 printed mock groups pass, including full support-role/coalition/proximity checks and unlimited ammunition/fuel read from the actual packed warehouse file. Validator zero errors/warnings; editor fixup 19 units; three compiled trigger chunks and archive geometry checks pass. Installed final SHA-256: 4ead084000ddb3cc8c789b0f565b6ad62d5d92af1a7477c12fc735af2b796b6e. Prior installed revision was preserved. No native rearm/refuel/repair/power interaction was performed in this revision; actual ammunition replenishment remains the required acceptance check.

@@ -35,6 +35,7 @@ function helicopter(name,type,side,pos,template,skill){
 const player=helicopter('NEEDLE','OH58D','blue',c.blueFarp,t.oh58,'Player');
 player.units[1].payload={pylons:{1:{CLSID:'OH58D_M3P_L500'},5:{CLSID:'OH58D_FIM_92_R'}},fuel:c.playerFuelKg,flare:30,chaff:0,gun:100};
 player.units[1].AddPropAircraft??={};player.units[1].AddPropAircraft.PDU=true;player.units[1].Radio[1].channels[1]=251;
+player.units[1].Radio[2].channels[1]=c.blueFrequency; // VHF AM preset for the departure FARP
 // The enemy objective is a target fix, never a route that forces an overflight.
 player.NavTargetPoints={1:{index:1,x:c.redAsset.x,y:c.redAsset.y,text_comment:'1T|1|UNK'}};
 const midpoint={x:(c.blueAsset.x+c.redAsset.x)/2,y:c.blueAsset.y-1800};
@@ -69,9 +70,25 @@ for(const [i,[,name,side,p]]of pads.entries()){
  support.route.points[1].speed=0;support.hidden=side==='red';support.hiddenOnMFD=side==='red';support.units[1].playerCanDrive=false;
  assert(Math.hypot(support.units[1].x-p.x,support.units[1].y-p.y)<150);
 }
+// Complete the occupied BLUE FARP's service chain, not just its ammo stock.
+for(const [role,type,dx,dy]of [
+ ['COMMS','Hummer',-70,-50],['FUEL','M978 HEMTT Tanker',-70,50],
+ ['GROUND POWER','M 818',-90,0],['REPAIR SERVICE','M 818',0,-90]
+]){
+ const p=c.blueFarp,g=addGroundGroup(m,'vehicle',{name:'BLUE FARP '+role,type,side:'blue',country:'USA',count:1,x:p.x+dx,y:p.y+dy,heading:0,skill:'Average'});
+ g.route.points[1].speed=0;g.units[1].playerCanDrive=false;
+ assert(Math.hypot(g.units[1].x-p.x,g.units[1].y-p.y)<150);
+}
 for(const [i,[,name,side,p]]of pads.entries()){
  const id=300+i,x=p.x+70,y=p.y+50,country=Object.values(m.coalition[side].country)[0];
  country.static.group[id]={name:name+' AMMO CANOPY',groupId:id,x,y,heading:0,dead:false,route:{points:{1:{x,y,alt:0,speed:0,type:'',action:''}}},units:{1:{name:name+' AMMO CANOPY',unitId:id,type:'FARP Ammo Dump Coating',category:'Fortifications',x,y,heading:0,canCargo:false}}};
+}
+for(const [i,[role,type,dx,dy]]of [
+ ['COMMAND POST','FARP CP Blindage',-90,-90],['FUEL DEPOT','FARP Fuel Depot',90,-90],['REPAIR TENT','FARP Tent',-90,90]
+].entries()){
+ const id=310+i,x=c.blueFarp.x+dx,y=c.blueFarp.y+dy,country=Object.values(m.coalition.blue.country)[0],name='BLUE FARP '+role;
+ country.static.group[id]={name,groupId:id,x,y,heading:0,dead:false,route:{points:{1:{x,y,alt:0,speed:0,type:'',action:''}}},units:{1:{name,unitId:id,type,category:'Fortifications',x,y,heading:0,canCargo:false}}};
+ assert(Math.hypot(dx,dy)<150);
 }
 // Fictional outbuildings supply local cover; they are not additional objectives.
 for(const [prefix,p]of [['BLUE',c.blueAsset],['RED',c.redAsset]]){
@@ -87,7 +104,7 @@ OBJECTIVE
 Destroy the enemy defended DShK technical to win immediately. If your technical is destroyed first, you lose immediately. Killing the Hind is optional and does not end the round. Native target-death event order decides the race; if both targets vanish between checks without an ordered event, friendly loss takes precedence. Loss of your aircraft also fails the mission. The first result is final, without a required recovery. Flying remains possible after the round ends.
 
 START / LOADOUT
-You are Anvil 1-1, NEEDLE, hot on a visible single helipad at BLUE FARP. FANG starts hot on its own RED FARP. Both use fixed zero-AGL ground starts; no stacked parking allocations. Two Stingers and an M3P .50-cal gun with 500 rounds, 30 flares, ${c.playerFuelKg} kg fuel (about 400 lb). Use Stingers against the Hind and the gun against the unarmored enemy technical. There are no Hellfires, wingmen, jets or additional combat units. Each FARP has an unarmed ammunition service truck and ammo canopy, separate from the defended target. The technical can shoot back; avoid a prolonged stationary hover in its sight line. Check actual gross weight, hover capability and fuel reserve in the cockpit. Both FARPs have unlimited ammunition warehouses, a nearby ammunition truck and ammo canopy from mission start. Land and park on your pad, then use Ground Crew > Rearm & Refuel to replenish Stingers and gun ammunition. Ground Crew rearm interaction still needs native DCS confirmation; only the defended technical decides the round, not logistics losses.
+You are Anvil 1-1, NEEDLE, hot on a visible single helipad at BLUE FARP. FANG starts hot on its own RED FARP. Both use fixed zero-AGL ground starts; no stacked parking allocations. Two Stingers and an M3P .50-cal gun with 500 rounds, 30 flares, ${c.playerFuelKg} kg fuel (about 400 lb). Use Stingers against the Hind and the gun against the unarmored enemy technical. There are no Hellfires, wingmen, jets or additional combat units. Each FARP has an unarmed ammunition service truck and ammo canopy, separate from the defended target. The technical can shoot back; avoid a prolonged stationary hover in its sight line. Check actual gross weight, hover capability and fuel reserve in the cockpit. BLUE FARP is your serviced departure/recovery base: ammunition truck/canopy, command Hummer/post, M978 fuel tanker/depot, M818 ground-power/repair trucks and repair tent are all present from mission start within 150 m, with unlimited pad warehouse resources. RED FARP retains its ammunition service. Land and park on your pad, then use Ground Crew > Rearm & Refuel to replenish Stingers and gun ammunition. VHF AM preset 1 is BLUE FARP 128.500; package UHF remains 251.000. Rearm/refuel interaction still needs native DCS confirmation after this service revision; only the defended technical decides the round, not logistics losses.
 
 GEOGRAPHY / INTELLIGENCE
 The defended vehicles are ${distance.toFixed(1)} nm apart, roughly five to six minutes at 90 kt before searching or combat. FARPs are near their own objectives; allow about 15-25 minutes for the duel, without a mission deadline. Both vehicles remain at their briefing-time positions beside authored outbuildings; terrain/forest concealment and landing fit require flight inspection. Your map shows friendly units only and labels are off. The exact RED OBJECTIVE marker and Kiowa target point 1T are fixed intelligence; the Hind's position is unknown. No live enemy tracking, scripted spotting or automatic aircraft coordinates are provided.
@@ -122,6 +139,8 @@ for(const p of Object.values(player.route.points))assert(Math.hypot(p.x-c.redAss
 const warehouse=coalition=>({coalition,size:100,speed:16.666666,periodicity:30,unlimitedMunitions:true,unlimitedAircrafts:true,unlimitedFuel:true,OperatingLevel_Air:10,OperatingLevel_Fuel:10,OperatingLevel_Eqp:10,aircrafts:{},weapons:{},suppliers:{},gasoline:{InitFuel:100},methanol_mixture:{InitFuel:100},diesel:{InitFuel:100},jet_fuel:{InitFuel:100},dynamicSpawn:false,dynamicCargo:false,allowHotStart:true});
 const zip=new AdmZip(s.sourceBytes);zip.updateFile('warehouses',Buffer.from(serializeLuaAssignment('warehouses',{airports:{},warehouses:{200:warehouse('BLUE'),201:warehouse('RED')}})));s.sourceBytes=zip.toBuffer();
 await saveSessionAs(s,path.join(base,'dist/Operation-Needle-and-Fang-Syria-OH58D.miz'),true);
+// Exercise the actual packed stock file in regression tests, not a parallel mock.
+fs.writeFileSync(path.join(base,'.build/warehouses.lua'),new AdmZip(path.join(base,'dist/Operation-Needle-and-Fang-Syria-OH58D.miz')).readAsText('warehouses'));
 fs.writeFileSync(path.join(base,'.build/mission.lua'),serializeLuaAssignment('mission',m));fs.writeFileSync(path.join(base,'.build/mission.json'),JSON.stringify(m));
 fs.writeFileSync(path.join(base,'dist/Operation-Needle-and-Fang-Briefing.txt'),brief);
 console.log(JSON.stringify({mission:'NEEDLE AND FANG',validation:report,objectiveSeparationNm:distance,groups:s.document.groups.length}));

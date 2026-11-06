@@ -99,4 +99,21 @@ for _,entry in ipairs({{'BLUE FARP',c.blueFarp,'M 818'},{'RED FARP',c.redFarp,'U
  local found=false;for _,side in pairs(mission.coalition)do for _,country in pairs(side.country or{})do for _,st in pairs((country.static or{}).group or{})do if st.name==entry[1]..' AMMO CANOPY'then assert(st.units[1].type=='FARP Ammo Dump Coating');found=true end end end end;assert(found)
 end
 output('PASS: both FARPs have immediate nearby ammunition trucks/canopies; trees-only clearings precede scripts')
+
+-- Verify the complete departure service chain and the actual packed warehouse.
+dofile('.build/warehouses.lua')
+assert(warehouses.warehouses[200].coalition=='BLUE'and warehouses.warehouses[200].unlimitedMunitions and warehouses.warehouses[200].unlimitedFuel)
+local types={['AMMO SERVICE']='M 818',COMMS='Hummer',FUEL='M978 HEMTT Tanker',['GROUND POWER']='M 818',['REPAIR SERVICE']='M 818'}
+for role,type in pairs(types)do
+ local g=groups['BLUE FARP '..role];assert(g and not g.data.lateActivation and g.units[1].type==type)
+ local p=g.units[1].p;local d=math.sqrt((p.x-c.blueFarp.x)^2+(p.z-c.blueFarp.y)^2);assert(d>40 and d<150)
+end
+local structures={['AMMO CANOPY']='FARP Ammo Dump Coating',['COMMAND POST']='FARP CP Blindage',['FUEL DEPOT']='FARP Fuel Depot',['REPAIR TENT']='FARP Tent'}
+for _,country in pairs(mission.coalition.blue.country)do for _,g in pairs((country.static or{}).group or{})do
+ for role,type in pairs(structures)do if g.name=='BLUE FARP '..role then local u=g.units[1];assert(u.type==type and math.sqrt((u.x-c.blueFarp.x)^2+(u.y-c.blueFarp.y)^2)<150);structures[role]=nil end end
+end end
+assert(not next(structures))
+assert(groups.NEEDLE.data.units[1].Radio[2].channels[1]==c.blueFrequency)
+output('PASS: BLUE departure FARP has same-side ammo, command, fuel, ground-power and repair support plus unlimited packed stocks and matching VHF preset')
+
 output('ALL NEEDLE AND FANG TESTS PASSED (simulated APIs; not native AI combat)')

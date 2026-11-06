@@ -1,5 +1,11 @@
 # Changelog
 
+## Departure FARP service correction — 2026-11-05
+
+- User reported rearming unavailable in the installed ammo-only revision. Added command Hummer/post, M978 tanker/fuel depot, separate M818 power/repair trucks and repair tent around the existing BLUE departure pad. All are same-coalition, active at start and within 150 m.
+- Set Kiowa VHF AM preset 1 to BLUE FARP 128.500. Preserve unlimited warehouse stock, ground starts and the ground-target race.
+- Added an integrated check of the packed archive's warehouse file and complete service-role coverage. Native Ground Crew replenishment still needs confirmation.
+
 ## Ground-target race and rearm support — 2026-11-05
 
 - Changed victory to first ground-target destruction: red technical lost wins immediately, blue technical lost fails immediately; Hind kills are optional. Native target-death events resolve the race in observed order, with a final latched result and best-effort AI ceasefire.
