@@ -48,3 +48,7 @@ Rebuilt after isolating optional drone calls, adding station hysteresis and one-
 ### Drone talk-ons and Lifeline progress — 2026-11-03
 
 Rebuilt and passed complete Lua 5.1 simulated suite, including generic compound-relative target descriptions, single final-approach report, halfway timing/reset after interruption, no premature airborne report, actual lift-off and recovery reporting through successful completion. Portable archive checks pass; updated script embedding and Lua syntax verified. No new menu commands. Reports are text only. Native DCS checks remain unrun; deployment attempted but blocked by missing DCS Missions profile.
+
+## Collection-wide planner policy — 2026-11-06
+
+Shared planner helper and packed-archive deployment check confirm all 6 red groups concealed, including aircraft and static/support groups. Mission logic tests and native Lua/editor/archive routines pass in the checked deploy workflow. A structured before/after archive comparison confirms that only red-group visibility fields changed; friendly and neutral groups, routes, prepoints, search/trigger zones, conditions/tasks and embedded resources are identical. A negative check rejects a deliberately omitted planner flag. Installed SHA-256: 4371f9bfd9712e846a6d71ea51aacb4dfca759ad7d1013ea5414f3705476d8e3. The existing installed revision matched tracked archive contents before replacement and was backed up. Native Mission Planner GUI inspection remains pending; this adds no native flight/rearm acceptance.

@@ -9,3 +9,5 @@ Read design, README, changelog, lessons and flight checklist before edits. Prese
 - Optional Hornet failures must not fail insertion. Protect all three friendly helicopters; cancel unsafe tasks, without promising to recall released weapons.
 - Do not add alternate LZ or escalation logic before recording native first-slice flight results. If DCS is unavailable, preserve these as pending and deliver the focused test artifact.
 - Build/deploy through shared/tools/mission.mjs using slug quiet-tide; report actual deployment result and remind user to restart.
+
+- Use shared/tools/planner.mjs to hide all red groups from Mission Planner before packing. Keep deliberate friendly route/prepoint/search intelligence. The deployment archive check must pass; native planner GUI acceptance is separate.

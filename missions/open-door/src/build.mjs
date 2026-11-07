@@ -1,3 +1,4 @@
+import {hideEnemyGroupsFromPlanner} from '../../../shared/tools/planner.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import assert from 'node:assert/strict';
@@ -145,6 +146,7 @@ Development build. Automated checks do not certify native UH-60A follow, tempora
 setBriefing(m,'Operation OPEN DOOR - Black Hawk Hostage Rescue',brief);m.descriptionBlueTask=brief;
 const configLua='OPEN_DOOR_CONFIG = '+serializeLuaAssignment('config',c).replace(/^config\s*=\s*/,'');
 fs.writeFileSync(path.join(base,'.build/config.lua'),configLua);
+hideEnemyGroupsFromPlanner(m);
 await loadScripts(s,s.dictionary,[{filePath:path.join(base,'.build/config.lua')},{filePath:path.join(base,'src/rescue.lua')}]);
 // Native Mission Editor action: zone ID, objects_mask=1 (TREES ONLY).
 // Keep occupied pads fixed; clear the camp and a 600 m initial departure lane.

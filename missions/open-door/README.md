@@ -66,3 +66,7 @@ Optional drone tasking or laser API errors disable Sentinel support without fail
 ### Target talk-ons and Lifeline progress
 
 Sentinel's laser reports describe a generic vehicle/infantry target and its approximate grid direction/distance from the hostage building, followed by coordinates and Kiowa-relative bearing/range. They do not claim unverified road or scenery landmarks. Lifeline reports final approach within 1.5 km, landed rescue start, halfway through each uninterrupted rescue attempt, timer interruption, actual airborne return with survivor count, and recovery approach within 2 km. These are on-screen messages, not recorded voice audio. Existing menus and explicit landing clearance are unchanged.
+
+## Mission Planner visibility
+
+Enemy groups and their routes are hidden from the preflight Mission Planner; deliberately briefed search areas, objective markers and player target prepoints remain available. The full Mission Editor can still inspect authored assets. Native planner GUI confirmation remains pending.

@@ -1,5 +1,9 @@
 # Changelog
 
+## Mission Planner concealment — 2026-11-06
+
+- Applied the collection-wide enemy planner-concealment rule to all red groups, preserving deliberate mission intelligence and friendly planning. Deployment now checks the delivered archive.
+
 ## Unreleased — 2026-11-03
 
 - Added generic drone target talk-ons relative to the compound and event-based Lifeline approach, halfway, interruption, airborne return and recovery reports without new menu layers.

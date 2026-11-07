@@ -23,3 +23,7 @@ Package 251.000 AM; Tarawa 128.500 AM; Stennis 127.500 AM. Expected initial rout
 One primary LZ, fixed small opposition, single-player lead with AI wingman and AI Hornets. No multiplayer readiness, automatic copilot observer, selectable alternate LZ, detection model, evolving alarm, or SEAL ground combat is claimed. Those features come after proving departure → insertion → recovery. Text reports only, no recorded voices.
 
 See [design](design.md), [verification](verification.md) and [flight checklist](flight-checklist.md). Portable validation and mocked logic cannot certify native deck fit, AI launch/landing, aircraft performance or the route's scenery.
+
+## Mission Planner visibility
+
+Enemy groups and their routes are hidden from the preflight Mission Planner; deliberately briefed search areas, objective markers and player target prepoints remain available. The full Mission Editor can still inspect authored assets. Native planner GUI confirmation remains pending.

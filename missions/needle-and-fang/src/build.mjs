@@ -1,3 +1,4 @@
+import {hideEnemyGroupsFromPlanner} from '../../../shared/tools/planner.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import assert from 'node:assert/strict';
@@ -103,10 +104,6 @@ for(const [prefix,p]of [['BLUE',c.blueAsset],['RED',c.redAsset]]){
  g.hidden=true;g.hiddenOnMFD=true;g.route.points[1].speed=0;
 }
 c.blueObjectiveId=friendly.units[1].unitId;c.redObjectiveId=enemy.units[1].unitId;
-// Planner visibility is independent of the in-flight F10 coalition filter.
-for(const country of Object.values(m.coalition.red.country))for(const category of ['helicopter','plane','vehicle','ship','static'])for(const g of Object.values(country[category]?.group??{})){
- g.hiddenOnPlanner=true;g.hidden=true;g.hiddenOnMFD=true;
-}
 const distance=Math.hypot(c.redAsset.x-c.blueAsset.x,c.redAsset.y-c.blueAsset.y)/1852;
 const brief=`OPERATION NEEDLE AND FANG - DEVELOPMENT DUEL
 Syria / 08:00 local / one player OH-58D versus one AI Mi-24V
@@ -134,6 +131,7 @@ Package 251.000 AM; BLUE FARP ${c.blueFrequency.toFixed(3)} AM. Requires Syria a
 `;
 setBriefing(m,'Operation NEEDLE AND FANG - Kiowa versus Hind',brief);m.descriptionBlueTask=brief;
 fs.writeFileSync(path.join(base,'.build/config.lua'),serializeLuaAssignment('NEEDLE_FANG_CONFIG',c));
+hideEnemyGroupsFromPlanner(m);
 await loadScripts(s,s.dictionary,[{filePath:path.join(base,'.build/config.lua')},{filePath:path.join(base,'src/duel.lua')}]);
 // Native trees-only clearance is local to the two starting FARPs, not the hunt area.
 const zones=[c.blueFarp,c.redFarp].map((p,i)=>addTriggerZone(m,{name:(i?'RED':'BLUE')+' FARP TREES ONLY',...p,radius:i?160:200}));

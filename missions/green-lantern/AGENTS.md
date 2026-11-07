@@ -11,3 +11,5 @@ Read this mission's design, player README, changelog and lessons before editing 
 - WP4 equals the fixed LANTERN pad. Never relocate the recovery pad at runtime; no recovery smoke/menu. Survivor green smoke remains request-only. Spotting dots and sensor-specific attack-my-target integration remain unimplemented.
 - Use `node shared/tools/mission.mjs deploy green-lantern` from the repository root after mission edits. This mission's artifact and test entry point are defined in `mission.json`.
 - Configuration and mock tests do not certify AI combat, FARP services, loadout performance or a complete sortie. Keep flight-check limitations explicit.
+
+- Use shared/tools/planner.mjs to hide all red groups from Mission Planner before packing. Keep deliberate friendly route/prepoint/search intelligence. The deployment archive check must pass; native planner GUI acceptance is separate.

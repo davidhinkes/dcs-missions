@@ -14,3 +14,5 @@
 - Default deployment detects one standard Saved Games DCS profile. Use `DCS_MISSIONS_DIR` for a custom or ambiguous profile; never guess between profiles. Request filesystem permission through the environment when needed. Existing installed revisions, including Mission Editor edits, are preserved under the target folder's `.mission-backups` before replacement; inspect/reconcile manual edits as appropriate.
 - Report the actual deployment destination and remind the user to restart the mission to load the update. Copying a file does not update a running mission. Never restart DCS or load a mission automatically unless requested.
 - Use GitHub Releases for stable playable versions, recording the tested commit and requirements. Public publishing requires the user's instruction.
+
+- Collection-wide player preference: enemy groups/routes must be hidden from the preflight Mission Planner. Use shared/tools/planner.mjs in every builder; the shared verify/deploy command checks the packed archive. Preserve deliberate briefing intelligence, search areas and player target prepoints. This does not conceal assets from the full Mission Editor.

@@ -34,3 +34,7 @@ STENNIS starts 70 nm northwest of extraction. Request the carrier package before
 ## Development status
 
 Mock mission logic and archive checks verify configuration and state transitions, not native AI combat or terrain. The four-pad launch, new Longbow attack behavior, fixed recovery pad and complete sortie need in-game acceptance. Read the [full briefing](dist/Operation-Green-Lantern-Briefing.txt), [design](design.md) and [verification record](verification.md).
+
+## Mission Planner visibility
+
+Enemy groups and their routes are hidden from the preflight Mission Planner; deliberately briefed search areas, objective markers and player target prepoints remain available. The full Mission Editor can still inspect authored assets. Native planner GUI confirmation remains pending.

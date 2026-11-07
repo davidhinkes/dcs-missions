@@ -1,5 +1,9 @@
 # Changelog
 
+## Mission Planner concealment — 2026-11-06
+
+- Applied the collection-wide enemy planner-concealment rule to all red groups, preserving deliberate mission intelligence and friendly planning. Deployment now checks the delivered archive.
+
 ## Initial development test slice — 2026-11-05
 
 - Added separate Quiet Tide mission: Tarawa-based Kiowas/UH-60A, nearby Stennis-based AI Hornets, one SEAL insertion site and moving-ship recovery.

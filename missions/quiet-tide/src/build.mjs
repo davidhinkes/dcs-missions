@@ -1,3 +1,4 @@
+import {hideEnemyGroupsFromPlanner} from '../../../shared/tools/planner.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import assert from 'node:assert/strict';
@@ -82,6 +83,7 @@ FLIGHT CHECK ORDER
 `;
 setBriefing(m,'Operation QUIET TIDE - SEAL insertion',brief);m.descriptionBlueTask=brief;
 fs.writeFileSync(path.join(base,'.build/config.lua'),serializeLuaAssignment('QUIET_TIDE_CONFIG',c));
+hideEnemyGroupsFromPlanner(m);
 await loadScripts(s,s.dictionary,[{filePath:path.join(base,'.build/config.lua')},{filePath:path.join(base,'src/insertion.lua')}]);
 refresh(s);const report=validateMission(s.document);assert.equal(report.errors.length,0,JSON.stringify(report));
 for(const [g,host] of [[kiowas,tarawa],[hawk,tarawa],[hornets,stennis]]){assert.equal(g.route.points[1].linkUnit,host.units[1].unitId);assert.equal(g.route.points[1].helipadId,host.units[1].unitId);assert.equal(g.route.points[1].type,'TakeOffParkingHot');}

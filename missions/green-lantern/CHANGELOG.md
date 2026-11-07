@@ -1,5 +1,9 @@
 # Changelog
 
+## Mission Planner concealment — 2026-11-06
+
+- Applied the collection-wide enemy planner-concealment rule to all red groups, preserving deliberate mission intelligence and friendly planning. Deployment now checks the delivered archive.
+
 ## Unreleased — 2026-11-04
 
 - Corrected reported overlapping Kiowa starts: four visible individual helipads 60 m apart, explicit matching aircraft coordinates, zero-AGL hot-ground starts and no shared parking allocation. Added warehouses for all four pads, all-pad service proximity checks, trees-only departure clearance and aligned Longbow recall.

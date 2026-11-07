@@ -56,3 +56,7 @@ Date, Git revision, DCS version, check type, result, limitations. Automated chec
 ## Open work
 
 Proposals and known issues, clearly distinguished from implemented behavior.
+
+## Mission Planner concealment
+
+Use the collection shared planner helper before packing. Hide all enemy groups/routes, including aircraft, support and statics. Preserve explicitly briefed intelligence/search areas/player prepoints. Pass the packed-archive planner check and record native GUI confirmation separately. Current player side is blue/opposition red; review the helper and policy if a future mission uses another player coalition.

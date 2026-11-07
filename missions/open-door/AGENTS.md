@@ -12,3 +12,5 @@
 - Labels off, friendly-only map. Known building/SAM intelligence uses fixed markers and separate Kiowa target points 1T|1|SA13 and 2T|1|UNK. Enemy assets must not appear in the flight route.
 - Route: FOOTHOLD → IP → planned LZ → FOOTHOLD. KEYSTONE is optional and marked on F10.
 - Use the shared checked deployment workflow after mission edits. Native AI flight, cockpit target import, terrain appearance, starts and servicing need actual DCS confirmation; do not claim mock tests prove them.
+
+- Use shared/tools/planner.mjs to hide all red groups from Mission Planner before packing. Keep deliberate friendly route/prepoint/search intelligence. The deployment archive check must pass; native planner GUI acceptance is separate.

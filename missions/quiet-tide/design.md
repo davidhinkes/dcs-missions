@@ -39,3 +39,7 @@ Flags: 940 success, 941 failure, 942 aborted, 943 team inserted. Flying continue
 - [ ] Full normal sortie and relevant retry/abort in DCS.
 
 See flight-checklist.md. Alternate LZ selection, noise/attack escalation, sophisticated patrol/detection behavior and multiplayer remain proposed. Do not treat this mock suite as validation of those features or of native flight. Check actual geometry before layering on complexity.
+
+## Mission Planner policy — 2026-11-06
+
+Enemy groups and their routes are hidden from the preflight Mission Planner; deliberately briefed search areas, objective markers and player target prepoints remain available. The full Mission Editor can still inspect authored assets. Native planner GUI confirmation remains pending. All red aircraft, ground, ship and static groups use hiddenOnPlanner/hidden/hiddenOnMFD. The shared deployment verifier checks the actual packed archive, independently of the in-flight F10 filter. No routes, target records or trigger zones are removed.

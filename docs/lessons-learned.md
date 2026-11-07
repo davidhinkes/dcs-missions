@@ -49,3 +49,5 @@ See [mission rework review](mission-rework-review.md) for evidence and the stage
 - Distinguish one-time milestone announcements from continuously changing availability. Use separate entry/exit thresholds when orbit or motion can repeatedly cross a boundary.
 - Design information and menus alongside mission phases. Prefer geographic coordinates and explicitly labeled true/grid bearing/range over internal engine coordinates; avoid unsupported scenery descriptions.
 - Validate the playable foundation and the distinctive native mechanic before treating added features as readiness. Document unrun DCS checks and the next flight experiment rather than accumulating ambiguous claims of verification.
+
+- Preflight Mission Planner concealment needs its own hiddenOnPlanner flag on every enemy category, including aircraft and support/static groups. Friendly-only F10 and hiddenOnMFD alone do not enforce it. The shared builder helper and packed-archive deployment check now apply this collection-wide user preference; player intelligence records remain separate. Native planner GUI acceptance is still a distinct check.

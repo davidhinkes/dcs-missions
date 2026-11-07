@@ -30,7 +30,12 @@ function artifact(){
   return path.join(dir,'dist',filename);
 }
 const test=()=>run(lua(),[config().logicTest],dir);
-const verify=()=>run(process.execPath,[path.join(vendor,'scripts/verify-mission.mjs'),artifact()],root,{...process.env,DCS_LUA:lua()});
+const verify=()=>{
+  run(process.execPath,[path.join(vendor,'scripts/verify-mission.mjs'),artifact()],root,{...process.env,DCS_LUA:lua()});
+  // Run after setup/build: importing vendor-dependent verification here at
+  // module load would break setup on a checkout without the submodule/packages.
+  run(process.execPath,[path.join(root,'shared/tools/verify-planner.mjs'),artifact()]);
+};
 switch(action){
   case 'setup': {
     run('git',['submodule','update','--init','--recursive','--','vendor/dcs-mcp']);

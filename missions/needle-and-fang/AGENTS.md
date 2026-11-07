@@ -10,3 +10,5 @@
 - Set hiddenOnPlanner=true, hidden=true and hiddenOnMFD=true on every red group, including aircraft, objective, service vehicles and static FARP structures. Preserve deliberate player NavTargetPoints 1T; planner hiding is separate from F10 filtering.
 - Labels off, friendly-only map, exact enemy vehicle target 1T and marker. No Hind coordinates, live tracking or enemy unit names in menu replies. One shallow Duel/Status command; no smoke or required recovery.
 - Build/deploy using shared runner slug needle-and-fang. Native terrain/cover fit, both pad starts, Hind attacks/encounters, missile/gun effectiveness and full sortie remain flight checks. Mock task acceptance never establishes a fair cat-and-mouse fight.
+
+- Use shared/tools/planner.mjs to hide all red groups from Mission Planner before packing. Keep deliberate friendly route/prepoint/search intelligence. The deployment archive check must pass; native planner GUI acceptance is separate.
