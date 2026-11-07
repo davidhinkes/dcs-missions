@@ -13,7 +13,7 @@ A Syria CSAR mission: recover downed pilot Sparrow while enemy vehicles hunt him
 
 ## Rescue and medical delivery
 
-Fly WP2 then WP3, about 13 nm from HAVEN. WP3 is an approximate search center; Sparrow is randomized within 200 m. Request green smoke when within 2 km, locate him and land within 400 m at less than 1 m/s. Boarding takes 20 seconds within 100 m and up to two minutes at 400 m; movement resets progress.
+Fly WP2 then WP3, about 13 nm from HAVEN. WP3 is the centre of a **2.5 km search region**: each start picks one of several possible crash sites inside it, so Sparrow can be up to about 2.4 km from WP3. Use **Rescue > Contact Sparrow** within about 15 km for a rough bearing and range from your position. The fix sharpens as you close and can be repeated every 30 seconds. Request green smoke when within 2 km of Sparrow himself, locate him and land within 400 m at less than 1 m/s. Boarding takes 20 seconds within 100 m and up to two minutes at 400 m; movement resets progress.
 
 After boarding, fly to **WP4: the exact fixed LANTERN landing pad**, about 25 nm southwest. Land within 100 m and remain still for 15 seconds. The F10 LANTERN marker identifies the same pad. There is no recovery smoke or recovery-smoke command. Fuel, rearm and repair facilities are configured at both FARPs; native services and terrain fit still require flight acceptance.
 
@@ -21,13 +21,13 @@ After boarding, fly to **WP4: the exact fixed LANTERN landing pad**, about 25 nm
 
 Under Other:
 
-- **Rescue:** Status / return directions; Request survivor smoke (green).
+- **Rescue:** Status / return directions; Contact Sparrow (direction fix); Request survivor smoke (green).
 - **Overwatch:** Engage vehicles near me; Hold fire / resume overwatch; Return to HAVEN.
 - **Air Support:** Launch carrier package; Request CAS near me; Request radar suppression; Hold fire / cancel CAS.
 
 For Longbow, get within 2 km of the vehicles you want attacked, then select **Overwatch > Engage vehicles near me**. This requests one target near your call position, without exposing enemy names or a target list. Longbow waits for an airborne shooter with missiles, terrain sight line and 6.5 km slant range, and excludes targets within 700 m of Sparrow or any of the four Kiowas. Requests can remain pending; cancel explicitly if needed. One target request does not authorize automatic follow-on attacks.
 
-Longbow holds around a staging point, not a guaranteed stationary firing position. Native AI may maneuver to fire; the script breaks off if its leader closes within 4 km of WP3, when separation becomes unsafe, on target destruction or after 90 seconds. Hold fire cannot recall a released missile. Accuracy, guidance, vegetation/building masking and native aircraft behavior require a DCS flight check.
+Longbow holds around a staging point, not a guaranteed stationary firing position. Native AI may maneuver to fire; the script breaks off if its leader closes within 4 km of Sparrow, when separation becomes unsafe, on target destruction or after 90 seconds. Hold fire cannot recall a released missile. Accuracy, guidance, vegetation/building masking and native aircraft behavior require a DCS flight check.
 
 STENNIS starts 70 nm northwest of extraction. Request the carrier package before departure; takeoff launches it as a fallback. Allow roughly 12–18 minutes for fighter launch/climb/transit; Bruiser launches three minutes later and needs CAS clearance. Hold at WP2 if cover has not arrived. Labels are off; F10 shows friendly units only.
 

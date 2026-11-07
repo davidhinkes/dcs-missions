@@ -80,3 +80,7 @@ If a cockpit waypoint must identify the actual landing pad, keep that pad fixed;
 ## Distinct parking numbers did not separate two flights
 
 The user observed helicopters stacked with no individual takeoff pads. The prior archive placed all four at identical coordinates and relied on one multi-slot FARP plus unique parking indices across two groups. Tests passed because they checked indices, not occupied footprints. The fix uses four visible single helipads, 60 m spacing, zero-AGL native ground starts and matching explicit coordinates. New regression checks reject coincident aircraft, mismatched pad positions, parking/start-link contradictions and missing service coverage. This is stronger configuration validation; a native sortie must still confirm spawn stability and AI departure.
+
+## Randomizing the search region
+
+- Moving the objective away from a fixed waypoint breaks every check that was written against that waypoint: smoke gates, AI breakoff radii, patrol placement and briefing text. Search for the old coordinates and decide for each whether it means "region" or "actual site". Green Lantern keeps the MiG gate, F10 marker and cockpit WP3 at the region centre and moves the rest to the pickup. Evidence: mock tests only; site terrain is unverified.

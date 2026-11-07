@@ -54,28 +54,61 @@ local function findClear(x,z,radius,vehicle)
   end
   error('No clear landing/ground site near '..x..','..z)
 end
-local function randomPickup()
-  -- Sample uniformly over the search disc, rejecting unsuitable terrain.
-  -- Never expand beyond WP3's 200 m search radius.
+-- WP3 is the centre of a 2.5 km search region. Each start picks one crash
+-- site, then randomizes Sparrow within 200 m of it. Every site disc lies
+-- inside the promised region and at least 5 km from Longbow's station.
+local searchCenter={x=42000,z=16000}
+local regionRadius=2500
+local crashSites={
+  {name='centre',x=42000,z=16000},
+  {name='north',x=44000,z=15400},
+  {name='east',x=42400,z=18100},
+  {name='west',x=41600,z=14000},
+}
+local function pickupNear(cx,cz)
+  -- Sample uniformly over the site disc, rejecting unsuitable terrain.
+  -- Never expand beyond the site's 200 m radius.
   for i=1,256 do
     local radius=200*math.sqrt(math.random())
     local angle=2*math.pi*math.random()
-    local p=clearPoint(42000+radius*math.cos(angle),16000+radius*math.sin(angle))
+    local p=clearPoint(cx+radius*math.cos(angle),cz+radius*math.sin(angle))
     if p then return p end
   end
   -- A narrow clearing may be missed by random samples. Choose randomly among
-  -- the valid grid candidates, still confined to the same search area.
+  -- the valid grid candidates, still confined to the same site disc.
   local candidates={}
   for dx=-200,200,20 do
     for dz=-200,200,20 do
       if dx*dx+dz*dz<=200*200 then
-        local p=clearPoint(42000+dx,16000+dz)
+        local p=clearPoint(cx+dx,cz+dz)
         if p then candidates[#candidates+1]=p end
       end
     end
   end
   if #candidates>0 then return candidates[math.random(#candidates)] end
-  error('No safe pickup clearing inside the 200 m WP3 search area')
+end
+local function randomPickup()
+  -- Random site order; a site with no safe clearing falls through to the next.
+  -- GREEN_LANTERN_SITE (1-4), if set before this script loads, forces the first
+  -- choice for tests or replaying a reported sortie.
+  local order,remaining={}, {}
+  for i=1,#crashSites do remaining[i]=i end
+  local forced=tonumber(GREEN_LANTERN_SITE)
+  if forced and crashSites[forced] then
+    order[1]=forced;table.remove(remaining,forced)
+  end
+  while #remaining>0 do order[#order+1]=table.remove(remaining,math.random(#remaining)) end
+  for _,i in ipairs(order) do
+    local site=crashSites[i]
+    local p=pickupNear(site.x,site.z)
+    if p then
+      S.siteIndex=i;S.site=site.name
+      env.info(string.format('[GREEN_LANTERN] Crash site %d (%s) selected; pickup x=%.1f z=%.1f',i,site.name,p.x,p.z))
+      return p
+    end
+    env.info('[GREEN_LANTERN] Crash site '..site.name..' has no safe clearing; trying another')
+  end
+  error('No safe pickup clearing at any crash site inside the 2.5 km WP3 search region')
 end
 local function waypoint(p,speed)
   return {x=p.x,y=p.z,alt=p.y,alt_type='BARO',type='Turning Point',action='Off Road',
@@ -145,11 +178,35 @@ local function requestPilotSmoke()
   if S.boarded then say('Sparrow is already aboard. Proceed to LANTERN.');return end
   if S.phase=='failed' or S.phase=='complete' then return end
   local u=alive(S.playerName or 'RESCUE-1')
-  if not u or distance(u:getPoint(),{x=42000,z=16000})>2000 then
-    say('Sparrow: get within 2 km of the WP3 search area before requesting smoke.');return
+  if not u or distance(u:getPoint(),pickup)>2000 then
+    say('Sparrow: I can\'t see you yet. Get within 2 km of me before I pop smoke. Use Rescue > Contact Sparrow for a direction fix.');return
   end
   trigger.action.smoke(pickup,trigger.smokeColor.Green)
-  say('Sparrow: GREEN smoke out. Look within 200 m of WP3; land within 400 m of me and hold still. Allow up to two minutes for the simulated approach and boarding.',25)
+  say('Sparrow: GREEN smoke out. Land within 400 m of me and hold still. Allow up to two minutes for the simulated approach and boarding.',25)
+end
+local function gridBearing(from,to)
+  return (math.deg(math.atan2(to.z-from.z,to.x-from.x))+360)%360
+end
+-- Survival-radio direction fix: approximate by design, sharper when closer.
+local fixRange,fixCooldown=15000,30
+local function contactSparrow()
+  if S.boarded then say('Sparrow is already aboard. Proceed to LANTERN.');return end
+  if S.phase=='failed' or S.phase=='complete' or not pickup then return end
+  local u=alive(S.playerName or 'RESCUE-1')
+  if not u then say('Sparrow: no contact.');return end
+  local now=timer.getTime()
+  if S.fixAt and now-S.fixAt<fixCooldown then
+    say(string.format('Sparrow: saving battery. Try again in %d seconds.',math.ceil(fixCooldown-(now-S.fixAt))));return
+  end
+  local p=u:getPoint();local range=distance(p,pickup)
+  if range>fixRange then say('Sparrow: no reply. His survival radio is short-range; close within about 15 km of the WP3 search region.');return end
+  S.fixAt=now
+  local errorDeg=math.min(20,3+2*range/1000)
+  local reported=gridBearing(p,pickup)+(2*math.random()-1)*errorDeg
+  reported=(math.floor(reported/5+0.5)*5)%360
+  local km=math.max(0.5,math.floor(range*(0.8+0.4*math.random())/500+0.5)*0.5)
+  S.lastFix={bearing=reported,km=km,error=errorDeg}
+  say(string.format('Sparrow: Anvil, I hear you. Rough fix from your position: approximate grid bearing %03d, about %.1f km (plus or minus %d degrees and 20 percent). The fix sharpens as you close; request green smoke within 2 km.',reported,km,math.ceil(errorDeg)),25)
 end
 local function havenNavigation(u)
   if not home or not u then return 'FARP LANTERN is marked on the F10 map.' end
@@ -165,9 +222,9 @@ end
 local function fail(reason)
   S.phase='failed';trigger.action.setUserFlag(903,1);say('MISSION FAILED: '..reason,40)
 end
-local function spawnExtra(name,x,z,pursue)
+local function spawnExtra(name,x,z,pursue,radius)
   local ok,err=pcall(function()
-    local g=spawnGround(name,findClear(x,z,1500,true))
+    local g=spawnGround(name,findClear(x,z,radius or 1500,true))
     if pursue then
       g:getController():setTask({id='Mission',params={route={points={waypoint(g:getUnit(1):getPoint(),6),waypoint(pickup,6)}}}})
     end
@@ -188,7 +245,7 @@ local function hunt(now)
       g:getController():setOption(0,2) -- ground ROE: open fire
     end
   end
-  say('Sparrow reports armed pickup patrols north, east and west. An eastern checkpoint has scout cars and trucks; reinforcements may follow. Two Hinds are also searching. Clear an approach and prioritize the rescue.')
+  say('Sparrow reports armed pickup patrols north, east and west. An eastern checkpoint has scout cars and trucks; reinforcements may follow. Two Hinds are also searching. Clear an approach and prioritize the rescue. Use Rescue > Contact Sparrow for a direction fix.')
 end
 local function activate(name)
   local g=Group.getByName(name);assert(g,'Missing flight '..name);trigger.action.activateGroup(g)
@@ -355,7 +412,7 @@ local function owTick(_,now)
   if distance(lead:getPoint(),owStation)<1000 and not S.owReady then S.owReady=true;say('Longbow: in the overwatch area. Holding fire; request a vehicle attack when needed.') end
   if S.owTarget then
     local target=alive(S.owTarget)
-    if not target or not owSafe(target:getPoint()) or distance(lead:getPoint(),{x=42000,z=16000})<4000 or now-S.owAttackAt>=90 then
+    if not target or not owSafe(target:getPoint()) or distance(lead:getPoint(),pickup)<4000 or now-S.owAttackAt>=90 then
       say(not target and 'Longbow: assigned vehicle destroyed; returning to overwatch.' or 'Longbow: breaking off; attack conditions or time limit reached.')
       owHold()
     end
@@ -393,9 +450,9 @@ local function owTick(_,now)
 end
 local function status()
   local u=alive('RESCUE-1'); local text='Phase: '..S.phase
-  if u and pickup and not S.boarded then text=text..string.format('. WP3 search area %.1f km away.',distance(u:getPoint(),{x=42000,z=16000})/1000) end
+  if u and pickup and not S.boarded then text=text..string.format('. WP3 search region centre %.1f km away.',distance(u:getPoint(),searchCenter)/1000) end
   if S.boarded then text=text..' Sparrow aboard. '..havenNavigation(u)
-  else text=text..' Sparrow is somewhere within 200 m of WP3. Request green smoke through F10 when nearby. Land within 400 m and hold still: 20 seconds close in, up to two minutes at maximum distance.' end
+  else text=text..' Sparrow is somewhere within 2.5 km of WP3. Use Rescue > Contact Sparrow for a rough direction fix, then request green smoke within 2 km of him. Land within 400 m and hold still: 20 seconds close in, up to two minutes at maximum distance.' end
   if S.coverAt then text=text..' Guardian released from STENNIS.' else text=text..' Guardian launches at your takeoff, or via F10 launch request.' end
   text=text..(S.radarCleared and ' Coastal SA-6 tracking radar destroyed.' or S.seadAt and ' Weasel working coastal radar threat.' or ' Weasel SEAD waiting for package launch.')
   text=text..(S.casOnStation and ' Bruiser CAS in range.' or S.casAt and ' Bruiser CAS inbound.' or ' Bruiser CAS is wave 2, three minutes behind Guardian.')
@@ -448,7 +505,7 @@ local function tick(_,now)
       say('Overlord: coastal SA-6 launcher destroyed. IR-guided Strela may still be active; this is not an all-clear for low-level flight.')
     end
   end
-  if not S.threatAt and distance(pos,{x=42000,z=16000})<=6000 then
+  if not S.threatAt and distance(pos,searchCenter)<=6000 then
     S.threatAt=now
     say('Overlord: Anvil approaching extraction. Guardian, expedite cover; hostile fighters may respond.')
   end
@@ -484,6 +541,7 @@ local function tick(_,now)
       if now-S.pickupAt>=S.pickupDuration then
         S.boarded=true;S.phase='return';pilot:destroy();trigger.action.setUserFlag(901,1)
         trigger.action.removeMark(8101)
+        if S.regionDrawn then pcall(trigger.action.removeMark,8103) end
         say('Sparrow aboard! '..havenNavigation(u)..' Land within 100 m of the pad and hold 15 seconds for medical handover.',40)
       end
     else
@@ -524,12 +582,18 @@ local function initialize()
     end
   end
   spawnGround('SURVIVOR',pickup)
-  spawnGround('HUNTER-NORTH',findClear(pickup.x+2700,pickup.z+1000,1000,true))
-  spawnGround('HUNTER-EAST',findClear(pickup.x-1000,pickup.z+3000,1000,true))
+  -- Patrols are placed relative to the chosen site. They are threats, not the
+  -- objective: a site with no nearby vehicle ground must not abort the rescue.
+  S.northPatrol=spawnExtra('HUNTER-NORTH',pickup.x+2700,pickup.z+1000,false,1000)
+  S.eastPatrol=spawnExtra('HUNTER-EAST',pickup.x-1000,pickup.z+3000,false,1000)
   S.checkpoint=spawnExtra('CHECKPOINT',pickup.x-3000,pickup.z+6000,false)
   S.phase='ingress';S.pickup=pickup;S.home=home
+  S.crashSites=crashSites;S.searchCenter=searchCenter;S.regionRadius=regionRadius
   env.info(string.format('[GREEN_LANTERN] LANTERN landing point x=%.3f z=%.3f',home.x,home.z))
-  trigger.action.markToCoalition(8101,'SPARROW SEARCH AREA - within 200 m of WP3; request green smoke when nearby',ground(42000,16000),2,true)
+  trigger.action.markToCoalition(8101,'SPARROW SEARCH REGION - within 2.5 km of WP3; Rescue > Contact Sparrow gives a rough fix; green smoke within 2 km of him',ground(searchCenter.x,searchCenter.z),2,true)
+  if trigger.action.circleToAll then
+    S.regionDrawn=pcall(trigger.action.circleToAll,2,8103,ground(searchCenter.x,searchCenter.z),regionRadius,{0,1,0,0.8},{0,1,0,0.08},2,true)
+  end
   trigger.action.markToCoalition(8102,'FARP LANTERN - medical handover / WP4 landing pad / land within 100 m, hold 15 s / ATC 127.500 AM',home,2,true)
   local rescueMenu=missionCommands.addSubMenuForCoalition(2,'Rescue')
   local airMenu=missionCommands.addSubMenuForCoalition(2,'Air Support')
@@ -538,12 +602,13 @@ local function initialize()
   missionCommands.addCommandForCoalition(2,'Hold fire / resume overwatch',owMenu,owCancel)
   missionCommands.addCommandForCoalition(2,'Return to HAVEN',owMenu,owReturn)
   missionCommands.addCommandForCoalition(2,'Status / return directions',rescueMenu,status)
+  missionCommands.addCommandForCoalition(2,'Contact Sparrow (direction fix)',rescueMenu,contactSparrow)
   missionCommands.addCommandForCoalition(2,'Request survivor smoke (green)',rescueMenu,requestPilotSmoke)
   missionCommands.addCommandForCoalition(2,'Launch carrier package',airMenu,launchGuardian)
   missionCommands.addCommandForCoalition(2,'Request CAS near me',airMenu,requestCAS)
   missionCommands.addCommandForCoalition(2,'Request radar suppression',airMenu,requestSEAD)
   missionCommands.addCommandForCoalition(2,'Hold fire / cancel CAS',airMenu,holdCAS)
-  say('Anvil: WP3 is Sparrow\'s approximate search area, not his exact position. Search within 200 m and request GREEN smoke using F10 when nearby. After pickup, deliver him to LANTERN, WP4 landing pad. Overlord 251 AM; F10 can launch the air package earlier.',30)
+  say('Anvil: WP3 is the centre of Sparrow\'s 2.5 km search region, not his position. Use F10 Rescue > Contact Sparrow for a rough direction fix, then request GREEN smoke within 2 km of him. After pickup, deliver him to LANTERN, WP4 landing pad. Overlord 251 AM; F10 can launch the air package earlier.',30)
   timer.scheduleFunction(function(_,now)
     local ok,nextTime=pcall(tick,nil,now)
     if not ok then env.error('[GREEN_LANTERN] '..tostring(nextTime));fail('Mission script error; see dcs.log.');return nil end

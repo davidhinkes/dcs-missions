@@ -1,5 +1,6 @@
 -- Exercise mission state transitions with a simulated DCS API, under DCS Lua 5.1.
 local originalPrint=print
+local forcedSite=1 -- Most scenarios pin the centre crash site; nil exercises random choice.
 local now,queue,units,groups,flags,activated,messages,commands,blueSmokeTimes,statics,greenSmokeTimes,markers
 local function makeUnit(d)
   local u={name=d.name,p={x=d.x,y=d.alt or 0,z=d.y},life=100,air=d.type=='OH58D' or d.type=='FA-18C_hornet' or d.type=='MiG-29 Fulcrum',velocity={x=0,y=0,z=0}}
@@ -40,7 +41,7 @@ local function reset(water)
       return name
     end,
     addCommandForCoalition=function(_,name,parent,fn)
-      local rescue=name=='Status / return directions' or name=='Request survivor smoke (green)'
+      local rescue=name=='Status / return directions' or name=='Request survivor smoke (green)' or name=='Contact Sparrow (direction fix)'
       local overwatch=name=='Engage vehicles near me' or name=='Hold fire / resume overwatch' or name=='Return to HAVEN'
       assert(parent==(rescue and 'Rescue' or overwatch and 'Overwatch' or 'Air Support'),'Wrong command category')
       assert(not commands[name],'Duplicate command');commands[name]=fn
@@ -49,6 +50,7 @@ local function reset(water)
   timer={getTime=function()return now end,scheduleFunction=function(fn,arg,t)table.insert(queue,{fn=fn,arg=arg,t=t})end}
   for _,side in pairs(mission.coalition)do for _,c in pairs(side.country or {})do for _,cat in ipairs({'plane','helicopter','vehicle'})do for _,g in pairs((c[cat]or{}).group or{})do addGroup(g) end end end end
   units['RESCUE-1'].air=false;units['RESCUE-2'].air=false;units['LONGBOW-1'].air=false;units['LONGBOW-2'].air=false
+  GREEN_LANTERN_SITE=forcedSite
   assert(loadfile('src/rescue.lua'))()
 end
 local function advance(to)
@@ -74,8 +76,8 @@ world.searchObjects=function(_,volume,callback)
 end
 advance(2)
 assert(GREEN_LANTERN.phase=='ingress' and groups['HUNTER-EAST'] and not flags[903])
-local commandCount=0;for _ in pairs(commands)do commandCount=commandCount+1 end;assert(commandCount==9)
-originalPrint('PASS: nine unique commands directly under Rescue, Air Support and Overwatch; no mission-name wrapper')
+local commandCount=0;for _ in pairs(commands)do commandCount=commandCount+1 end;assert(commandCount==10)
+originalPrint('PASS: ten unique commands directly under Rescue, Air Support and Overwatch; no mission-name wrapper')
 originalPrint('PASS: patrol spawns where scenery prevents a helicopter-size clearing')
 reset();advance(600);assert(GREEN_LANTERN.phase=='ingress' and not GREEN_LANTERN.huntAt and not activated.GUARDIAN)
 originalPrint('PASS: ten minutes at FARP does not start the hunt or air package')
@@ -200,20 +202,62 @@ move('HUNTER-NORTH-2',{x=p.x+1500,z=p.z+20},false)
 move('LONGBOW-2',{x=p.x+1500,z=p.z+50},true)
 commands['Request CAS near me']();advance(188);assert(not groups.BRUISER.attacks)
 originalPrint('PASS: CAS clearance protects the independent overwatch flight')
-local locations={}
-for seed=1,20 do
+local locations,sitesSeen={},{}
+forcedSite=nil
+local function d2(a,b)return math.sqrt((a.x-b.x)^2+(a.z-b.z)^2)end
+for seed=1,40 do
  math.randomseed(seed);reset();advance(2)
- local p=GREEN_LANTERN.pickup;assert((p.x-42000)^2+(p.z-16000)^2<=40000.0001)
+ local S=GREEN_LANTERN;local p=S.pickup;local site=S.crashSites[S.siteIndex]
+ assert(d2(p,site)<=200.0001,'Sparrow must stay within 200 m of the chosen crash site')
+ assert(d2(p,S.searchCenter)<=S.regionRadius,'Sparrow must stay inside the briefed WP3 search region')
+ sitesSeen[S.siteIndex]=true
  locations[string.format('%.1f,%.1f',p.x,p.z)]=true
  assert(markers[8101].p.x==42000 and markers[8101].p.z==16000)
  assert(groups.SURVIVOR.hidden and groups.SURVIVOR.hiddenOnMFD)
  assert(#greenSmokeTimes==0)
+ -- Patrols are placed around the actual site, not WP3.
+ assert(math.abs(units['HUNTER-NORTH-1'].p.x-(p.x+2700))<1 and math.abs(units['HUNTER-NORTH-1'].p.z-(p.z+1000))<30)
 end
 local variants=0;for _ in pairs(locations)do variants=variants+1 end;assert(variants>1)
+for i=1,#GREEN_LANTERN.crashSites do assert(sitesSeen[i],'Every crash site should occur across seeds') end
+for _,site in ipairs(GREEN_LANTERN.crashSites)do
+ assert(d2(site,GREEN_LANTERN.searchCenter)+200<=GREEN_LANTERN.regionRadius)
+ assert(d2(site,{x=36444,z=16000})>=5000,'Longbow station must stay outside its 4 km breakoff from any site')
+end
+originalPrint('PASS: random crash site within the 2.5 km WP3 region; Sparrow within 200 m of it; every site occurs; patrols follow the site')
+forcedSite=3;reset();advance(2);local p=GREEN_LANTERN.pickup
+assert(GREEN_LANTERN.site=='east' and d2(p,{x=42000,z=16000})>1500)
 commands['Request survivor smoke (green)']();assert(#greenSmokeTimes==0)
-move('RESCUE-1',{x=42000,z=17000},true)
+move('RESCUE-1',{x=42000,z=16000},true);commands['Request survivor smoke (green)']()
+assert(#greenSmokeTimes==0,'WP3 alone is not close enough when Sparrow is at another site')
+move('RESCUE-1',{x=p.x+1900,z=p.z},true)
 commands['Request survivor smoke (green)']();assert(#greenSmokeTimes==1)
-originalPrint('PASS: varied pickup locations stay within 200 m; approximate marker, hidden unit and requested-only smoke')
+originalPrint('PASS: green smoke is gated by distance to Sparrow, not to WP3')
+forcedSite=1;reset();world.searchObjects=function(_,volume,callback)
+ local p=volume.params.point;if d2(p,{x=42000,z=16000})<=300 and volume.params.radius>=40 then callback({})end
+end
+advance(2);assert(GREEN_LANTERN.phase=='ingress' and not flags[903] and GREEN_LANTERN.siteIndex~=1)
+assert(d2(GREEN_LANTERN.pickup,GREEN_LANTERN.crashSites[GREEN_LANTERN.siteIndex])<=200.0001)
+originalPrint('PASS: a crash site with no safe clearing falls through to another site without failing setup')
+-- Direction fix: range gate, cooldown, bounded error, no unit names.
+local function trueBearing(from,to)return (math.deg(math.atan2(to.z-from.z,to.x-from.x))+360)%360 end
+forcedSite=nil
+for seed=1,30 do
+ math.randomseed(seed);reset();advance(2);local S=GREEN_LANTERN;local p=S.pickup
+ move('RESCUE-1',{x=p.x-16000,z=p.z},true);commands['Contact Sparrow (direction fix)']();assert(not S.lastFix)
+ local from={x=p.x-6000,z=p.z+3000};move('RESCUE-1',from,true);commands['Contact Sparrow (direction fix)']()
+ local fix=S.lastFix;assert(fix)
+ local diff=math.abs(((fix.bearing-trueBearing(from,p))+540)%360-180)
+ assert(diff<=fix.error+2.5+1e-6,'Bearing error exceeds the stated accuracy')
+ local km=d2(from,p)/1000;assert(fix.km>=km*0.8-0.25-1e-6 and fix.km<=km*1.2+0.25+1e-6)
+ S.lastFix=nil;advance(10);commands['Contact Sparrow (direction fix)']();assert(not S.lastFix,'30 s cooldown')
+ advance(40);move('RESCUE-1',{x=p.x+500,z=p.z},true);commands['Contact Sparrow (direction fix)']()
+ assert(S.lastFix and S.lastFix.error<fix.error,'Fix sharpens when closer')
+ for _,text in ipairs(messages)do assert(not text:find('HUNTER%-') and not text:find('SURVIVOR') and not text:find('[Cc]rash site'),'Radio text must not name the chosen site')end
+end
+forcedSite=1
+originalPrint('PASS: Contact Sparrow gives a bounded approximate fix within 15 km, sharpens when closer and enforces a 30 s cooldown')
+
 local savedRandom=math.random
 math.random=function(n)if n then return 1 end;return 0.5 end
 reset();world.searchObjects=function(_,volume,callback)

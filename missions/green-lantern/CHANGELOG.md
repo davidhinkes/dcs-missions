@@ -1,5 +1,11 @@
 # Changelog
 
+## Randomized crash site — 2026-11-07
+
+- WP3 is now the centre of a 2.5 km search region. Each start picks one of four crash sites, then places Sparrow within 200 m of it; a site without a safe clearing falls through to another.
+- Added F10 Rescue > Contact Sparrow (direction fix): approximate bearing/range within 15 km, sharper when closer, 30 s cooldown.
+- Green smoke, hunt gate, patrol placement and Longbow breakoff now use Sparrow's actual position. North/east hunter placement no longer aborts setup if it fails. The F10 marker and a region circle remain at WP3.
+
 ## Mission Planner concealment — 2026-11-06
 
 - Applied the collection-wide enemy planner-concealment rule to all red groups, preserving deliberate mission intelligence and friendly planning. Deployment now checks the delivered archive.
