@@ -121,4 +121,9 @@ reset();advance(1);commands['Status / objectives']();assert(messages[#messages]:
 units['NEEDLE-1'].air=true;commands['Status / objectives']();assert(messages[#messages]:find('AIRBORNE')and messages[#messages]:find('Ground Crew will be hidden'))
 kill('RED-OBJECTIVE-1',true);units['NEEDLE-1'].air=false;commands['Status / objectives']();assert(messages[#messages]:find('LANDED')and messages[#messages]:find('round won'))
 output('PASS: Ground Crew diagnostic distinguishes native landed/airborne state and remains available after the round')
+local hiddenCount=0
+for _,country in pairs(mission.coalition.red.country)do for _,category in ipairs({'helicopter','plane','vehicle','ship','static'})do for _,g in pairs((country[category]or{}).group or{})do assert(g.hiddenOnPlanner==true and g.hidden==true and g.hiddenOnMFD==true);hiddenCount=hiddenCount+1 end end end
+assert(hiddenCount==5)
+assert(groups.NEEDLE.data.NavTargetPoints[1].text_comment=='1T|1|UNK')
+output('PASS: every red aircraft/objective/service/static group is hidden on planner; player 1T intelligence remains')
 output('ALL NEEDLE AND FANG TESTS PASSED (simulated APIs; not native AI combat)')
