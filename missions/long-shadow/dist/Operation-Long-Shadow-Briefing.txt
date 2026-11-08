@@ -1,0 +1,31 @@
+OPERATION LONG SHADOW - DEVELOPMENT TEST SLICE
+Syria / 07:00 local / single-player OH-58D
+
+SITUATION
+MAGPIE is a weapons-network coordinator who has spent the winter in a guarded compound in northern Homs. A source reports he moves to Hama this morning by road, in a small escorted convoy on the M5 highway. Ground forces cannot reach him and a strike from altitude would be seen coming. One Kiowa, flown low and patient, can. This is a fictional scenario.
+
+MISSION
+Covertly reach the M5 corridor, find and follow the convoy, and destroy MAGPIE's vehicle before it reaches Hama. Destroying the MAGPIE vehicle wins immediately. Escorts are optional. You fail if MAGPIE reaches the southern entrance of Hama (within 600 m of the destination) or if your Kiowa is lost.
+
+INTELLIGENCE
+- Departure: the M5 at the northern exit of Homs, N34 47.280 E036 43.290. Expected to roll between H+4 and H+8 minutes (mission time); the exact time is not known.
+- Route: north on the M5 through Talbiseh and Ar-Rastan to Hama. About 8.8 nm (straight line) from departure to 1T, then 9.7 nm to Hama.
+- Destination: Hama southern entrance on the M5, N35 05.700 E036 44.160.
+- Proposed attack point 1T: where the M5 is expected to cross the Orontes north of Ar-Rastan, N34 56.040 E036 43.620. This is the convoy's most likely passage point, converted from real-world coordinates; check it against the road on your map. It is a suggestion, not a requirement - attack wherever you like.
+- Convoy: five vehicles in column, about 50 km/h (27 kt), so roughly 19 minutes from departure to 1T. Order of march: BRDM-2 scout car (14.5 mm), DShK technical, MAGPIE in the UAZ-469 jeep (third vehicle), Ural truck, Ural with ZU-23 cannon at the rear. The ZU-23 and the heavy machine guns are dangerous inside about 2 km; stay outside that and use terrain and towns to hide.
+- If the convoy is fired on, or fires at you, it will try to run for Hama at about 72 km/h. A clean first shot is best.
+
+PLANNING
+Your flight plan has no waypoints except your start at FARP JUNIPER. Plan your own route, hide and battle positions in the Mission Planner. 1T is about 9.7 nm from FARP JUNIPER; Hama is about 16.1 nm. Enemy units are hidden from the Mission Planner and your F10 map shows friendly units only, with labels off.
+
+MMS PREPOINT
+Select MMS PREPT, R2 PPT, enter 1T and press Enter to slew to the proposed attack point. It marks a place on the road, not a vehicle and not a weapons lock.
+
+PONTIAC (MQ-9) SUPPORT
+Pontiac 1-1 is an unarmed MQ-9 already orbiting high over the M5 east of the road at 18,000 ft. It watches MAGPIE and calls the convoy's progress automatically: departure, then distance short of 1T at 8, 6, 4, 3, 2, 1 nm, passing 1T, and distance from Hama at 6, 4, 2, 1 nm once past. Each call gives road distance (or straight-line, labelled, if road data is unavailable), speed in knots and an ETA. It also reports if the convoy is alerted. Pontiac does NOT give coordinates or lase; finding and identifying the convoy is your job. F10 Other > Pontiac > Convoy report gives an update at any time. If Pontiac is lost, the mission continues without reports.
+
+START / LOADOUT
+You are Anvil 3-1 (SHADOW), hot on the ground at FARP JUNIPER, a covert single pad on the Houla plain west of the Orontes. Two AGM-114 Hellfires on the right pylon, M3P .50-cal with 500 rounds on the left, 30 flares, PDU, 181.4 kg (about 400 lb) fuel. There is no rearm or refuel service. Check gross weight, hover margin and fuel reserve in the cockpit. UHF preset 1 is 251.000; VHF AM preset 1 is the FARP frequency 127.500. Recovery to JUNIPER after the shot is optional.
+
+DEVELOPMENT STATUS
+Not yet flown. Coordinates were converted offline; the convoy's road following, Pontiac's orbit, the FARP site and the vehicle types UAZ-469 and Ural-375 ZU-23 need an in-game check. See the mission flight checklist.

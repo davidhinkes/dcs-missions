@@ -1,0 +1,12 @@
+# Long Shadow instructions
+
+- Read design, README, changelog, lessons, verification and flight checklist before edits. This is a separate Syria convoy-interception mission; preserve other missions and do not inherit their settings.
+- Single-player, one OH-58D. Covertly reach the M5, find, follow and destroy the MAGPIE vehicle in a moving convoy from Homs to Hama. Killing MAGPIE wins immediately; MAGPIE reaching Hama (within arrivalRadius of the destination) or player loss fails. Escorts are optional.
+- User choice: the player flight plan contains ONLY its start point. Intelligence is a single Kiowa target point 1T (`1T|1|UNK`) at the proposed attack point, plus briefing text and in-game F10 markers. Never add route waypoints for the player; the Mission Planner is for the pilot.
+- User choice: an MQ-9 (Pontiac) in the area calls out how far the convoy is from the proposed attack point. It is on station from mission start, unarmed, does not lase and never gives convoy coordinates — distance/speed/ETA relative to 1T, then to Hama once past. Drone loss or API faults stop reports only, never the mission.
+- All geography comes from WGS84 lat/lon in `src/config.json`, converted by `src/projection.mjs` (DCS Syria transverse Mercator). Briefing, markers, target point and convoy route derive from it. Moving a site means editing lat/lon there; rebuild updates everything.
+- Convoy: one late-activated red group `MAGPIE CONVOY` (BRDM-2, tt_DSHK, UAZ-469 `MAGPIE HVT`, Ural-375, Ural-375 ZU-23), On Road route Homs north → Talbiseh → 1T → Hama south. Lua activates it at a random time inside the briefed window (`LONG_SHADOW_DEPARTURE_DELAY` overrides). When hit or firing it re-routes once at alert speed.
+- Player: FARP JUNIPER, single SINGLE_HELIPAD ID 200, TakeOffGroundHot / From Ground Area Hot at alt 0 RADIO, no parking link. Two Hellfires (OH58D_AGM_114_R, pylon 5), M3P (pylon 1), 181.4 kg fuel, 30 flares, PDU. No rearm/refuel promise. Trees-only clearing precedes the scripts.
+- Hide all red groups with shared/tools/planner.mjs. Labels off, friendly-only map. Flags: 960 success, 961 failure, 962 MAGPIE destroyed.
+- Runtime lists passed to Lua must be converted to 1-based tables (the vendored serializer writes JS arrays from index 0).
+- Build/deploy with the shared runner slug `long-shadow`. Coordinates, road following, vehicle types, FARP terrain, drone orbit and the whole sortie are unflown; see flight-checklist.md. Never treat mock road paths as DCS road behaviour.
