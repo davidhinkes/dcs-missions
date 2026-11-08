@@ -1,0 +1,26 @@
+{
+  "geography": {
+    "projection": "DCS Syria transverse Mercator: central meridian 39E, k0 0.9996, false easting 282801 m, false northing -3879866 m. Points below were converted from the listed WGS84 lat/lon offline and are unverified in DCS.",
+    "farp": {"lat": 34.8780, "lon": 36.5420, "label": "FARP JUNIPER, Houla plain"},
+    "convoyStart": {"lat": 34.7880, "lon": 36.7215, "label": "Homs northern exit, M5"},
+    "talbiseh": {"lat": 34.8420, "lon": 36.7290, "label": "M5 at Talbiseh"},
+    "attackPoint": {"lat": 34.9340, "lon": 36.7270, "label": "M5 Orontes crossing north of Ar-Rastan"},
+    "destination": {"lat": 35.0950, "lon": 36.7360, "label": "Hama southern entrance, M5"},
+    "droneOrbit": {"lat": 34.8800, "lon": 36.7700, "label": "Pontiac orbit east of the M5"}
+  },
+  "farpFrequency": 127.5,
+  "playerFuelKg": 181.4,
+  "convoySpeed": 13.9,
+  "alertSpeed": 20,
+  "departureMinSeconds": 240,
+  "departureMaxSeconds": 480,
+  "activationTimeout": 30,
+  "arrivalRadius": 600,
+  "passRadius": 300,
+  "passRecede": 400,
+  "reportInterval": 5,
+  "approachCallsNm": [8, 6, 4, 3, 2, 1],
+  "destinationCallsNm": [6, 4, 2, 1],
+  "playerMissingGrace": 10,
+  "drone": {"altitude": 5500, "speed": 70, "fuelKg": 1300}
+}

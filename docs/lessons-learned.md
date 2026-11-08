@@ -30,6 +30,8 @@ Keep only reusable findings here. Store a mission's observed failures, coordinat
 
 ## Verification and delivery
 
+- The pinned authoring serializer writes JS arrays as 0-indexed Lua tables. Convert lists passed into mission Lua to 1-based tables, and assert the first element explicitly; `ipairs`/`#` otherwise skip it silently and count-based tests can agree with the bug (found in Long Shadow).
+
 - Capacity checks do not establish gross weight, hover performance or endurance. Distinguish those limits in the design and flight checks.
 - Separate portable archive checks, simulated logic tests and observed DCS sorties. Mock tests cannot establish scenery clearance, AI taxi/launch/attacks or cockpit usability.
 - Check time/radius boundaries, interruptions, delayed spawn and failure paths, not just the normal completion path.
