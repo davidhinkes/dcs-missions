@@ -27,6 +27,10 @@ local function finish(success,reason)
 end
 
 -- Departure time: fixed override for tests/replay, else random in the briefed window.
+-- DCS Lua 5.1 on Windows uses the C runtime rand(): the first draw after
+-- seeding with nearby values is almost identical (about 0.0013-0.10 for
+-- seeds 1-1000, i.e. always near H+4). Discard a few draws first.
+for _=1,3 do math.random() end
 S.departureDelay=LONG_SHADOW_DEPARTURE_DELAY or (C.departureMinSeconds+math.random()*(C.departureMaxSeconds-C.departureMinSeconds))
 S.departAt=timer.getTime()+S.departureDelay
 

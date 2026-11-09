@@ -10,7 +10,8 @@ local function reset(o)
  opts=o or {};eventHandler=nil;now=0;queue={};units={};groups={};flags={};messages={};commands={};marks={}
  dofile('.build/config.lua');dofile('.build/mission.lua');c=LONG_SHADOW_CONFIG
  env={mission=mission,info=function()end}
- LONG_SHADOW_DEPARTURE_DELAY=opts.random and nil or (opts.delay or 300)
+ -- Not `opts.random and nil or ...`: that idiom always yields the fallback.
+ if opts.random then LONG_SHADOW_DEPARTURE_DELAY=nil else LONG_SHADOW_DEPARTURE_DELAY=opts.delay or 300 end
  for _,side in pairs(mission.coalition)do for _,country in pairs(side.country or {})do for _,cat in ipairs({'helicopter','plane','vehicle'})do for _,d in pairs((country[cat]or{}).group or{})do
   local g={units={},data=d,active=not d.lateActivation,speed=c.convoySpeed,leg=1};groups[d.name]=g
   function g:isExist()return true end
@@ -152,7 +153,15 @@ output('PASS: renamed occupied Kiowa is acquired')
 reset({slope=true});advance(2);assert(LONG_SHADOW.phase=='ready'and count('uneven')==1 and not flags[961])
 output('PASS: uneven pad site is warned and logged without blocking the sortie')
 for _=1,20 do reset({random=true});local d=LONG_SHADOW.departureDelay;assert(d>=c.departureMinSeconds and d<=c.departureMaxSeconds)end
-output('PASS: random departure stays inside the briefed window')
+-- Nearby seeds must spread across the window (DCS Lua's first draw after a small seed is near zero).
+local quarters={}
+for seed=1,40 do
+ math.randomseed(seed);reset({random=true});local d=LONG_SHADOW.departureDelay
+ assert(d>=c.departureMinSeconds and d<=c.departureMaxSeconds)
+ quarters[math.min(4,math.floor((d-c.departureMinSeconds)/(c.departureMaxSeconds-c.departureMinSeconds)*4)+1)]=true
+end
+for q=1,4 do assert(quarters[q],'Departure should fall in every quarter of the window across seeds 1-40') end
+output('PASS: random departure stays inside the briefed window and spreads across it for nearby seeds')
 
 -- 6. Information contract: no coordinates in reports; markers and target point.
 reset();advance(400);commands['Convoy report']()

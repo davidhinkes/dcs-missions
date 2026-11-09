@@ -12,3 +12,7 @@ Passed:
 Not done:
 - Deployment: no DCS Saved Games folder exists here; `node shared/tools/mission.mjs deploy long-shadow` has not been run. The mission is not installed.
 - No DCS-native check of any kind: terrain/roads, spawn, AI driving, drone orbit, weapons, Mission Planner GUI. The installed-DCS Lua interpreter was not used. Vehicle type names UAZ-469 and Ural-375 ZU-23 are standard DCS names but are new to this collection and unverified here.
+
+## Departure randomness fix — 2026-11-08
+
+Run under DCS `luae.exe` (Steam install, Lua 5.1). The previous random-departure test never ran the random path (`opts.random and nil or 300` always yields 300). With that corrected, a new check that seeds 1–40 cover every quarter of the H+4–8 window fails without the fix and passes with three draws discarded before the departure draw. All Long Shadow logic tests and the archive verifier pass. How DCS seeds `math.random` at a real mission start is unverified; watch departure times across several sorties.

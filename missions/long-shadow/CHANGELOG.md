@@ -1,5 +1,10 @@
 # Long Shadow changelog
 
+## Departure randomness fix — 2026-11-08
+
+- Departure-time selection now discards three random draws first. Under DCS's Lua the first draw after a small or missing seed is near zero, so the convoy would have left at about H+4 nearly every time.
+- Fixed the random-departure test: its `opts.random and nil or …` override always fell back to the fixed 300 s, so randomness was never exercised. It now also checks that seeds 1–40 reach every quarter of the window.
+
 ## First development test slice — 2026-11-08
 
 - New Syria OH-58D convoy-interception mission: MAGPIE convoy Homs → Hama on the M5, proposed attack point 1T at the expected Orontes crossing north of Ar-Rastan.
