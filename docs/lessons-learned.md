@@ -25,6 +25,7 @@ Keep only reusable findings here. Store a mission's observed failures, coordinat
 - Test menu hierarchy, uniqueness and callback behavior. Flat callback lookup cannot detect duplicate labels or incorrect submenu placement.
 - Generate repeated briefing facts from shared mission configuration where practical; test them against the actual build.
 - Keep randomized search locations inside the promised bounds, including fallback placement. Record seeds for reproducible failures.
+- DCS's Lua 5.1 (`luae.exe`, Windows C runtime `rand()`) returns nearly identical first draws after nearby seeds: seeds 1–40 all gave the same `math.random(4)`. Discard a few draws before a gameplay choice, and run randomness tests under DCS's own `luae.exe`, not a portable Lua shim. Evidence: Green Lantern crash-site test, 2026-11-08. How DCS seeds missions at runtime remains unverified.
 - Map visibility, labels and scripted disclosure are separate controls. Check all of them against the intended information available to the player.
 - Simulated boarding, movement or recovery needs clear phase-specific instructions and explicit completion cues.
 

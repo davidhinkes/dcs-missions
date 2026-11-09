@@ -41,4 +41,8 @@ Shared planner helper and packed-archive deployment check confirm all 11 red gro
 
 Built in a cloud container without DCS. All 36 printed mock scenarios pass under Lupa 2.8 / Lua 5.1 (a local shim, not DCS luae.exe). They include 40 seeds covering all four sites, with Sparrow within 200 m of the chosen site and inside the 2.5 km region; patrols follow the site; site geometry clears Longbow's breakoff radius; fall-through when a site has no clearing; smoke gated on distance to Sparrow; and direction-fix range gate, cooldown, stated error bounds and sharpening. The portable archive verifier reports VERIFY OK; native Mission Editor open and compiled-trigger checks were skipped (no luae.exe). The planner check reports all 11 enemy groups hidden. Packed rescue.lua parses under Lua 5.1. Deployment was attempted and stopped before copying: no DCS Missions profile in this environment. Not deployed.
 
+## Crash-site randomness fix — 2026-11-08
+
+First run of the randomized build under DCS `luae.exe` (Steam install, Lua 5.1) failed "Every crash site should occur across seeds": seeds 1–40 all selected site 1, because the first `math.random` draw after nearby seeds is nearly constant. Lupa had masked this. After discarding three draws before site selection, the 40 seeds give 10 of each site and all mission logic tests pass under `luae.exe`. How DCS seeds `math.random` for a real mission start is unverified; check across several sorties that more than one site appears.
+
 Pending in DCS: terrain/clearing suitability of the north, east and west sites and their relative patrol placements; whether the F10 circle draws; whether the fix accuracy makes the search fun rather than tedious; total sortie time with up to 2.4 km of extra search.

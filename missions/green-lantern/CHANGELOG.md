@@ -1,5 +1,9 @@
 # Changelog
 
+## Crash-site randomness fix — 2026-11-08
+
+- Crash-site selection now discards three random draws before choosing. Under DCS's Lua the first draw after nearby seeds was nearly constant, so the centre site could be chosen almost every time.
+
 ## Randomized crash site — 2026-11-07
 
 - WP3 is now the centre of a 2.5 km search region. Each start picks one of four crash sites, then places Sparrow within 200 m of it; a site without a safe clearing falls through to another.

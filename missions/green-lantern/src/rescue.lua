@@ -91,6 +91,10 @@ local function randomPickup()
   -- Random site order; a site with no safe clearing falls through to the next.
   -- GREEN_LANTERN_SITE (1-4), if set before this script loads, forces the first
   -- choice for tests or replaying a reported sortie.
+  -- DCS Lua 5.1 on Windows uses the C runtime rand(): the first draw after
+  -- seeding with nearby values is almost identical (seeds 1-40 all gave
+  -- site 1). Discard a few draws so the site choice depends on the seed.
+  for _=1,3 do math.random() end
   local order,remaining={}, {}
   for i=1,#crashSites do remaining[i]=i end
   local forced=tonumber(GREEN_LANTERN_SITE)
