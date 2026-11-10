@@ -70,10 +70,11 @@ Phases: `waiting` (player not yet seen) → `ready` → `rolling` (convoy activa
 | Item | Contract |
 | --- | --- |
 | Start | Airborne on station at mission start, 18,000 ft MSL, orbiting east of the M5. No transit, no dispatch command. |
-| Knowledge | Scripted: while Pontiac is alive it "sees" MAGPIE. No sensor/LOS simulation. |
+| Knowledge | Scripted: while Pontiac is alive it "sees" MAGPIE for reports (no sensor/LOS simulation). The laser alone requires terrain line of sight (land.isVisible) and 25 km slant range. |
 | Automatic calls | Departure (once, with composition and position in column); road distance short of 1T at 8, 6, 4, 3, 2, 1 nm (once each, tightest newly crossed threshold only); "passing 1T" (once); distance from Hama at 6, 4, 2, 1 nm (once each); convoy alerted (once). Each call: distance, label `by road` (DCS `land.findPathOnRoads`) or `direct` (fallback, labelled), speed in knots and ETA, or `convoy halted` below 2 m/s. |
 | Passing rule | MAGPIE within 300 m of 1T, or more than 400 m farther than its closest approach after coming within 1.5 km. Latched. |
-| On demand | F10 Other > Pontiac > Convoy report (one submenu, one command): pre-departure status, current progress, escorts remaining, alerted/unaware; mission result after the end. |
+| Laser | F10 Other > Pontiac > Lase MAGPIE / Stop lasing (user decision, 2026-11-10). Lases MAGPIE's vehicle only, code 1688, only while the player is within 3 nm (laserGateNm) of it; re-checked every second and switched off with a message when the gate, line of sight, range, drone or target fails, or on the result. No coordinates. Laser faults disable Pontiac support only. |
+| On demand | F10 Other > Pontiac > Convoy report: pre-departure status, current progress, escorts remaining, alerted/unaware; mission result after the end. |
 | Never | Coordinates, bearings, lasing, weapon release, internal unit names. |
 | Loss / fault | Pontiac dead → one-time "Pontiac lost" and the report command says unavailable. Any Lua/API fault in drone reporting disables Pontiac reports with one message; departure, alert and result logic continue. |
 

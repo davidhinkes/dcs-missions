@@ -18,8 +18,16 @@ local function flat(a,b)return math.sqrt((a.x-b.x)^2+(a.z-b.z)^2)end
 local function vec3(p)return {x=p.x,y=land.getHeight({x=p.x,y=p.y}),z=p.y}end
 local function isConvoy(name)return type(name)=='string' and name:find('^MAGPIE ')~=nil end
 
+-- Pontiac laser spot (optional support). Never fails the mission.
+local function stopLaser(reason)
+  local spot=S.laser;S.laser=nil
+  if spot then pcall(function()spot:destroy()end) end
+  if spot and reason then say('Pontiac: laser off - '..reason..'.') end
+end
+
 local function finish(success,reason)
   if terminal() then return end
+  stopLaser()
   S.phase=success and 'won' or 'failed';S.result=reason
   trigger.action.setUserFlag(success and 960 or 961,1)
   if success then trigger.action.setUserFlag(962,1) end
@@ -88,7 +96,7 @@ local function droneCall(fn)
   if S.droneDisabled then return end
   local ok,err=pcall(fn)
   if not ok then
-    S.droneDisabled=true
+    S.droneDisabled=true;stopLaser()
     env.info('[LONG_SHADOW] Pontiac support disabled: '..tostring(err))
     say('Pontiac support unavailable. No further convoy reports; MAGPIE is still your target.')
   end
@@ -139,6 +147,39 @@ local function convoyReport()
     for i=1,#C.convoyTypes do if i~=C.hvtIndex and unit(C.convoyGroup..'-'..i) then escorts=escorts+1 end end
     pontiac(progressText(r)..string.format(' %d escort vehicle%s remaining. %s',escorts,escorts==1 and '' or 's',S.alerted and 'Convoy is alerted and running.' or 'Convoy appears unaware.'))
   end)
+end
+
+---------------------------------------------------------------------------
+-- Pontiac laser (optional, on request): lases MAGPIE's vehicle only while the
+-- player is within laserGateNm of it and Pontiac has a terrain line of sight.
+-- Finding the convoy stays the player's job; no coordinates are given.
+---------------------------------------------------------------------------
+local function laserBlock()
+  if terminal() then return 'mission ended' end
+  if S.droneDisabled then return 'Pontiac support unavailable' end
+  local drone=unit(C.drone.unit);if not drone then return 'Pontiac unavailable' end
+  local hvt=S.activated and unit(C.hvt);if not hvt then return 'convoy not moving yet' end
+  local player=unit(S.playerName or C.player);if not player then return 'no contact with your Kiowa' end
+  if flat(player:getPoint(),hvt:getPoint())>C.drone.laserGateNm*NM then return string.format('close within %d nm of the convoy first',C.drone.laserGateNm) end
+  if not Spot or not Spot.createLaser or not land.isVisible then return 'laser unavailable' end
+  local source,p=drone:getPoint(),hvt:getPoint();local aim={x=p.x,y=p.y+1,z=p.z}
+  local dx,dy,dz=aim.x-source.x,aim.y-source.y,aim.z-source.z
+  if dx*dx+dy*dy+dz*dz>C.drone.laserMaxRange^2 then return 'target beyond laser range' end
+  if not land.isVisible(source,aim) then return 'no line of sight to the target' end
+  return nil,drone,aim
+end
+local function laseMagpie()
+  if S.laser then pontiac(string.format('Already lasing MAGPIE\'s vehicle, code %d.',C.drone.laserCode));return end
+  local reason,drone,aim=laserBlock()
+  if reason then pontiac('Unable to lase: '..reason..'.');return end
+  S.laser=Spot.createLaser(drone,{x=0,y=0,z=0},aim,C.drone.laserCode)
+  if not S.laser then pontiac('Unable to create a laser spot.');return end
+  pontiac(string.format('Laser on MAGPIE\'s vehicle, code %d. Positively identify before firing. I keep it on while you stay within %d nm and I have line of sight.',C.drone.laserCode,C.drone.laserGateNm))
+end
+local function updateLaser()
+  if not S.laser then return end
+  local reason,_,aim=laserBlock()
+  if reason then stopLaser(reason) else S.laser:setPoint(aim) end
 end
 
 ---------------------------------------------------------------------------
@@ -222,6 +263,7 @@ local function tick(_,now)
     if hvt then S.seen.hvt=true
     elseif now-S.activatedAt>C.activationTimeout then error('MAGPIE vehicle did not appear after activation') end
   end
+  if S.laser then droneCall(updateLaser) end
   -- No result while an acquired player is missing (loss grace still running).
   if S.seen.player and not player then return now+1 end
   if S.seen.hvt then
@@ -267,6 +309,13 @@ end
 
 local menu=missionCommands.addSubMenuForCoalition(2,'Pontiac')
 missionCommands.addCommandForCoalition(2,'Convoy report',menu,convoyReport)
+missionCommands.addCommandForCoalition(2,'Lase MAGPIE',menu,function()
+  if S.droneDisabled then pontiac('Support unavailable; no laser.');return end
+  droneCall(laseMagpie)
+end)
+missionCommands.addCommandForCoalition(2,'Stop lasing',menu,function()
+  if S.laser then stopLaser('stopped on request') else pontiac('Laser already off.') end
+end)
 timer.scheduleFunction(function(_,now)
   local ok,nextTime=pcall(tick,nil,now)
   if not ok then env.info('[LONG_SHADOW] Mandatory setup error: '..tostring(nextTime));finish(false,'Mission setup failed (convoy did not start); see dcs.log.');return nil end

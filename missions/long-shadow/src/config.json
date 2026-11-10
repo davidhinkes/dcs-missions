@@ -25,5 +25,5 @@
   "stallMoveMetres": 50,
   "stallNoticeSeconds": 300,
   "stallSeconds": 900,
-  "drone": {"altitude": 5500, "speed": 70, "fuelKg": 1300}
+  "drone": {"altitude": 5500, "speed": 70, "fuelKg": 1300, "laserCode": 1688, "laserGateNm": 3, "laserMaxRange": 25000}
 }

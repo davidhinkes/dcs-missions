@@ -1,5 +1,9 @@
 # Long Shadow changelog
 
+## Pontiac laser — 2026-11-10
+
+- Pontiac can now lase MAGPIE's vehicle on request (F10 Other > Pontiac > Lase MAGPIE, code 1688) once you are within 3 nm of the convoy. The spot follows the UAZ and switches off automatically if you open beyond 3 nm, Pontiac loses line of sight, the drone or target is lost, or the round ends; Stop lasing turns it off. Pontiac still gives no coordinates.
+
 ## Convoy robustness — 2026-11-10
 
 - The alert dash now starts from the leading surviving vehicle. It previously started at MAGPIE's position (third in column), which could turn the lead vehicles back.
