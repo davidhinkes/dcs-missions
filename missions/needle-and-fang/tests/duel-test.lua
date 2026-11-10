@@ -75,14 +75,14 @@ assert(player.units[1].payload.fuel==181.4)
 assert(math.abs(math.sqrt((c.redAsset.x-c.blueAsset.x)^2+(c.redAsset.y-c.blueAsset.y)^2)/1852-8)<0.0001)
 assert(player.NavTargetPoints[1].x==c.redAsset.x and player.NavTargetPoints[1].y==c.redAsset.y and player.NavTargetPoints[1].text_comment=='1T|1|UNK')
 for _,p in pairs(player.route.points)do assert(math.sqrt((p.x-c.redAsset.x)^2+(p.y-c.redAsset.y)^2)>500)end
-local p=player.route.points[1];assert(p.type=='TakeOffParkingHot'and p.action=='From Parking Area Hot'and p.linkUnit==200 and p.helipadId==200 and player.units[1].parking=='1'and player.units[1].parking_id=='1'and player.units[1].alt_type=='BARO')
+local p=player.route.points[1];local u=player.units[1];assert(p.type=='TakeOffGroundHot'and p.action=='From Ground Area Hot'and p.alt==0 and p.alt_type=='RADIO'and not p.linkUnit and not p.helipadId and not u.parking and not u.parking_id and u.alt==0 and u.alt_type=='RADIO','player must start on the ground at zero AGL with no parking link')
 local p=hind.route.points[1];local u=hind.units[1];assert(p.type=='TakeOffGroundHot'and p.action=='From Ground Area Hot'and p.alt==0 and p.alt_type=='RADIO'and not p.linkUnit and not p.helipadId and not u.parking and u.alt==0 and u.alt_type=='RADIO')
 local pads=0;for _,side in pairs(mission.coalition)do for _,country in pairs(side.country or{})do for _,g in pairs((country.static or{}).group or{})do for _,u in pairs(g.units)do
- if u.type=='SINGLE_HELIPAD'or u.type=='FARP'then pads=pads+1;local p=u.unitId==200 and c.blueFarp or c.redFarp;assert(u.shape_name==(u.unitId==200 and 'FARPS'or'FARP')and u.x==p.x and u.y==p.y)end
+ if u.type=='SINGLE_HELIPAD'or u.type=='FARP'then pads=pads+1;local p=u.unitId==200 and c.blueFarp or c.redFarp;assert(u.type=='SINGLE_HELIPAD'and u.shape_name=='FARP'and u.x==p.x and u.y==p.y)end
 end end end end;assert(pads==2)
 assert(groups['BLUE-OBJECTIVE'].data.units[1].type=='tt_DSHK'and groups['RED-OBJECTIVE'].data.units[1].type=='tt_DSHK')
 assert(groups['RED-OBJECTIVE'].data.hidden and mission.forcedOptions.labels==0 and mission.forcedOptions.optionsView=='optview_onlyallies')
-output('PASS: gun/Stinger loadout, native linked BLUE FARP parking and separate RED ground-start pad, 8 nm spacing and target-only prepoint match the mission contract')
+output('PASS: gun/Stinger loadout, BLUE and RED zero-AGL ground starts on their own helipads, 8 nm spacing and target-only prepoint match the mission contract')
 local tasks=hind.route.points[1].task.params.tasks
 assert(tasks[1].id=='EngageTargetsInZone'and tasks[1].params.targetTypes[1]=='Helicopters')
 assert(tasks[2].id=='EngageGroup'and tasks[2].params.groupId==groups['BLUE-OBJECTIVE'].data.groupId and tasks[2].params.weaponType==9663676414)

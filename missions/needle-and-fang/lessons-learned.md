@@ -17,3 +17,8 @@ The user flew the first-target-race revision and reported no rearm service. Inst
 The user reports the complete service camp still failed: Ground Crew was missing or nobody answered. Installed file matched the previous deployment. The installed OH58D comm.lua delegates to Scripts/UI/RadioCommandDialogPanel/Config/Common/Ground Crew.lua; that builder hides Ground Crew while Unit:inAir() is true and selects the local/intercom communicator. Thus neither a tuned ATC frequency nor more supply trucks establishes contact. BLUE now uses a conventional FARP and explicit native hot parking, with one aircraft/slot; RED keeps its ground start. Status/log diagnostics expose native landed/base-registration state without claiming service readiness. The installed DCS bridge was read-only reachable but at the menu, so this revision was not flight-verified. Do not infer the exact prior failure cause from the new configuration passing offline checks.
 
 - Mission Planner visibility is a separate contract from friendly-only F10 and hiddenOnMFD. The installed editor removes hiddenOnPlanner groups and their map objects. Apply the flag to aircraft and support/static groups as well as ground objectives; retain deliberate player prepoints independently. Source-level flag verification does not replace native planner GUI acceptance.
+
+
+## Airborne spawn from a parking start — 2026-11-10
+
+The FARPS parking start (TakeOffParkingHot, slot 1) with a BARO altitude copied from another mission spawned the player about 20 ft up; the aircraft fell and crashed. Native parking did not correct the altitude. Use zero-AGL RADIO ground starts unless a parking spot's spawn height has been measured in DCS.

@@ -1,5 +1,9 @@
 # Changelog
 
+## Ground start on the pad — 2026-11-10
+
+- User reported the Kiowa spawning about 20 ft in the air and crashing. The four-pad FARPS parking start used a guessed 33.38 m BARO altitude. BLUE FARP is a single helipad again and the Kiowa starts on it engines-running at zero height above ground, with no parking link (the Hind's start and Green Lantern's HAVEN pads at this same spot). Services, warehouse and duel rules unchanged. Ground Crew rearm on this pad remains unconfirmed.
+
 ## Mission Planner concealment — 2026-11-06
 
 - Explicitly hid all red aircraft, objective, service vehicles and static FARP groups from the preflight Mission Planner, including their routes. Retained the player's deliberate 1T ground-target intelligence.

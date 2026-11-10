@@ -49,3 +49,8 @@ Installed editor source me_map_window.lua explicitly removes groups with hiddenO
 ## Collection-wide planner policy — 2026-11-06
 
 Shared planner helper and packed-archive deployment check confirm all 5 red groups concealed, including aircraft and static/support groups. Mission logic tests and native Lua/editor/archive routines pass in the checked deploy workflow. A structured before/after archive comparison confirms that only red-group visibility fields changed; friendly and neutral groups, routes, prepoints, search/trigger zones, conditions/tasks and embedded resources are identical. A negative check rejects a deliberately omitted planner flag. Installed SHA-256: d57c707a2346c5d50dc9416eab3477862e7839d97b56204702b2c11da3911078. The existing installed revision matched tracked archive contents before replacement and was backed up. Native Mission Planner GUI inspection remains pending; this adds no native flight/rearm acceptance.
+
+
+## Ground start on the pad — 2026-11-10
+
+BLUE start changed from FARPS parking to a SINGLE_HELIPAD zero-AGL ground start after the user's airborne-spawn crash report. Build assertions and the mock suite check both helicopters use TakeOffGroundHot at alt 0 RADIO with no parking links, and both pads are SINGLE_HELIPAD/FARP. All logic tests and the archive verifier pass under DCS `luae.exe`. Pending in DCS: the Kiowa sits on the pad at start, and Ground Crew rearm on this pad.
