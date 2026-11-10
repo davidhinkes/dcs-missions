@@ -256,8 +256,11 @@ local function activate(name)
 end
 local function launchGuardian()
   if S.coverAt then say('Guardian has already been released from STENNIS.');return end
-  activate('GUARDIAN');activate('WEASEL');S.coverAt=timer.getTime();S.seadAt=S.coverAt
-  say('STENNIS: Guardian fighter sweep and Weasel SEAD released for launch. Bruiser CAS follows in three minutes. Overlord Hawkeye provides radar support on 251 AM. Hold at the IP until cover checks in.',30)
+  -- The package is already airborne at offshore marshal points; release spawns it there
+  -- so cover can reach the extraction before the Kiowas (see design.md, support timing).
+  activate('GUARDIAN');activate('WEASEL');activate('BRUISER')
+  S.coverAt=timer.getTime();S.seadAt=S.coverAt;S.casAt=S.coverAt
+  say('STENNIS: package airborne at marshal and pushing. Guardian fighter sweep, Weasel SEAD and Bruiser CAS released together. Overlord Hawkeye provides radar support on 251 AM. Guardian expects the extraction area in about 3-4 minutes; hold at the IP if cover has not checked in.',30)
 end
 local function requestSEAD()
   if not S.seadAt then say('Launch the air package first using F10.');return end
@@ -294,10 +297,6 @@ local function holdCAS()
   say('Bruiser: hold fire. Pending attack requests cancelled. Weapons already released cannot be recalled.')
 end
 local function updateCAS(now)
-  if S.coverAt and not S.casAt and now-S.coverAt>=180 then
-    activate('BRUISER');S.casAt=now
-    say('STENNIS: Wave 2, Bruiser CAS, released for carrier launch. Mavericks and guns available on request.')
-  end
   if not S.casAt then return end
   local near=false
   for _,name in ipairs({'BRUISER-1','BRUISER-2'}) do
@@ -457,9 +456,9 @@ local function status()
   if u and pickup and not S.boarded then text=text..string.format('. WP3 search region centre %.1f km away.',distance(u:getPoint(),searchCenter)/1000) end
   if S.boarded then text=text..' Sparrow aboard. '..havenNavigation(u)
   else text=text..' Sparrow is somewhere within 2.5 km of WP3. Use Rescue > Contact Sparrow for a rough direction fix, then request green smoke within 2 km of him. Land within 400 m and hold still: 20 seconds close in, up to two minutes at maximum distance.' end
-  if S.coverAt then text=text..' Guardian released from STENNIS.' else text=text..' Guardian launches at your takeoff, or via F10 launch request.' end
+  if S.coverOnStation then text=text..' Guardian on station over extraction.' elseif S.coverAt then text=text..' Guardian pushing from marshal.' else text=text..' Carrier package holding at marshal; released at your takeoff, or via F10 launch request.' end
   text=text..(S.radarCleared and ' Coastal SA-6 tracking radar destroyed.' or S.seadAt and ' Weasel working coastal radar threat.' or ' Weasel SEAD waiting for package launch.')
-  text=text..(S.casOnStation and ' Bruiser CAS in range.' or S.casAt and ' Bruiser CAS inbound.' or ' Bruiser CAS is wave 2, three minutes behind Guardian.')
+  text=text..(S.casOnStation and ' Bruiser CAS in range.' or S.casAt and ' Bruiser CAS inbound.' or ' Bruiser CAS releases with the package.')
   text=text..(S.owReturning and ' Longbow returning to HAVEN.' or S.owTarget and ' Longbow attacking.' or S.owReady and ' Longbow overwatch ready.' or ' Longbow staging/inbound.')
   say(text,25)
 end

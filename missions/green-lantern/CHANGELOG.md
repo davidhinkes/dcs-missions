@@ -1,5 +1,12 @@
 # Changelog
 
+## Carrier package arrives first — 2026-11-10
+
+- Guardian, Weasel and Bruiser now start airborne at offshore marshal points (already launched from STENNIS) instead of launching from the deck at your takeoff. They push together on takeoff or via F10 Launch carrier package; Bruiser no longer waits three minutes.
+- Estimated arrival: Guardian over the extraction area about 3–5 minutes after release and Bruiser at its CAS hold about 2–4 minutes, versus about 6 minutes for the Kiowas to reach the hunt gate. Previously 12–18 minutes.
+- Longer on-station time (40 minutes for Guardian/Bruiser, 30 for Weasel). All still recover aboard STENNIS; Overlord still deck-launches at mission start.
+- Status reports whether Guardian is holding at marshal, pushing, or on station.
+
 ## Crash-site randomness fix — 2026-11-08
 
 - Crash-site selection now discards three random draws before choosing. Under DCS's Lua the first draw after nearby seeds was nearly constant, so the centre site could be chosen almost every time.

@@ -29,7 +29,7 @@ For Longbow, get within 2 km of the vehicles you want attacked, then select **Ov
 
 Longbow holds around a staging point, not a guaranteed stationary firing position. Native AI may maneuver to fire; the script breaks off if its leader closes within 4 km of Sparrow, when separation becomes unsafe, on target destruction or after 90 seconds. Hold fire cannot recall a released missile. Accuracy, guidance, vegetation/building masking and native aircraft behavior require a DCS flight check.
 
-STENNIS starts 70 nm northwest of extraction. Request the carrier package before departure; takeoff launches it as a fallback. Allow roughly 12–18 minutes for fighter launch/climb/transit; Bruiser launches three minutes later and needs CAS clearance. Hold at WP2 if cover has not arrived. Labels are off; F10 shows friendly units only.
+STENNIS starts 70 nm northwest of extraction. Its strike package (Guardian, Weasel, Bruiser) is already airborne at offshore marshal points about 20 nm from station and pushes together when you take off, or earlier via Launch carrier package. Estimated arrival: Guardian over extraction about 3–5 minutes after release, Bruiser at its CAS hold about 2–4 minutes — before you reach the 8 km hunt gate (about 6 minutes from HAVEN at 90 kt). Bruiser still needs CAS clearance. Hold at WP2 if Guardian has not checked in. They recover aboard STENNIS; Overlord still launches from the deck at mission start. Labels are off; F10 shows friendly units only.
 
 ## Development status
 
