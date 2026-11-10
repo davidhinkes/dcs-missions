@@ -2,6 +2,14 @@ QUIET_TIDE={phase='setup',inserted=false}
 local S,C=QUIET_TIDE,assert(QUIET_TIDE_CONFIG)
 local function say(t)trigger.action.outTextForCoalition(2,'QUIET TIDE: '..t,20);env.info('[QUIET_TIDE] '..t)end
 local function alive(n)local u=Unit.getByName(n);if u and u:isExist() and u:getLife()>0 then return u end end
+-- The player's Kiowa: ANVIL-1, or the occupied OH-58D if the slot was renamed.
+local function playerUnit()
+ local u=alive(S.playerName or 'ANVIL-1')
+ if not u and coalition and coalition.getPlayers then
+  for _,c in ipairs(coalition.getPlayers(2) or {})do if c:isExist() and c:getLife()>0 and c:getTypeName()=='OH58D' then u=c;S.playerName=c:getName();break end end
+ end
+ return u
+end
 local function ctrl(n)local g=Group.getByName(n);if g and g:isExist()then return g:getController()end end
 local function dist(a,b)return math.sqrt((a.x-b.x)^2+(a.z-b.z)^2)end
 local function ground(p)return {x=p.x,y=land.getHeight({x=p.x,y=p.y}),z=p.y}end
@@ -47,7 +55,7 @@ local function holdFire()
  local c=ctrl('SWORD');if c then c:resetTask();c:setOption(0,4)end
 end
 local function strikeSafe(target)
- for _,name in ipairs({'ANVIL-1','ANVIL-2','LIFELINE-1'})do local u=alive(name);if u and dist(u:getPoint(),target:getPoint())<700 then return false end end
+ for _,name in ipairs({'ANVIL-1','ANVIL-2','LIFELINE-1',S.playerName or 'ANVIL-1'})do local u=alive(name);if u and dist(u:getPoint(),target:getPoint())<700 then return false end end
  return not S.inserted and dist(target:getPoint(),S.lz)<=2500
 end
 local function updateStrike(now)
@@ -87,7 +95,7 @@ local function clearTransport()
  if S.phase=='return'then say('Lifeline is returning.');return end
  if S.phase=='ready'then say('Take off first; Lifeline will launch automatically.');return end
  if S.phase=='inserting'then say('Lifeline already cleared; cover the LZ.');return end
- local lead=alive('ANVIL-1');if not lead or dist(lead:getPoint(),S.lz)>8000 then say('Move within 8 km of the actual insertion site.');return end
+ local lead=playerUnit();if not lead or dist(lead:getPoint(),S.lz)>8000 then say('Move within 8 km of the actual insertion site.');return end
  if not safeLZ()then say('Insertion site threatened. Clear nearby hostile ground units first.');return end
  local u=assert(alive('LIFELINE-1'));local land=wp(S.lz,'SEAL INSERTION',30)
  land.task.params.tasks={{number=1,enabled=true,auto=false,id='Land',params={point={x=S.lz.x,y=S.lz.z},durationFlag=false,duration=C.insertionSeconds,combatLandingFlag=false}}}
@@ -128,8 +136,11 @@ end
 local function tick(_,now)
  if terminal()then return nil end
  if S.phase=='setup'then local ok,err=pcall(setup);if not ok then endMission('failed','Setup failed: '..tostring(err));return nil end end
- local lead,hawk,boat=alive('ANVIL-1'),alive('LIFELINE-1'),alive('TARAWA-1')
- for name,u in pairs({lead=lead or false,transport=hawk or false,ship=boat or false})do
+ local lead,hawk,boat=playerUnit(),alive('LIFELINE-1'),alive('TARAWA-1')
+ -- A brief player disappearance (slot change, respawn) is tolerated for playerMissingGrace seconds.
+ if lead then S.leadSeen=true;S.leadMissingAt=nil
+ elseif S.leadSeen then S.leadMissingAt=S.leadMissingAt or now;if now-S.leadMissingAt>=C.playerMissingGrace then endMission('failed','lead lost; insertion failed.');return nil end end
+ for name,u in pairs({transport=hawk or false,ship=boat or false})do
   if u then S[name..'Seen']=true elseif S[name..'Seen']then endMission('failed',name..' lost; insertion failed.');return nil end
  end
  if not lead or not hawk or not boat then return now+2 end

@@ -22,5 +22,6 @@
   "recoverySeconds": 20,
   "lzRadius": 80,
   "shipRadius": 180,
-  "teamSize": 6
+  "teamSize": 6,
+  "playerMissingGrace": 10
 }

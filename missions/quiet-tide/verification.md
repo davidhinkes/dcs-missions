@@ -21,3 +21,8 @@ Follow [flight-checklist.md](flight-checklist.md) before expanding this slice. A
 ## Collection-wide planner policy — 2026-11-06
 
 Shared planner helper and packed-archive deployment check confirm all 3 red groups concealed, including aircraft and static/support groups. Mission logic tests and native Lua/editor/archive routines pass in the checked deploy workflow. A structured before/after archive comparison confirms that only red-group visibility fields changed; friendly and neutral groups, routes, prepoints, search/trigger zones, conditions/tasks and embedded resources are identical. A negative check rejects a deliberately omitted planner flag. Installed SHA-256: aa542d8d875b6a1040aa2a0adc2bcb2b54e0b189a9b02d8465728f3415d94629. The existing installed revision matched tracked archive contents before replacement and was backed up. Native Mission Planner GUI inspection remains pending; this adds no native flight/rearm acceptance.
+
+
+## Player-loss grace — 2026-11-10
+
+Review found Quiet Tide failed the moment `ANVIL-1` was missing and never discovered a renamed player slot. Added occupied-OH-58D discovery and a 10 s `playerMissingGrace` for the lead only. Mock tests cover failure after the grace and survival of a brief absence. All logic tests and the archive verifier pass under DCS `luae.exe`. Renamed-slot discovery has no Quiet Tide mock test.
