@@ -53,5 +53,6 @@
       "y": 12130.177058387668
     },
     "stationExitRadius": 4000
-  }
+  },
+  "playerMissingGrace": 10
 }

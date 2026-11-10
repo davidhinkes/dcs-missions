@@ -11,6 +11,16 @@ local function copy(t)if type(t)~='table'then return t end;local n={};for k,v in
 local function group(n)return Group.getByName(n)end
 local function controller(n)local g=group(n);if g and g:isExist()then return g:getController()end end
 local function terminal()return S.phase=='complete' or S.phase=='partial' or S.phase=='failed'end
+-- The player's Kiowa: LATCH-1, or the occupied OH-58D if the slot was renamed.
+local function playerUnit()
+  local u=alive(S.playerName or 'LATCH-1')
+  if not u and coalition and coalition.getPlayers then
+    for _,candidate in ipairs(coalition.getPlayers(2) or {})do
+      if candidate:isExist() and candidate:getLife()>0 and candidate:getTypeName()=='OH58D' then u=candidate;S.playerName=candidate:getName();break end
+    end
+  end
+  return u
+end
 local function stopLaser(announce)
   local laser=S.laser;S.laser=nil
   if laser then local ok,err=pcall(function()laser:destroy()end);if not ok then env.info('[OPEN_DOOR] Laser cleanup failed: '..tostring(err))end end
@@ -32,7 +42,7 @@ local function eligibleLaser(u,drone)
   local p=laserPoint(u);local source=drone:getPoint()
   if distance(p,point(C.building))<C.drone.protectedRadius then return false end
   for i=1,C.hostages do local h=alive('HOSTAGES-'..i);if h and distance(p,h:getPoint())<C.drone.protectedRadius then return false end end
-  for _,name in ipairs({'LATCH-1','LATCH-2','LATCH-3','LATCH-4','LIFELINE-1'})do
+  for _,name in ipairs({'LATCH-1','LATCH-2','LATCH-3','LATCH-4','LIFELINE-1',S.playerName or 'LATCH-1'})do
     local h=alive(name);if h and distance(p,h:getPoint())<C.drone.friendlyRadius then return false end
   end
   local dx,dy,dz=p.x-source.x,p.y-source.y,p.z-source.z
@@ -49,7 +59,7 @@ local function targetReport(u)
 
   local lat,lon
   if coord and coord.LOtoLL then lat,lon=coord.LOtoLL(p);text=text..string.format('Target %.6f latitude, %.6f longitude. ',lat,lon)end
-  local player=alive('LATCH-1')
+  local player=playerUnit()
   if player then
     local from=player:getPoint();local bearing=math.deg(math.atan2(p.z-from.z,p.x-from.x));local reference='grid'
     if lat and coord and coord.LOtoLL then
@@ -234,7 +244,7 @@ local function requestLand()
   if S.boarded or S.phase=='return'then say('Lifeline is returning to FOOTHOLD.');return end
   if not S.launched then say('Lifeline launches when the Kiowa lead takes off.');return end
   if S.phase=='ingress' or S.phase=='rescue'then say('Lifeline already cleared; cover the landing area.');return end
-  local lead=alive('LATCH-1');if not lead or distance(lead:getPoint(),point(C.building))>10000 then say('Move closer to the objective before clearing the extraction.');return end
+  local lead=playerUnit();if not lead or distance(lead:getPoint(),point(C.building))>10000 then say('Move closer to the objective before clearing the extraction.');return end
   if not safe()then say('Extraction area is not secure. Neutralize the known SAM and close defenders before clearing Lifeline.');return end
   local ctrl=controller('LIFELINE');local bh=alive('LIFELINE-1');if not ctrl or not bh then return end
   -- Native temporary-ground-landing task, indefinite until rescue completion or wave-off.
@@ -317,8 +327,13 @@ local function tick(_,now)
     S.droneOnStation=arrived or false
     updateLaser()
   end)end
-  local player=alive('LATCH-1')
-  if player then S.playerSeen=true elseif S.playerSeen then result('failed','Kiowa lead lost.');return nil end
+  local player=playerUnit()
+  -- A brief disappearance (slot change, respawn) is tolerated for playerMissingGrace seconds.
+  if player then S.playerSeen=true;S.playerMissingAt=nil
+  elseif S.playerSeen then
+    S.playerMissingAt=S.playerMissingAt or now
+    if now-S.playerMissingAt>=C.playerMissingGrace then result('failed','Kiowa lead lost.');return nil end
+  end
   local bh=alive('LIFELINE-1')
   if bh then S.hawkSeen=true elseif S.hawkSeen then S.onboard=0;result('failed','Lifeline lost. Extraction failed.');return nil end
   if not player or not bh then return now+2 end
