@@ -26,7 +26,7 @@ What is simulated or abstracted, information available to the player, randomizat
 
 ## Support and player-feedback contract
 
-For each support asset specify start location/altitude, automatic or requested departure, transit estimate, arrival criteria and one-time report, available tactical commands, loss/timeout behavior and whether its failure can affect the main objective. Separate a request from observed arrival/action.
+For each support asset specify start location/altitude, automatic or requested departure, transit estimate compared against the player's fastest time to the first enemy activation gate (with the margin the build asserts), arrival criteria and one-time report, available tactical commands, loss/timeout behavior and whether its failure can affect the main objective. Separate a request from observed arrival/action.
 
 List complete F10 paths and their selection count. For each phase state the cue, next player action, blocked-action explanation and retry behavior. Specify text versus actual audio and what intelligence may be disclosed. Use cockpit-usable coordinates/directions.
 
