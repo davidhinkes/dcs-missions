@@ -1,5 +1,10 @@
 # Changelog
 
+## Bruiser CAS watchdog — 2026-11-10
+
+- Bruiser now calls off an assigned attack if Sparrow or any Kiowa comes within 700 m of the target; the request stays open and resumes once clear. Each attack is also limited to two minutes, after which the request is cleared. Previously the 700 m check applied only when choosing the target, and an attack stayed cleared indefinitely.
+- Status now uses your actual Kiowa slot (it previously assumed RESCUE-1, losing distances and LANTERN directions if the slot was renamed).
+
 ## Carrier package arrives first — 2026-11-10
 
 - Guardian, Weasel and Bruiser now start airborne at offshore marshal points (already launched from STENNIS) instead of launching from the deck at your takeoff. They push together on takeoff or via F10 Launch carrier package; Bruiser no longer waits three minutes.

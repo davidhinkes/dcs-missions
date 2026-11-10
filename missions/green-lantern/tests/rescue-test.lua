@@ -153,6 +153,26 @@ advance(190);assert(groups.BRUISER.attacks[1].params.unitId==units['HUNTER-NORTH
 assert(groups.BRUISER.attacks[1].id=='AttackUnit' and groups.BRUISER.attacks[1].params.weaponType==9663676414)
 commands['Hold fire / cancel CAS']();assert(#groups.BRUISER.attacks==0 and groups.BRUISER.option==4)
 originalPrint('PASS: CAS releases with the package, queued requests, friendly-separation check, explicit target task and hold-fire cancellation')
+-- Watchdog: an assigned attack is called off when a friendly closes within 700 m, and after the time limit.
+local function assignCAS()
+ reset();advance(2);units['RESCUE-1'].air=true;advance(4);advance(184)
+ local p=GREEN_LANTERN.pickup
+ move('RESCUE-1',{x=p.x-2500,z=p.z},true);advance(186);isolateCAS('HUNTER-NORTH')
+ commands['Request CAS near me']()
+ move('BRUISER-1',{x=p.x+10000,z=p.z},true)
+ move('HUNTER-NORTH-1',{x=p.x+1500,z=p.z},false);units['HUNTER-NORTH-2'].life=0
+ advance(190);assert(groups.BRUISER.attacks and #groups.BRUISER.attacks==1 and groups.BRUISER.option==2,'CAS attack assigned')
+ return units['HUNTER-NORTH-1']:getPoint()
+end
+local t=assignCAS()
+move('RESCUE-1',{x=t.x+200,z=t.z},true);advance(194)
+assert(#groups.BRUISER.attacks==0 and groups.BRUISER.option==4 and GREEN_LANTERN.casTarget==nil,'CAS must break off when a Kiowa closes within 700 m')
+move('RESCUE-1',{x=t.x-2500,z=t.z},true);advance(198)
+assert(groups.BRUISER.attacks[1] and groups.BRUISER.option==2,'Pending request may re-attack once separation is restored')
+assignCAS();advance(190+120+2)
+assert(#groups.BRUISER.attacks==0 and groups.BRUISER.option==4 and GREEN_LANTERN.casArea==nil,'CAS must break off and clear the request after the time limit')
+advance(340);assert(#groups.BRUISER.attacks==0,'No automatic re-attack after the time limit')
+originalPrint('PASS: CAS watchdog breaks off on friendly proximity (resumable) and after 120 s (request cleared)')
 reset();advance(2);units['RESCUE-1'].air=true;advance(4);advance(184)
 local sam=units['COAST-SA6-NORTH-1'];local pt=sam:getPoint()
 move('RESCUE-1',{x=pt.x+3000,z=pt.z},true)

@@ -273,6 +273,17 @@ local function requestSEAD()
   end
 end
 local casRequests={}
+local casAttackLimit=120
+-- 700 m from Sparrow (until boarded) and from every friendly helicopter.
+local function casSeparated(point)
+  if not S.boarded and distance(point,pickup)<=700 then return false end
+  for _,friendly in ipairs({'RESCUE-1','RESCUE-2','LONGBOW-1','LONGBOW-2'}) do
+    local helo=alive(friendly)
+    if helo and distance(point,helo:getPoint())<=700 then return false end
+  end
+  if S.playerName then local p=alive(S.playerName);if p and distance(point,p:getPoint())<=700 then return false end end
+  return true
+end
 local function requestCAS()
   if S.boarded or S.phase=='complete' or S.phase=='failed' then say('Rescue attack phase is over.');return end
   local u=alive(S.playerName or 'RESCUE-1')
@@ -311,7 +322,22 @@ local function updateCAS(now)
   end
   if not near then return end
   if not S.casOnStation then S.casOnStation=true;say('Bruiser: within tasking range. Request CAS near your position through F10 Other > Air Support.') end
-  if S.casTarget and alive(S.casTarget) then return end
+  -- Watchdog: an assigned attack stays cleared only while friendly separation
+  -- holds and for at most casAttackLimit seconds (released weapons cannot be recalled).
+  if S.casTarget then
+    local target=alive(S.casTarget)
+    if target and casSeparated(target:getPoint()) and now-S.casAttackAt<casAttackLimit then return end
+    if target then
+      local g=Group.getByName('BRUISER')
+      if g then g:getController():setOption(0,4);g:getController():resetTask() end
+      if casSeparated(target:getPoint()) then
+        casRequests={};S.casArea=nil
+        say('Bruiser: attack time limit reached; breaking off and holding fire. Request CAS again if needed.')
+      else
+        say('Bruiser: friendlies within 700 m of the target; breaking off and holding fire. Weapons already released cannot be recalled.')
+      end
+    end
+  end
   S.casTarget=nil
   if S.boarded or S.phase=='complete' or S.phase=='failed' then return end
   for _,patrol in ipairs({'COAST-SA6-NORTH','COAST-STRELA-CENTRAL','HUNTER-NORTH','HUNTER-EAST','HUNTER-WEST','CHECKPOINT','REINFORCEMENTS'}) do
@@ -328,16 +354,12 @@ local function updateCAS(now)
             local jet=alive(name)
             if jet and distance(jet:getPoint(),point)<=20000 then inRange=true end
           end
-          local separated=S.boarded or distance(point,pickup)>700
-          for _,friendly in ipairs({'RESCUE-1','RESCUE-2','LONGBOW-1','LONGBOW-2'}) do
-            local helo=alive(friendly)
-            if helo and distance(point,helo:getPoint())<=700 then separated=false end
-          end
+          local separated=casSeparated(point)
           if separated and inRange then
             local g=Group.getByName('BRUISER')
             g:getController():setOption(0,2)
             g:getController():pushTask({id='AttackUnit',params={unitId=target:getID(),groupAttack=true,weaponType=9663676414,attackQtyLimit=true,attackQty=1,expend='One',altitudeEnabled=false,directionEnabled=false}})
-            S.casTarget=name
+            S.casTarget=name;S.casAttackAt=now
             say('Bruiser: engaging a hostile vehicle in the requested area. Keep clear.')
             return
           elseif not separated and not S.casHoldNotice then
@@ -452,7 +474,7 @@ local function owTick(_,now)
   return now+2
 end
 local function status()
-  local u=alive('RESCUE-1'); local text='Phase: '..S.phase
+  local u=alive(S.playerName or 'RESCUE-1'); local text='Phase: '..S.phase
   if u and pickup and not S.boarded then text=text..string.format('. WP3 search region centre %.1f km away.',distance(u:getPoint(),searchCenter)/1000) end
   if S.boarded then text=text..' Sparrow aboard. '..havenNavigation(u)
   else text=text..' Sparrow is somewhere within 2.5 km of WP3. Use Rescue > Contact Sparrow for a rough direction fix, then request green smoke within 2 km of him. Land within 400 m and hold still: 20 seconds close in, up to two minutes at maximum distance.' end
