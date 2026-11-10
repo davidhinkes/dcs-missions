@@ -2,7 +2,7 @@
 
 Record exact artifact hash, Git revision and DCS/module versions. Mock and archive checks are separate from these observations.
 
-1. **Starts/site fit:** inspect both FARP pads, technicals and neutral cover structures in the Mission Editor/DCS. Confirm land, slope, forest/building/rotor clearance, BLUE native linked parking slot 1 and RED zero-AGL ground start, with no collision. BLUE is a conventional four-pad FARP; only the player uses it. Sites are fixed; stop if unsuitable rather than silently relocating a prepoint target.
+1. **Starts/site fit:** inspect both FARP pads, technicals and neutral cover structures in the Mission Editor/DCS. Confirm land, slope, forest/building/rotor clearance, BLUE and RED zero-AGL ground starts on their own helipads, with the Kiowa sitting on the pad (not dropping from the air) and no collision. Only the player uses BLUE. Sites are fixed; stop if unsuitable rather than silently relocating a prepoint target.
 2. **Loadout/performance:** verify two Stingers, M3P/500 rounds, 181.4 kg fuel, 30 flares and PDU. Check gross weight/hover capability and reserve. Confirm Hind rocket/gun loadout with no ATGMs and its own stable hot start.
 3. **Information:** labels off; enemy units absent from friendly-only F10. Fixed enemy-objective marker and 1T match the technical. MMS PREPT/R2 PPT/1T slews to the intended location; no waypoint forces an overflight. Hind position remains unknown.
 4. **Native hunt:** wait on pad and confirm the Hind remains parked. Take off; observe its actual departure and attack on the friendly technical, then an encounter with the player. Record detection, maneuvering, weapons and damage rather than inferring them from release/task messages. Check both technicals can defend themselves.
