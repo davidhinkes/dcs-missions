@@ -21,3 +21,8 @@ Run under DCS `luae.exe` (Steam install, Lua 5.1). The previous random-departure
 ## Convoy robustness — 2026-11-10
 
 Review found the alert re-route began at MAGPIE's position (third vehicle) and that a stalled convoy left the round open indefinitely. The dash now starts from the first surviving vehicle in column order; a stall timer (50 m movement threshold, 5 min Pontiac notice, 15 min failure) ends the round. Mock tests cover the lead start point, notice, failure timing and reset on movement. All logic tests and the archive verifier pass under DCS `luae.exe`. Pending in DCS: native column behaviour on the alert re-route, and whether real convoy halts (e.g. under fire) ever approach 15 minutes.
+
+
+## Pontiac laser — 2026-11-10
+
+Added on-request lasing of MAGPIE's vehicle gated on the player being within 3 nm, drone terrain line of sight and 25 km slant range. Mock tests (simulated `Spot` and `land.isVisible`) cover refusal before departure and beyond 3 nm, spot creation without coordinates, the spot following MAGPIE, automatic switch-off beyond 3 nm, Stop lasing, cleanup on the result and on drone loss, refusal without line of sight, and a native laser error disabling support without failing the mission. All logic tests and the archive verifier pass under DCS `luae.exe`. Pending in DCS: the spot visibly on the UAZ, Kiowa Hellfire acquisition and guidance on code 1688, and how often the drone's orbit has line of sight to the M5.

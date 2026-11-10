@@ -33,14 +33,15 @@ local function reset(o)
  Unit={getByName=function(n)return units[n]end};Group={getByName=function(n)return groups[n]end}
  coalition={getPlayers=function()return opts.renamed and {units['Other pilot']}or{}end}
  world={event={S_EVENT_SHOT=1,S_EVENT_HIT=2,S_EVENT_DEAD=8,S_EVENT_SHOOTING_START=23,S_EVENT_UNIT_LOST=30},addEventHandler=function(h)eventHandler=h end}
- land={getHeight=function(p)if opts.slope and p.x==c.farp.x+15 then return 100 end;return 40 end,getSurfaceType=function()return 1 end}
+ land={getHeight=function(p)if opts.slope and p.x==c.farp.x+15 then return 100 end;return 40 end,getSurfaceType=function()return 1 end,isVisible=function()return not opts.masked end}
  if not opts.noRoads then
   land.findPathOnRoads=function(kind,x1,y1,x2,y2)assert(kind=='roads');return {{x=(x1+x2)/2,y=(y1+y2)/2},{x=x2,y=y2}}end
   land.getClosestPointOnRoads=function(_,x,y)return x+10,y end
  end
  trigger={action={outTextForCoalition=function(_,text)messages[#messages+1]=text end,setUserFlag=function(k,v)flags[k]=v end,markToCoalition=function(id,text,p)marks[id]={text=text,p=p}end}}
  missionCommands={addSubMenuForCoalition=function(_,name,parent)assert(name=='Pontiac'and not parent and not commands.menu);commands.menu=name;return name end,
-  addCommandForCoalition=function(_,name,parent,fn)assert(parent=='Pontiac'and name=='Convoy report'and not commands[name]);commands[name]=fn end}
+  addCommandForCoalition=function(_,name,parent,fn)assert(parent=='Pontiac'and(name=='Convoy report'or name=='Lase MAGPIE'or name=='Stop lasing')and not commands[name]);commands[name]=fn end}
+ Spot={createLaser=function(source,offset,p,code)if opts.laserError then error('native createLaser error')end;assert(source==units['PONTIAC-1']and code==c.drone.laserCode);local s={p=p,code=code};function s:setPoint(q)self.p=q end;function s:destroy()self.destroyed=true end;return s end}
  timer={getTime=function()return now end,scheduleFunction=function(fn,arg,t)queue[#queue+1]={fn=fn,arg=arg,t=t}end}
  dofile('src/shadow.lua')
 end
@@ -133,6 +134,20 @@ advance(400+310);assert(count('halted for 5 minutes')==1 and not flags[961],'Pon
 advance(400+890);assert(not flags[961]);advance(400+905);assert(flags[961]and LONG_SHADOW.phase=='failed'and LONG_SHADOW.result:find('stopped short'),'a convoy stalled 15 minutes ends the round')
 reset();advance(400);groups['MAGPIE CONVOY'].halted=true;advance(400+600);groups['MAGPIE CONVOY'].halted=false;advance(400+1200);assert(not flags[961],'resuming movement restarts the stall timer')
 output('PASS: a convoy halted 5 minutes is reported; 15 minutes stationary ends the round; moving again resets it')
+
+-- Pontiac laser: on request, only within 3 nm of the convoy, line of sight required.
+local function nearHvt(m)local p=units['MAGPIE HVT'].p;units['SHADOW-1'].p={x=p.x+m,y=40,z=p.z}end
+reset();commands['Lase MAGPIE']();assert(not LONG_SHADOW.laser and last():find('convoy not moving'))
+advance(400);commands['Lase MAGPIE']();assert(not LONG_SHADOW.laser and last():find('within 3 nm'),'no laser from the FARP')
+nearHvt(4000);commands['Lase MAGPIE']();local spot=LONG_SHADOW.laser;assert(spot and spot.code==1688 and last():find('code 1688')and not last():find('%d%d%d%d%d'),'laser on MAGPIE within 3 nm, no coordinates')
+advance(405);local hp=units['MAGPIE HVT'].p;assert(spot.p.x==hp.x and spot.p.z==hp.z,'laser follows MAGPIE')
+nearHvt(6000);advance(407);assert(spot.destroyed and not LONG_SHADOW.laser and count('laser off')==1,'laser stops beyond 3 nm')
+nearHvt(1000);commands['Lase MAGPIE']();spot=LONG_SHADOW.laser;commands['Stop lasing']();assert(spot.destroyed and not LONG_SHADOW.laser)
+commands['Lase MAGPIE']();spot=LONG_SHADOW.laser;kill('MAGPIE HVT',true);assert(spot.destroyed and flags[960],'laser cleaned up on the result')
+reset({masked=true});advance(400);nearHvt(1000);commands['Lase MAGPIE']();assert(not LONG_SHADOW.laser and last():find('line of sight'))
+reset();advance(400);nearHvt(1000);commands['Lase MAGPIE']();spot=LONG_SHADOW.laser;kill('PONTIAC-1',true);advance(402);assert(spot.destroyed and not LONG_SHADOW.laser)
+reset({laserError=true});advance(400);nearHvt(1000);commands['Lase MAGPIE']();assert(LONG_SHADOW.droneDisabled and not LONG_SHADOW.laser and not flags[961]);advance(410);assert(LONG_SHADOW.phase~='failed','laser fault never fails the mission')
+output('PASS: Pontiac lases MAGPIE on request only within 3 nm with line of sight; follows, stops on range/request/result/drone loss; faults disable support only')
 
 -- 4. Optional drone: loss and faults never stop the mission.
 reset();advance(400);kill('PONTIAC-1',true);advance(410);assert(count('Pontiac lost')==1)
