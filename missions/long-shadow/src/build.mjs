@@ -103,7 +103,7 @@ SITUATION
 MAGPIE is a weapons-network coordinator who has spent the winter in a guarded compound in northern Homs. A source reports he moves to Hama this morning by road, in a small escorted convoy on the M5 highway. Ground forces cannot reach him and a strike from altitude would be seen coming. One Kiowa, flown low and patient, can. This is a fictional scenario.
 
 MISSION
-Covertly reach the M5 corridor, find and follow the convoy, and destroy MAGPIE's vehicle before it reaches Hama. Destroying the MAGPIE vehicle wins immediately. Escorts are optional. You fail if MAGPIE reaches the southern entrance of Hama (within ${c.arrivalRadius} m of the destination) or if your Kiowa is lost.
+Covertly reach the M5 corridor, find and follow the convoy, and destroy MAGPIE's vehicle before it reaches Hama. Destroying the MAGPIE vehicle wins immediately. Escorts are optional. You fail if MAGPIE reaches the southern entrance of Hama (within ${c.arrivalRadius} m of the destination) or if your Kiowa is lost. If the convoy halts short of Hama and stays put for ${Math.round(c.stallSeconds/60)} minutes, MAGPIE goes to ground and the mission also fails; Pontiac warns after ${Math.round(c.stallNoticeSeconds/60)} minutes halted.
 
 INTELLIGENCE
 - Departure: the M5 at the northern exit of Homs, ${dm(g.convoyStart)}. Expected to roll between H+${depMin} and H+${depMax} minutes (mission time); the exact time is not known.

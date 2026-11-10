@@ -124,6 +124,15 @@ output('PASS: convoy fire or a hit alerts it; nothing alerts it before departure
 reset();advance(306);while hvtTo1T()>200 do advance(now+5)end;advance(now+60);assert(LONG_SHADOW.passed)
 kill('MAGPIE CONVOY-4',true);local pts=groups['MAGPIE CONVOY'].task.params.route.points;assert(#pts==2 and pts[2].x==c.destination.x)
 output('PASS: a post-1T alert re-routes straight to Hama')
+reset();advance(400);local leadP=units['MAGPIE CONVOY-1'].p;units['MAGPIE CONVOY-1'].p={x=leadP.x+80,y=0,z=leadP.z+40}
+eventHandler:onEvent({id=world.event.S_EVENT_SHOT,initiator=units['MAGPIE CONVOY-5']})
+local first=groups['MAGPIE CONVOY'].task.params.route.points[1];assert(first.x==leadP.x+80 and first.y==leadP.z+40,'alert dash must start at the leading vehicle, not MAGPIE')
+output('PASS: the alert dash starts from the leading surviving vehicle')
+reset();advance(400);groups['MAGPIE CONVOY'].halted=true;for _,u in ipairs(groups['MAGPIE CONVOY'].units)do u.v={x=0,y=0,z=0}end
+advance(400+310);assert(count('halted for 5 minutes')==1 and not flags[961],'Pontiac reports a halted convoy')
+advance(400+890);assert(not flags[961]);advance(400+905);assert(flags[961]and LONG_SHADOW.phase=='failed'and LONG_SHADOW.result:find('stopped short'),'a convoy stalled 15 minutes ends the round')
+reset();advance(400);groups['MAGPIE CONVOY'].halted=true;advance(400+600);groups['MAGPIE CONVOY'].halted=false;advance(400+1200);assert(not flags[961],'resuming movement restarts the stall timer')
+output('PASS: a convoy halted 5 minutes is reported; 15 minutes stationary ends the round; moving again resets it')
 
 -- 4. Optional drone: loss and faults never stop the mission.
 reset();advance(400);kill('PONTIAC-1',true);advance(410);assert(count('Pontiac lost')==1)

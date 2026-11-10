@@ -16,3 +16,8 @@ Not done:
 ## Departure randomness fix — 2026-11-08
 
 Run under DCS `luae.exe` (Steam install, Lua 5.1). The previous random-departure test never ran the random path (`opts.random and nil or 300` always yields 300). With that corrected, a new check that seeds 1–40 cover every quarter of the H+4–8 window fails without the fix and passes with three draws discarded before the departure draw. All Long Shadow logic tests and the archive verifier pass. How DCS seeds `math.random` at a real mission start is unverified; watch departure times across several sorties.
+
+
+## Convoy robustness — 2026-11-10
+
+Review found the alert re-route began at MAGPIE's position (third vehicle) and that a stalled convoy left the round open indefinitely. The dash now starts from the first surviving vehicle in column order; a stall timer (50 m movement threshold, 5 min Pontiac notice, 15 min failure) ends the round. Mock tests cover the lead start point, notice, failure timing and reset on movement. All logic tests and the archive verifier pass under DCS `luae.exe`. Pending in DCS: native column behaviour on the alert re-route, and whether real convoy halts (e.g. under fire) ever approach 15 minutes.

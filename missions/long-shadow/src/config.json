@@ -22,5 +22,8 @@
   "approachCallsNm": [8, 6, 4, 3, 2, 1],
   "destinationCallsNm": [6, 4, 2, 1],
   "playerMissingGrace": 10,
+  "stallMoveMetres": 50,
+  "stallNoticeSeconds": 300,
+  "stallSeconds": 900,
   "drone": {"altitude": 5500, "speed": 70, "fuelKg": 1300}
 }

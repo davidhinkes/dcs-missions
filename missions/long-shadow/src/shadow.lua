@@ -151,7 +151,11 @@ local function alert(cause)
   local ok,err=pcall(function()
     local hvt=assert(unit(C.hvt),'MAGPIE unavailable for alert reroute')
     local grp=assert(Group.getByName(C.convoyGroup),'convoy group unavailable')
-    local p=hvt:getPoint()
+    -- Start the dash from the leading surviving vehicle, not MAGPIE (third in
+    -- column): a first waypoint behind the lead would turn the column around.
+    local lead=hvt
+    for i=1,#C.convoyTypes do local u=unit(i==C.hvtIndex and C.hvt or C.convoyGroup..'-'..i);if u then lead=u;break end end
+    local p=lead:getPoint()
     local function wp(x,y,name)return {x=x,y=y,type='Turning Point',action='On Road',speed=C.alertSpeed,speed_locked=true,name=name,task={id='ComboTask',params={tasks={}}}}end
     local points={wp(p.x,p.z,'ALERT DASH')}
     if not S.passed then points[#points+1]=wp(C.attackPoint.x,C.attackPoint.y,'M5 ORONTES CROSSING') end
@@ -223,6 +227,15 @@ local function tick(_,now)
   if S.seen.hvt then
     if not hvt then finish(true,'MAGPIE\'s vehicle destroyed. Target eliminated.');return nil end
     if flat(hvt:getPoint(),{x=C.destination.x,z=C.destination.y})<=C.arrivalRadius then finish(false,'MAGPIE reached Hama. The window has closed.');return nil end
+    -- Stall: if MAGPIE stops short of Hama (blocked road, AI pathing), end the
+    -- round instead of leaving it open forever.
+    local hp=hvt:getPoint()
+    if not S.stallFrom or flat(hp,S.stallFrom)>C.stallMoveMetres then S.stallFrom=hp;S.stallAt=now;S.stallNoticed=false end
+    if now-S.stallAt>=C.stallNoticeSeconds and not S.stallNoticed then
+      S.stallNoticed=true
+      if not S.droneDisabled and droneAlive() then pontiac(string.format('MAGPIE convoy has been halted for %d minutes. If it stays put it may go to ground.',math.floor(C.stallNoticeSeconds/60))) end
+    end
+    if now-S.stallAt>=C.stallSeconds then finish(false,string.format('MAGPIE\'s convoy stopped short of Hama and stayed put for %d minutes; MAGPIE went to ground and the window has closed.',math.floor(C.stallSeconds/60)));return nil end
   end
   if S.ready and (not S.nextReport or now>=S.nextReport) then
     S.nextReport=now+C.reportInterval;droneCall(droneTrack)
