@@ -29,7 +29,7 @@ Single-player reconnaissance and rescue in an OH-58D, with useful AI wingmen and
 
 USS Stennis is initially 70 nm northwest of extraction, moving west at 25 kt. Carrier flights are linked to it for departure/recovery. TACAN 74X, ICLS 11, ATC 127.500 AM. Main package frequency 251.000 AM; HAVEN 128.500 AM; LANTERN 127.500 AM.
 
-Strike flights spawn airborne at marshal when released, so cover precedes the Kiowas (see Support timing — 2026-11-10). The IP hold remains the fallback if Guardian has not checked in. BRUISER requests select a 5 km snapshot area around the player's call position and queue until jets are within 20 km. Target assignment requires 700 m separation from Sparrow and all four Kiowas. Released weapons cannot be recalled. HARM success reports confirm a previously seen tracking radar's destruction, not elimination of every threat.
+Strike flights spawn airborne at marshal when released, so cover precedes the Kiowas (see Support timing — 2026-11-10). The IP hold remains the fallback if Guardian has not checked in. BRUISER requests select a 5 km snapshot area around the player's call position and queue until jets are within 20 km. Target assignment requires 700 m separation from Sparrow and all four Kiowas; a watchdog re-checks that separation every update and calls off the attack (ROE hold, task reset) if it fails, keeping the request open, and ends any attack after 120 s, clearing the request. Released weapons cannot be recalled. HARM success reports confirm a previously seen tracking radar's destruction, not elimination of every threat.
 
 ## Rescue state
 
