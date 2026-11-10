@@ -84,3 +84,7 @@ The user observed helicopters stacked with no individual takeoff pads. The prior
 ## Randomizing the search region
 
 - Moving the objective away from a fixed waypoint breaks every check that was written against that waypoint: smoke gates, AI breakoff radii, patrol placement and briefing text. Search for the old coordinates and decide for each whether it means "region" or "actual site". Green Lantern keeps the MiG gate, F10 marker and cockpit WP3 at the region centre and moves the rest to the pickup. Evidence: mock tests only; site terrain is unverified.
+
+## Air-start support instead of a long deck launch
+
+User report (2026-11-10): even after moving STENNIS to 70 nm and offering an early F10 launch, the Kiowa reached the objective first. Players do not reliably use an optional early-launch command, and a deck launch plus long transit cannot be shortened by briefing advice. When support must arrive first, start it airborne near its station and late-activate it on the player's trigger, keeping the carrier as recovery deck. The build now compares each flight's marshal-to-station estimate against the Kiowa's takeoff-to-hunt-gate time and fails if the margin is under two minutes. Evidence: build estimate and mock tests only; native arrival time is unmeasured.

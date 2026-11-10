@@ -17,9 +17,9 @@ Single-player reconnaissance and rescue in an OH-58D, with useful AI wingmen and
 
 | Flight / threat | Role and activation |
 | --- | --- |
-| GUARDIAN, 2 F/A-18Cs | Fighter sweep / cover, launches at player takeoff or early F10 request |
-| WEASEL, 2 F/A-18Cs | Two HARMs each; launches with GUARDIAN, radar SEAD task and F10 request |
-| BRUISER, 2 F/A-18Cs | Four Mavericks each plus guns, launches 180 s after GUARDIAN; holds until CAS requested |
+| GUARDIAN, 2 F/A-18Cs | Fighter sweep / cover; air-start at offshore marshal, released at player takeoff or early F10 request |
+| WEASEL, 2 F/A-18Cs | Two HARMs each; air-start at marshal, released with GUARDIAN, radar SEAD task and F10 request |
+| BRUISER, 2 F/A-18Cs | Four Mavericks each plus guns; air-start at marshal, released with GUARDIAN; holds until CAS requested |
 | OVERLORD, E-2C | Mission-start launch, offshore AWACS orbit about 25,000 ft |
 | VIPER, 2 MiG-29s | Activates 75 s after player crosses 6 km search gate |
 | HIND-PATROL, 2 Mi-24Vs | Activates at 8 km gate; patrols east/south, helicopter engagement |
@@ -29,7 +29,7 @@ Single-player reconnaissance and rescue in an OH-58D, with useful AI wingmen and
 
 USS Stennis is initially 70 nm northwest of extraction, moving west at 25 kt. Carrier flights are linked to it for departure/recovery. TACAN 74X, ICLS 11, ATC 127.500 AM. Main package frequency 251.000 AM; HAVEN 128.500 AM; LANTERN 127.500 AM.
 
-Shorter helicopter departure means early carrier launch and an IP hold are needed for coordination. Allow roughly 12–18 minutes for launch/climb/transit; this is a planning estimate, not a measured guarantee. BRUISER requests select a 5 km snapshot area around the player's call position and queue until jets are within 20 km. Target assignment requires 700 m separation from Sparrow and all four Kiowas. Released weapons cannot be recalled. HARM success reports confirm a previously seen tracking radar's destruction, not elimination of every threat.
+Strike flights spawn airborne at marshal when released, so cover precedes the Kiowas (see Support timing — 2026-11-10). The IP hold remains the fallback if Guardian has not checked in. BRUISER requests select a 5 km snapshot area around the player's call position and queue until jets are within 20 km. Target assignment requires 700 m separation from Sparrow and all four Kiowas. Released weapons cannot be recalled. HARM success reports confirm a previously seen tracking radar's destruction, not elimination of every threat.
 
 ## Rescue state
 
@@ -57,7 +57,7 @@ Implementation detail lives in `src/rescue.lua`; update these notes when changin
 - [x] Prior rescue/menu revision passed the mock state-transition suite.
 - [ ] Latest complete revision flown from hot start through pickup and LANTERN handover.
 - [ ] Confirm all three pads, AI departure and FARP fuel/rearm/repair in the simulator.
-- [ ] Observe carrier launches, support arrival, radar attack, CAS weapon use, MiG/Hind engagement and recovery.
+- [ ] Observe Overlord deck launch, strike-package air starts at marshal, support arrival before the Kiowas, radar attack, CAS weapon use, MiG/Hind engagement and recovery.
 - [ ] Confirm actual fuel consumption / reserve and loadout performance.
 
 Migration verification is recorded in `verification.md`. Earlier user sorties established the rescue was enjoyable and completable on earlier builds; they do not certify later changes. Exact earlier DCS version and commit were not recorded.
@@ -88,6 +88,20 @@ The medical pad is fixed at WP4. Removed automatic blue smoke and its F10 comman
 ## Correcting overlapping starts — 2026-11-04
 
 The user observed stacked helicopters and missing individual pads after the two-flight revision. All aircraft had identical coordinates and relied on parking indices across two groups; the earlier tests checked distinct indices rather than physical separation. Replaced the shared four-slot FARP with four explicit SINGLE_HELIPAD/FARP objects, IDs 100–103, in a 60 m square around HAVEN. Each aircraft starts at its matching pad at zero RADIO altitude with TakeOffGroundHot / From Ground Area Hot and no parking/start links. Both group origins/first waypoints match their leads. Four warehouses and all-pad service-distance checks cover the complete departure base. Native trees-only clearance precedes Lua; occupied pads remain fixed. Longbow recall uses pad 102 and its actual coordinates. Native simultaneous starts/AI takeoff and recovery still require flight verification.
+
+## Support timing — 2026-11-10
+
+User report: the carrier package took too long to reach the target; the player's Kiowa arrived first and was caught without cover. Root cause: GUARDIAN/WEASEL were deck-launched (hot parking) only at player takeoff, with a 70 nm transit, and BRUISER a further 180 s later. Estimated 12–18 minutes against roughly 6 minutes from HAVEN takeoff to the 8 km hunt gate at 90 kt.
+
+Decision: keep STENNIS as the package's origin and recovery deck, but treat the strike flights as launched before the sortie. GUARDIAN, WEASEL and BRUISER are late-activated air starts at offshore marshal points and are released together (player takeoff or F10 Launch carrier package); BRUISER's 180 s delay is removed. OVERLORD still deck-launches at mission start.
+
+| Flight | Marshal (x, east) / alt | Station | Straight-line estimate at 230 m/s |
+| --- | --- | --- | --- |
+| GUARDIAN | (30000, -25000) / 5500 m | RESCUE CAP over WP3 region centre | 42.7 km, 3.1 min |
+| BRUISER | (24000, -20000) / 2500 m | CAS hold (33000, 8000) | 29.4 km, 2.1 min |
+| WEASEL | (80000, -35000) / 5000 m | SEAD standoff (65000, -26000) | 17.5 km, 1.3 min |
+
+Guardian's marshal and route keep at least 25 km from the SA-6 (the previous carrier route passed about 6 km from it) and are above Strela-10 reach; marshal points are separated by altitude and position. Orbit stop conditions grew because the jets no longer burn fuel on the deck launch and long transit: CAP and CAS 40 minutes, SEAD 30 minutes. The build asserts each strike flight reaches its station at least two minutes before the Kiowas reach the hunt gate; this is a straight-line estimate ignoring AI turns and acceleration, not a measured arrival. Native air-start behaviour, actual arrival times, fuel state on station and STENNIS recovery need a DCS sortie.
 
 ## Mission Planner policy — 2026-11-06
 
